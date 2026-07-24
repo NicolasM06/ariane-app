@@ -21617,7 +21617,7 @@ function respondHelp(entry, originalText) {
   // (ex: 'https://ariane-backend.onrender.com'). Comme ça, aucun vendeur n'a
   // jamais à voir ni taper d'URL technique : il connecte juste son compte
   // bancaire en un clic, exactement comme Shopify Payments ou SumUp.
-  const ARIANE_BACKEND_URL_DEFAULT = '';
+  const ARIANE_BACKEND_URL_DEFAULT = 'https://ariane-backend.onrender.com';
   window.ARIANE_BACKEND_URL_DEFAULT = ARIANE_BACKEND_URL_DEFAULT;
 
   function escV5(v){
@@ -22897,6 +22897,21 @@ showPage();
     }
   }
 
+  // Relie le vendeur (Stripe/PayPal) de cet appareil au compte qui vient de
+  // se connecter — nécessite le secret du vendeur, qu'Ariane a déjà en
+  // local. Silencieux : ne bloque jamais la connexion si ça échoue.
+  async function claimSellerIfAny(token){
+    try {
+      const p = data?.paymentsV5;
+      if(!p || !p.sellerId || !p.sellerSecret) return;
+      await fetch(accountBackendUrl() + '/api/sellers/claim', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', Authorization: 'Bearer ' + token},
+        body: JSON.stringify({ sellerId: p.sellerId, sellerSecret: p.sellerSecret })
+      });
+    } catch(e){ /* pas bloquant */ }
+  }
+
   async function accountSignup(){
     const email = (document.getElementById('account-email')?.value || '').trim();
     const password = document.getElementById('account-password')?.value || '';
@@ -22916,6 +22931,7 @@ showPage();
       if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
       const acc = { token: json.token, email: json.user.email, businessName: json.user.businessName, lastSync: new Date().toISOString() };
       saveAccount(acc);
+      await claimSellerIfAny(json.token);
       renderAccountUI();
       accountStatus('Compte créé et données sauvegardées en ligne ✅', 'ok');
     } catch(e){
@@ -22979,6 +22995,7 @@ showPage();
 
       acc.lastSync = new Date().toISOString();
       saveAccount(acc);
+      await claimSellerIfAny(json.token);
       await accountPush(true);
       renderAccountUI();
       accountStatus('Connecté ✅', 'ok');
