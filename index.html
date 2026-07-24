@@ -21652,6 +21652,13 @@ function respondHelp(entry, originalText) {
     if(!data.paymentsV5 || typeof data.paymentsV5 !== 'object') data.paymentsV5 = {};
     const p = data.paymentsV5;
     if(typeof p.backendUrl !== 'string' || !p.backendUrl) p.backendUrl = ARIANE_BACKEND_URL_DEFAULT || 'http://localhost:4242';
+    // Migration automatique : si une ancienne sauvegarde a gardé l'adresse
+    // localhost par défaut (avant qu'un vrai backend soit configuré dans ce
+    // fichier), on la remplace toute seule par la vraie adresse — l'ancienne
+    // valeur ne peut jamais être un choix volontaire pour un site en ligne.
+    if(p.backendUrl === 'http://localhost:4242' && ARIANE_BACKEND_URL_DEFAULT){
+      p.backendUrl = ARIANE_BACKEND_URL_DEFAULT;
+    }
     // Chaque installation d'Ariane = un vendeur : on génère un identifiant unique
     // une seule fois, stocké avec les données. Personne n'a besoin de le taper.
     if(typeof p.sellerId !== 'string' || !p.sellerId || p.sellerId === 'vendeur-demo') p.sellerId = 'vendeur-' + uidV5();
