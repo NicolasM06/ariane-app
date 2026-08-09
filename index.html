@@ -4830,13 +4830,13 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
 </style>
 
 <!-- V4.37 PWA anti-cache -->
-<link rel="manifest" href="manifest.webmanifest?v=516">
+<link rel="manifest" href="manifest.webmanifest?v=520">
 <meta name="theme-color" content="#080a10">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Ariane">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=516">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=520">
 
 </head>
 <body>
@@ -5705,7 +5705,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
         <label class="form-label">Canal de vente</label>
         <select class="form-select" id="vente-canal" onchange="toggleMarcheSelect()">
           <option value="evenement">🎪 Événement</option>
-          <option value="site">🌐 Site web (lorangerie)</option>
+          <option value="site">🌐 Site web</option>
           <option value="autre-canal">Autre</option>
         </select>
       </div>
@@ -5786,6 +5786,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
         <span style="font-size:0.78rem;color:var(--text3)">Total des frais</span>
         <span class="amount-neg" id="marche-frais-total" style="font-size:0.88rem">0,00 €</span>
       </div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:6px">⚠️ Ce total est déjà compté dans ton bénéfice. Ne le rajoute pas en plus comme dépense dans "Dépenses & Compta" — ça compterait le même frais deux fois.</div>
     </div>
     <div class="form-row">
       <label class="form-label">Nb de jours</label>
@@ -5824,7 +5825,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       </div>
       <div class="form-row">
         <label class="form-label">Catégorie</label>
-        <select class="form-select" id="tx-categorie">
+        <select class="form-select" id="tx-categorie" onchange="toggleTxMarcheField()">
           <optgroup label="🎨 Matières premières">
             <option value="resine">Résine / matériaux</option>
             <option value="peinture">Peintures / pigments</option>
@@ -5853,6 +5854,15 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
           </optgroup>
         </select>
       </div>
+    </div>
+    <div class="form-row" id="row-tx-marche" style="display:none">
+      <label class="form-label">Lié à un événement (optionnel)</label>
+      <select class="form-select" id="tx-marche-id" onchange="toggleTxAdditionalRow()"><option value="">— Aucun —</option></select>
+      <div class="form-row toggle-row" id="row-tx-additional" style="display:none;margin-top:8px">
+        <input type="checkbox" id="tx-additional">
+        <label for="tx-additional" style="font-size:0.84rem;color:var(--text2)">C'est une dépense EN PLUS des frais déjà saisis sur l'événement (pas un doublon)</label>
+      </div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:4px">⚠️ Ne coche rien ci-dessus si cette dépense correspond déjà aux frais que tu as saisis pour cet événement — elle ne sera alors comptée qu'une seule fois. Coche la case si c'est un coût supplémentaire non prévu.</div>
     </div>
     <div class="form-row toggle-row">
       <input type="checkbox" id="tx-justif">
@@ -6018,6 +6028,24 @@ function loadData() {
   if (!data.calTypes) data.calTypes = [];
   if (!data.siteBuilder) data.siteBuilder = null;
   if (!data.params) data.params = { regime: 'micro-bnc', cotis: 22, impot: 7, marge: 5 };
+  // Empêche les données de démo de réapparaître et d'écraser de vraies
+  // données : dès qu'une donnée réelle quelconque est présente (même sans
+  // vente), on marque "démo déjà traitée" — qu'importe la valeur actuelle
+  // du drapeau (y compris si une sauvegarde importée le vaut explicitement
+  // à false), pour ne jamais se fier uniquement à son absence.
+  {
+    const hasAnyRealData = (
+      data.ventes.length || data.marches.length || data.transactions.length ||
+      data.factures.length || data.products.length ||
+      (data.stocks && data.stocks.length) ||
+      (data.taches && data.taches.length) ||
+      (data.calTypes && data.calTypes.length) ||
+      data.siteBuilder ||
+      data.params?.entreprise?.nom
+    );
+    if (hasAnyRealData) data.params.demoInitialized = true;
+  }
+  repairTransactionEventLinks();
   migrateVenteCanaux();
   migrateLockFactures();
   ensureProductsData();
@@ -6153,7 +6181,7 @@ function legacyCategory(id) {
   };
   return map[id] || 'Autre';
 }
-function prodLabel(id) { return productEntry(id)?.label || LEGACY_MAP[id]?.label || id; }
+function prodLabel(id) { return String(productEntry(id)?.label || LEGACY_MAP[id]?.label || id); }
 function prodPrix(id) { return Number(productEntry(id)?.prix ?? LEGACY_MAP[id]?.prix ?? 0) || 0; }
 function prodCategory(id) { return String(productEntry(id)?.category || legacyCategory(id) || 'Autre').trim() || 'Autre'; }
 function escapeHtml(str) {
@@ -6250,12 +6278,41 @@ function stockWarningsForSale(newItems, oldItems=[]) {
 
 
 // ─── COMPUTE ─────────────────────────────────────────────────
+// Le frais "effectif" d'un événement : au moins son propre champ frais,
+// mais jamais moins que ce qu'une dépense liée indique réellement —
+// évite de sous-évaluer si les deux montants ne correspondent pas
+// exactement (ex: frais saisi à 80€ mais dépense liée réelle de 100€).
+// Répare les liens cassés : une transaction dont l'événement lié n'existe
+// plus (supprimé autrement que via l'interface, sauvegarde corrompue ou
+// modifiée, ancien import…) redevient une dépense normale au lieu de
+// rester exclue à tort du calcul pour toujours.
+function repairTransactionEventLinks() {
+  if (!Array.isArray(data.transactions) || !Array.isArray(data.marches)) return;
+  const validIds = new Set(data.marches.map(m => String(m.id)));
+  data.transactions.forEach(t => {
+    if (t.eventId && !validIds.has(String(t.eventId))) t.eventId = null;
+  });
+}
+function eventEffectiveFrais(m) {
+  const ownFrais = parseFloat(m.frais) || 0;
+  // Seules les dépenses liées MAIS PAS marquées "en plus" entrent dans le
+  // calcul du doublon potentiel — une dépense explicitement marquée comme
+  // supplémentaire est toujours comptée à part, jamais traitée comme un
+  // doublon des frais déjà saisis sur l'événement.
+  const linkedTotal = data.transactions
+    .filter(t => t.type === 'depense' && t.eventId === m.id && !t.additionalToEvent)
+    .reduce((s, t) => s + Math.abs(t.montant), 0);
+  return Math.max(ownFrais, linkedTotal);
+}
 function compute() {
   const caVentes = data.ventes.reduce((s,v) => s + v.items.reduce((a,i)=>a+i.qte*i.prix,0), 0);
   const caTx = data.transactions.filter(t=>t.type==='recette').reduce((s,t)=>s+t.montant,0);
   const ca = caVentes + caTx;
-  const depenses = data.transactions.filter(t=>t.type==='depense').reduce((s,t)=>s+Math.abs(t.montant),0);
-  const fraisMarches = data.marches.reduce((s,m)=>s+(parseFloat(m.frais)||0),0);
+  // Une dépense liée à un événement (tx.eventId) est déjà comptée via le
+  // frais total de cet événement ci-dessous — on ne la recompte pas ici,
+  // pour ne jamais compter deux fois le même frais.
+  const depenses = data.transactions.filter(t=>t.type==='depense' && (!t.eventId || t.additionalToEvent)).reduce((s,t)=>s+Math.abs(t.montant),0);
+  const fraisMarches = data.marches.reduce((s,m)=>s+eventEffectiveFrais(m),0);
   const totalDepenses = depenses + fraisMarches;
   const coutVendus = data.ventes.reduce((s,v)=>s+venteCost(v.items),0);
   const margeBrute = caVentes - coutVendus;
@@ -6384,7 +6441,7 @@ function renderDashboard() {
     const pct = totalCA>0?Math.round(s.ca/totalCA*100):0;
     return `<div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-        <span style="font-size:0.82rem;color:var(--text)">${id}</span>
+        <span style="font-size:0.82rem;color:var(--text)">${escapeHtml(id)}</span>
         <span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--accent)">${pct}% — ${fmt(s.ca)}</span>
       </div>
       <div class="prog-bar-bg"><div class="prog-bar" style="width:${pct}%"></div></div>
@@ -6495,10 +6552,10 @@ function renderDashboard() {
           </div>
           <div style="background:var(--surface);border-radius:var(--radius-sm);padding:9px 12px">
             <div style="font-size:0.68rem;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:3px">Top produit</div>
-            <div style="font-size:0.78rem;color:var(--text2)">${topProd ? prodLabel(topProd[0]) : '—'}</div>
+            <div style="font-size:0.78rem;color:var(--text2)">${topProd ? escapeHtml(prodLabel(topProd[0])) : '—'}</div>
           </div>
         </div>
-        ${evts.length ? `<div style="font-size:0.75rem;color:var(--text3)">⛺ ${evts.join(' · ')}</div>` : ''}
+        ${evts.length ? `<div style="font-size:0.75rem;color:var(--text3)">⛺ ${evts.map(escapeHtml).join(' · ')}</div>` : ''}
       </div>
     </details>`;
   }).join('') : '<div style="color:var(--text3);font-size:0.83rem">Aucune donnée mensuelle</div>';
@@ -6506,13 +6563,13 @@ function renderDashboard() {
   const last5 = [...data.ventes].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
   document.getElementById('dash-ventes').innerHTML = last5.length ? last5.map(v=>{
     const total = v.items.reduce((s,i)=>s+i.qte*i.prix,0);
-    const prods = v.items.map(i=>`${prodCategory(i.produit)} — ${prodLabel(i.produit)} ×${i.qte}`).join(', ');
+    const prods = v.items.map(i=>`${escapeHtml(prodCategory(i.produit))} — ${escapeHtml(prodLabel(i.produit))} ×${i.qte}`).join(', ');
     const canal = normalizeCanal(v.canal);
     const marche = v.marcheId && canal === 'evenement' ? data.marches.find(m=>m.id===v.marcheId) : null;
     return `<tr>
       <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${v.date}</td>
       <td style="color:var(--text);font-size:0.81rem">${prods}</td>
-      <td><span class="tag tag-${canal}">${marche?marche.nom:CANAUX[canal]||canal}</span></td>
+      <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span></td>
       <td style="font-family:'DM Mono',monospace;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
       <td class="amount-pos">${fmt(total)}</td>
     </tr>`;
@@ -6536,7 +6593,7 @@ function renderVentes() {
   const prodsIds = [...new Set(data.ventes.flatMap(v=>v.items.map(i=>i.produit)))];
   const ps = document.getElementById('filter-vente-produit');
   const prev = ps.value;
-  ps.innerHTML = '<option value="">Tous produits</option>' + prodsIds.map(p=>`<option value="${p}"${prev===p?' selected':''}>${prodLabel(p)}</option>`).join('');
+  ps.innerHTML = '<option value="">Tous produits</option>' + prodsIds.map(p=>`<option value="${escapeHtml(p)}"${prev===p?' selected':''}>${escapeHtml(prodLabel(p))}</option>`).join('');
   let ventes = [...data.ventes].sort((a,b)=>b.date.localeCompare(a.date));
   if (canalF) ventes = ventes.filter(v=>normalizeCanal(v.canal)===canalF);
   if (prodF) ventes = ventes.filter(v=>v.items.some(i=>i.produit===prodF));
@@ -6584,14 +6641,14 @@ function renderVentes() {
       const prixMoyen = v.items.length>0?(total/v.items.reduce((s,i)=>s+i.qte,0)):0;
       rows.push(`<tr>
         <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.75rem;padding-left:20px">↳</td>
-        <td style="color:var(--text);font-size:0.81rem;max-width:200px">${v.items.map(i=>`${prodCategory(i.produit)} — ${prodLabel(i.produit)} ×${i.qte}`).join(', ')}${v.note?`<div style="color:var(--text3);font-size:0.72rem;margin-top:2px">${v.note}</div>`:''}</td>
-        <td><span class="tag tag-${canal}">${marche?marche.nom:CANAUX[canal]||canal}</span></td>
+        <td style="color:var(--text);font-size:0.81rem;max-width:200px">${v.items.map(i=>`${escapeHtml(prodCategory(i.produit))} — ${escapeHtml(prodLabel(i.produit))} ×${i.qte}`).join(', ')}${v.note?`<div style="color:var(--text3);font-size:0.72rem;margin-top:2px">${escapeHtml(v.note)}</div>`:''}</td>
+        <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span></td>
         <td style="font-family:'DM Mono',monospace;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
         <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text3)">${fmt(prixMoyen)}</td>
         <td class="amount-pos">${fmt(total)}</td>
         <td>
-          <button class="action-btn" data-action="edit-vente" data-id="${v.id}" title="Modifier">✎</button>
-          <button class="action-btn" data-action="delete-vente" data-id="${v.id}" title="Supprimer" style="color:var(--danger)">✕</button>
+          <button class="action-btn" data-action="edit-vente" data-id="${escapeHtml(v.id)}" title="Modifier">✎</button>
+          <button class="action-btn" data-action="delete-vente" data-id="${escapeHtml(v.id)}" title="Supprimer" style="color:var(--danger)">✕</button>
         </td>
       </tr>`);
     });
@@ -6616,11 +6673,11 @@ function renderMarches() {
     if (m.fraisStand > 0) fraisDetail.push(`⛺ ${fmt(m.fraisStand)}`);
     // rétro-compat : anciens enregistrements avec seulement m.frais
     const fraisStr = fraisDetail.length > 0 ? fraisDetail.join(' · ') : (frais > 0 ? `Stand : ${fmt(frais)}` : '');
-    return `<div class="marche-card" data-action="show-marche" data-id="${m.id}">
+    return `<div class="marche-card" data-action="show-marche" data-id="${escapeHtml(m.id)}">
       <div class="marche-header">
         <div>
-          <div class="marche-name">${m.nom}</div>
-          <div class="marche-meta">${m.debut}${m.fin&&m.fin!==m.debut?' → '+m.fin:''} · ${m.lieu||'Lieu non précisé'}</div>
+          <div class="marche-name">${escapeHtml(m.nom)}</div>
+          <div class="marche-meta">${escapeHtml(m.debut)}${m.fin&&m.fin!==m.debut?" → "+escapeHtml(m.fin):""}</div>
         </div>
         <div style="text-align:right">
           <div class="amount-pos" style="font-size:1rem">${fmt(stats.totalCA)}</div>
@@ -6632,8 +6689,8 @@ function renderMarches() {
         <span class="tag tag-${m.type||'marche'}">${CANAUX[m.type||'marche']||m.type}</span>
         ${fraisStr ? `<span style="font-size:0.73rem;color:var(--text3)">${fraisStr}</span>` : ''}
         <div style="margin-left:auto;display:flex;gap:4px">
-          <button class="action-btn" data-action="edit-marche" data-id="${m.id}" title="Modifier">✎</button>
-          <button class="action-btn" data-action="delete-marche" data-id="${m.id}" title="Supprimer" style="color:var(--danger)">✕</button>
+          <button class="action-btn" data-action="edit-marche" data-id="${escapeHtml(m.id)}" title="Modifier">✎</button>
+          <button class="action-btn" data-action="delete-marche" data-id="${escapeHtml(m.id)}" title="Supprimer" style="color:var(--danger)">✕</button>
         </div>
       </div>
     </div>`;
@@ -6669,7 +6726,7 @@ function showMarcheDetail(id) {
     const rows = ventesJour.map(v => {
       const total = v.items.reduce((s,i)=>s+i.qte*i.prix,0);
       return `<tr>
-        <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.75rem;padding-left:20px">${v.items.map(i=>`${prodLabel(i.produit)} ×${i.qte}`).join(', ')}</td>
+        <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.75rem;padding-left:20px">${v.items.map(i=>`${escapeHtml(prodLabel(i.produit))} ×${i.qte}`).join(', ')}</td>
         <td class="amount-pos" style="font-size:0.82rem">${fmt(total)}</td>
       </tr>`;
     }).join('');
@@ -6689,7 +6746,7 @@ function showMarcheDetail(id) {
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px">
       <div class="kpi-card purple" style="padding:14px"><div class="kpi-label">CA brut</div><div class="kpi-value purple" style="font-size:1.2rem">${fmt(totalCA)}</div></div>
       <div class="kpi-card red" style="padding:14px"><div class="kpi-label">Frais totaux</div><div class="kpi-value red" style="font-size:1.2rem">${fmt(frais)}</div></div>
-      <div class="kpi-card green" style="padding:14px"><div class="kpi-label">Net après impôt</div><div class="kpi-value ${net>=0?'green':'red'}" style="font-size:1.2rem">${fmt(net)}</div></div>
+      <div class="kpi-card green" style="padding:14px"><div class="kpi-label">Net après frais</div><div class="kpi-value ${net>=0?'green':'red'}" style="font-size:1.2rem">${fmt(net)}</div></div>
       <div class="kpi-card blue" style="padding:14px"><div class="kpi-label">Nb ventes</div><div class="kpi-value blue" style="font-size:1.2rem">${ventes.length}</div></div>
       <div class="kpi-card gold" style="padding:14px"><div class="kpi-label">Panier moyen</div><div class="kpi-value gold" style="font-size:1.2rem">${fmt(panierMoyen)}</div></div>
     </div>
@@ -6705,7 +6762,7 @@ function showMarcheDetail(id) {
         const pctP = s.qte>0 ? (ps.qte/s.qte*100) : 0;
         return `<div style="display:grid;grid-template-columns:28px 1fr 70px 70px;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);align-items:center">
           <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text3)">#${idx+1}</span>
-          <span style="font-size:0.8rem;color:var(--text)">${prodLabel(pid)}</span>
+          <span style="font-size:0.8rem;color:var(--text)">${escapeHtml(prodLabel(pid))}</span>
           <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent)">${pctP.toFixed(1)}%</span>
           <span class="amount-neutral">×${ps.qte}</span>
         </div>`;
@@ -6753,7 +6810,7 @@ function renderStatsPage() {
               const pctP = s.qte>0 ? (ps.qte/s.qte*100) : 0;
               return `<div style="display:grid;grid-template-columns:28px 1fr 75px 90px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
                 <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text3)">#${idx+1}</span>
-                <span style="font-size:0.8rem;color:var(--text)">${prodLabel(pid)}</span>
+                <span style="font-size:0.8rem;color:var(--text)">${escapeHtml(prodLabel(pid))}</span>
                 <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent)">${pctP.toFixed(1)}%</span>
                 <span class="amount-neutral">${ps.qte} vendu(s)</span>
               </div>`;
@@ -6763,7 +6820,7 @@ function renderStatsPage() {
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
                   <div style="display:flex;align-items:center;gap:8px">
                     <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:${col};font-weight:700;min-width:20px">#${i+1}</span>
-                    <span style="font-size:0.84rem;color:var(--text)">${cat}</span>
+                    <span style="font-size:0.84rem;color:var(--text)">${escapeHtml(cat)}</span>
                     <span style="font-size:0.72rem;color:var(--text3)">ouvrir ▾</span>
                   </div>
                   <div style="text-align:right">
@@ -6775,7 +6832,7 @@ function renderStatsPage() {
                 <div style="font-size:0.72rem;color:var(--text3);margin-top:3px">${s.qte} unité(s) · prix moyen ${fmt(s.ca/s.qte)}</div>
               </summary>
               <div style="margin-top:10px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm)">
-                <div style="font-size:0.72rem;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px;text-transform:uppercase">Top des produits dans ${cat}</div>
+                <div style="font-size:0.72rem;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px;text-transform:uppercase">Top des produits dans ${escapeHtml(cat)}</div>
                 ${productRows || '<div style="font-size:0.8rem;color:var(--text3)">Aucun produit vendu</div>'}
               </div>
             </details>`;
@@ -6802,7 +6859,7 @@ function renderStatsPage() {
     <div class="section-card">
       <div class="section-header"><div class="section-title">📅 Stats par événement</div></div>
       <table>
-        <thead><tr><th>Événement</th><th>Date</th><th>CA</th><th>Frais stand</th><th>Net après impôt</th><th>Nb ventes</th><th>Catégorie n°1</th><th>Produit n°1</th></tr></thead>
+        <thead><tr><th>Événement</th><th>Date</th><th>CA</th><th>Frais stand</th><th>Net après frais</th><th>Nb ventes</th><th>Catégorie n°1</th><th>Produit n°1</th></tr></thead>
         <tbody>
           ${data.marches.length ? data.marches.sort((a,b)=>b.debut.localeCompare(a.debut)).map(m=>{
             const { ventes, prodStats, totalCA } = computeStatsMarche(m.id);
@@ -6811,14 +6868,14 @@ function renderStatsPage() {
             const topCat = Object.entries(prodStats).sort((a,b)=>b[1].ca-a[1].ca)[0];
             const topProduct = topCat ? Object.entries(topCat[1].products||{}).sort((a,b)=>b[1].qte-a[1].qte || b[1].ca-a[1].ca)[0] : null;
             return `<tr>
-              <td style="color:var(--text);font-weight:500">${m.nom}</td>
-              <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${m.debut}</td>
+              <td style="color:var(--text);font-weight:500">${escapeHtml(m.nom)}</td>
+              <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${escapeHtml(m.debut)}</td>
               <td class="amount-pos">${fmt(totalCA)}</td>
               <td class="amount-neg">${frais>0?'-'+fmt(frais):'-'}</td>
               <td class="${net>=0?'amount-pos':'amount-neg'}">${fmt(net)}</td>
               <td style="font-family:'DM Mono',monospace;font-size:0.8rem">${ventes.length}</td>
               <td style="font-size:0.8rem;color:var(--text2)">${topCat?topCat[0]:'-'}</td>
-              <td style="font-size:0.8rem;color:var(--text2)">${topProduct?prodLabel(topProduct[0]):'-'}</td>
+              <td style="font-size:0.8rem;color:var(--text2)">${topProduct?escapeHtml(prodLabel(topProduct[0])):'-'}</td>
             </tr>`;
           }).join('') : `<tr><td colspan="8" class="empty-state">Aucun événement enregistré</td></tr>`}
         </tbody>
@@ -6830,15 +6887,15 @@ function renderStatsPage() {
 // ─── RENDER TRANSACTIONS ──────────────────────────────────────
 function catLabel(c) {
   const map = { resine:'Résine/matériaux', peinture:'Peintures', moules:'Moules/silicone', fournitures:'Fournitures', stand:'Frais de stand', 'transport-marche':'Transport marché', hebergement:'Hébergement', 'site-web':'Site web', logiciel:'Logiciel', publicite:'Publicité', emballage:'Emballages', expedition:'Expédition', 'charges-sociales':'URSSAF', 'frais-bancaires':'Frais banc.', formation:'Formation', autre:'Autre' };
-  return map[c]||c;
+  return map[c] || escapeHtml(c);
 }
 function typeTag(t) {
   const map = { recette:'<span class="tag tag-recette">Recette</span>', depense:'<span class="tag tag-depense">Dépense pro</span>', perso:'<span class="tag tag-perso">Perso</span>', classer:'<span class="tag tag-classer">À classer</span>' };
-  return map[t]||t;
+  return map[t] || escapeHtml(t);
 }
 function statutTag(s) {
   const map = { payee:'<span class="tag tag-payee">Payée</span>', impayee:'<span class="tag tag-impayee">Impayée</span>', retard:'<span class="tag tag-retard">En retard</span>' };
-  return map[s]||s;
+  return map[s] || escapeHtml(s);
 }
 
 function renderStock() {
@@ -6890,8 +6947,8 @@ function renderStock() {
     else if (s.suivi) { tag = '<span class="tag tag-stock-ok">OK</span>'; }
 
     return `<tr class="${rowClass}">
-      <td style="color:var(--text3);font-size:0.78rem;font-family:'DM Mono',monospace">${prodCategory(s.produit)}</td>
-      <td style="color:var(--text);font-size:0.82rem">${prodLabel(s.produit)}</td>
+      <td style="color:var(--text3);font-size:0.78rem;font-family:'DM Mono',monospace">${escapeHtml(prodCategory(s.produit))}</td>
+      <td style="color:var(--text);font-size:0.82rem">${escapeHtml(prodLabel(s.produit))}</td>
       <td>${tag}</td>
       <td class="amount-neutral">${s.suivi ? stock : '—'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text3)">${s.suivi ? seuil : '—'}</td>
@@ -6901,8 +6958,8 @@ function renderStock() {
       <td class="amount-neutral">${s.suivi ? fmt(stock * cout) : '—'}</td>
       <td class="amount-neutral">${s.suivi ? fmt(stock * prix) : '—'}</td>
       <td>
-        <button class="action-btn" data-action="edit-stock" data-id="${s.produit}" title="Modifier">✎</button>
-        ${s.suivi ? `<button class="action-btn" data-action="delete-stock" data-id="${s.produit}" title="Désactiver" style="color:var(--danger)">✕</button>` : ''}
+        <button class="action-btn" data-action="edit-stock" data-id="${escapeHtml(s.produit)}" title="Modifier">✎</button>
+        ${s.suivi ? `<button class="action-btn" data-action="delete-stock" data-id="${escapeHtml(s.produit)}" title="Désactiver" style="color:var(--danger)">✕</button>` : ''}
       </td>
     </tr>`;
   }).join('');
@@ -6919,14 +6976,14 @@ function renderTransactions() {
   document.getElementById('tx-tbody').innerHTML = txs.length ? txs.map(t=>`
     <tr>
       <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${t.date}</td>
-      <td style="color:var(--text)">${t.libelle}</td>
+      <td style="color:var(--text)">${escapeHtml(t.libelle)}</td>
       <td style="font-size:0.78rem;color:var(--text3)">${catLabel(t.categorie)}</td>
       <td>${typeTag(t.type)}</td>
       <td>${t.type==='depense'?(t.justif?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--danger)">✗</span>'):'-'}</td>
       <td class="${t.montant>0?'amount-pos':'amount-neg'}">${t.montant>0?'+':''}${fmt(t.montant)}</td>
       <td>
-        <button class="action-btn" data-action="edit-tx" data-id="${t.id}" title="Modifier">✎</button>
-        <button class="action-btn" data-action="delete-tx" data-id="${t.id}" title="Supprimer" style="color:var(--danger)">✕</button>
+        <button class="action-btn" data-action="edit-tx" data-id="${escapeHtml(t.id)}" title="Modifier">✎</button>
+        <button class="action-btn" data-action="delete-tx" data-id="${escapeHtml(t.id)}" title="Supprimer" style="color:var(--danger)">✕</button>
       </td>
     </tr>`).join('') : `<tr><td colspan="7" class="empty-state"><div class="empty-icon">↕</div>Aucune transaction</td></tr>`;
   updateBadges();
@@ -6935,15 +6992,15 @@ function renderFactures() {
   const facs = [...data.factures].sort((a,b)=>b.date.localeCompare(a.date));
   document.getElementById('fac-tbody').innerHTML = facs.length ? facs.map(f=>`
     <tr>
-      <td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:0.78rem">${f.locked ? '🔒 ' : ''}${f.num}${f.type==='avoir' ? ' <span style="color:var(--danger)">(avoir)</span>' : ''}</td>
-      <td style="color:var(--text)">${f.client}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:0.78rem">${f.locked ? '🔒 ' : ''}${escapeHtml(f.num)}${f.type==='avoir' ? ' <span style="color:var(--danger)">(avoir)</span>' : ''}</td>
+      <td style="color:var(--text)">${escapeHtml(f.client)}</td>
       <td class="amount-neutral">${fmt(f.montant)}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text3)">${f.echeance||'-'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text3)">${escapeHtml(f.echeance||'-')}</td>
       <td>${statutTag(f.statut)}</td>
       <td>
-        <button class="action-btn" data-action="edit-fac" data-id="${f.id}" title="${f.locked ? 'Voir / changer le statut' : 'Modifier'}">✎</button>
-        ${(f.locked && f.type!=='avoir') ? `<button class="action-btn" data-action="avoir-fac" data-id="${f.id}" title="Créer un avoir">↩</button>` : ''}
-        <button class="action-btn" data-action="delete-fac" data-id="${f.id}" title="${f.locked ? 'Verrouillée : passe par un avoir' : 'Supprimer'}" style="color:var(--danger)">✕</button>
+        <button class="action-btn" data-action="edit-fac" data-id="${escapeHtml(f.id)}" title="${f.locked ? 'Voir / changer le statut' : 'Modifier'}">✎</button>
+        ${(f.locked && f.type!=='avoir') ? `<button class="action-btn" data-action="avoir-fac" data-id="${escapeHtml(f.id)}" title="Créer un avoir">↩</button>` : ''}
+        <button class="action-btn" data-action="delete-fac" data-id="${escapeHtml(f.id)}" title="${f.locked ? 'Verrouillée : passe par un avoir' : 'Supprimer'}" style="color:var(--danger)">✕</button>
       </td>
     </tr>`).join('') : `<tr><td colspan="6" class="empty-state"><div class="empty-icon">◻</div>Aucune facture</td></tr>`;
   updateBadges();
@@ -7056,6 +7113,8 @@ function openModal(id) {
     document.getElementById('tx-type').value='depense';
     document.getElementById('tx-categorie').value='resine';
     document.getElementById('tx-justif').checked=false;
+    if (document.getElementById('tx-marche-id')) document.getElementById('tx-marche-id').value='';
+    toggleTxMarcheField(); // repart de zéro : masque la ligne, jamais d'ancien événement hérité
   }
   if (id==='modal-facture') {
     document.getElementById('fac-edit-id').value='';
@@ -7192,7 +7251,7 @@ function refreshMarcheSelect() {
   const sel = document.getElementById('vente-marche-id');
   const sorted = [...data.marches].sort((a,b)=>b.debut.localeCompare(a.debut));
   sel.innerHTML = '<option value="">— Aucun événement sélectionné —</option>' +
-    sorted.map(m=>`<option value="${m.id}">${m.nom} (${m.debut})</option>`).join('');
+    sorted.map(m=>`<option value="${escapeHtml(m.id)}">${escapeHtml(m.nom)} (${escapeHtml(m.debut)})</option>`).join('');
 }
 function toggleMarcheSelect() {
   const canal = document.getElementById('vente-canal').value;
@@ -7208,9 +7267,9 @@ function addVenteItem(produitId='', qte=1, prix=0) {
   const products = data.products || [];
   const selectedId = produitId || products[0]?.id || '';
   const selectedCategory = selectedId ? prodCategory(selectedId) : (categoryList()[0] || 'Autre');
-  const catOpts = categoryList().map(cat=>`<option value="${escapeHtml(cat)}" ${cat===selectedCategory?'selected':''}>${cat}</option>`).join('');
+  const catOpts = categoryList().map(cat=>`<option value="${escapeHtml(cat)}" ${cat===selectedCategory?'selected':''}>${escapeHtml(cat)}</option>`).join('');
   const prodOpts = productsByCategory(selectedCategory).length
-    ? productsByCategory(selectedCategory).map(p=>`<option value="${p.id}" ${p.id===selectedId?'selected':''}>${p.label}</option>`).join('')
+    ? productsByCategory(selectedCategory).map(p=>`<option value="${escapeHtml(p.id)}" ${p.id===selectedId?'selected':''}>${escapeHtml(p.label)}</option>`).join('')
     : '<option value="">Aucun produit</option>';
   const defaultPrix = selectedId ? prodPrix(selectedId) : 0;
   div.innerHTML = `
@@ -7229,7 +7288,7 @@ function onCategorieChange(sel, itemId) {
   const prodSelect = div.querySelector('.vente-produit');
   const prods = productsByCategory(sel.value);
   prodSelect.innerHTML = prods.length
-    ? prods.map((p,idx)=>`<option value="${p.id}" ${idx===0?'selected':''}>${p.label}</option>`).join('')
+    ? prods.map((p,idx)=>`<option value="${escapeHtml(p.id)}" ${idx===0?'selected':''}>${escapeHtml(p.label)}</option>`).join('')
     : '<option value="">Aucun produit</option>';
   prodSelect.disabled = !prods.length;
   if (prods.length) div.querySelectorAll('input')[1].value = prodPrix(prods[0].id);
@@ -7366,15 +7425,46 @@ function deleteMarche(id) {
   data.marches = data.marches.filter(m=>m.id!==id);
   // On garde les ventes, mais on retire le lien vers l'événement supprimé
   data.ventes = data.ventes.map(v => v.marcheId === id ? { ...v, marcheId: '' } : v);
+  // Important : les dépenses liées à cet événement ne doivent plus être
+  // exclues du calcul une fois l'événement supprimé, sinon elles
+  // disparaissent silencieusement du bénéfice (elles redeviennent des
+  // dépenses normales, comptées normalement).
+  data.transactions = data.transactions.map(t => t.eventId === id ? { ...t, eventId: null } : t);
   saveData();
   const detail = document.getElementById('marche-detail');
   if (detail) detail.style.display = 'none';
   renderMarches();
   renderDashboard();
   renderVentes();
+  renderTransactions();
 }
 
 // ─── SAVE TX / FAC ────────────────────────────────────────────
+const TX_EVENT_CATEGORIES = ['stand', 'transport-marche', 'hebergement'];
+function toggleTxMarcheField() {
+  const cat = document.getElementById('tx-categorie').value;
+  const row = document.getElementById('row-tx-marche');
+  const sel = document.getElementById('tx-marche-id');
+  if (!row || !sel) return;
+  if (TX_EVENT_CATEGORIES.includes(cat)) {
+    const sorted = [...(data.marches||[])].sort((a,b)=>b.debut.localeCompare(a.debut));
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Aucun —</option>' + sorted.map(m=>`<option value="${escapeHtml(m.id)}">${escapeHtml(m.nom)} (${escapeHtml(m.debut)})</option>`).join('');
+    sel.value = prev;
+    row.style.display = '';
+  } else {
+    row.style.display = 'none';
+    sel.value = '';
+  }
+  toggleTxAdditionalRow();
+}
+function toggleTxAdditionalRow() {
+  const sel = document.getElementById('tx-marche-id');
+  const addRow = document.getElementById('row-tx-additional');
+  if (!sel || !addRow) return;
+  if (sel.value) { addRow.style.display = ''; }
+  else { addRow.style.display = 'none'; document.getElementById('tx-additional').checked = false; }
+}
 function saveTx() {
   const id = document.getElementById('tx-edit-id').value;
   const libelle = document.getElementById('tx-libelle').value.trim();
@@ -7383,9 +7473,14 @@ function saveTx() {
   const type = document.getElementById('tx-type').value;
   const categorie = document.getElementById('tx-categorie').value;
   const justif = document.getElementById('tx-justif').checked;
+  // Sécurité : on ne fait confiance à la valeur du sélecteur événement que
+  // si la catégorie actuelle en a réellement besoin — évite qu'une ancienne
+  // sélection oubliée dans le champ (même masqué) ne s'applique par erreur.
+  const eventId = TX_EVENT_CATEGORIES.includes(categorie) ? (document.getElementById('tx-marche-id')?.value || null) : null;
+  const additionalToEvent = eventId ? document.getElementById('tx-additional').checked : false;
   if (!libelle||isNaN(montant)||!date) { alert('Remplis tous les champs.'); return; }
-  if (id) { const idx=data.transactions.findIndex(t=>t.id===id); if(idx>=0) data.transactions[idx]={id,date,libelle,montant,type,categorie,justif}; }
-  else data.transactions.push({id:uid(),date,libelle,montant,type,categorie,justif});
+  if (id) { const idx=data.transactions.findIndex(t=>t.id===id); if(idx>=0) data.transactions[idx]={id,date,libelle,montant,type,categorie,justif,eventId,additionalToEvent}; }
+  else data.transactions.push({id:uid(),date,libelle,montant,type,categorie,justif,eventId,additionalToEvent});
   saveData(); closeModal('modal-transaction'); renderDashboard(); renderTransactions();
 }
 function editTx(id) {
@@ -7398,6 +7493,10 @@ function editTx(id) {
   document.getElementById('tx-type').value=t.type;
   document.getElementById('tx-categorie').value=t.categorie;
   document.getElementById('tx-justif').checked=t.justif;
+  toggleTxMarcheField();
+  if (document.getElementById('tx-marche-id')) document.getElementById('tx-marche-id').value = t.eventId || '';
+  toggleTxAdditionalRow();
+  if (document.getElementById('tx-additional')) document.getElementById('tx-additional').checked = Boolean(t.additionalToEvent);
   document.getElementById('modal-transaction').classList.add('open');
 }
 function deleteTx(id) {
@@ -7607,24 +7706,33 @@ function importCSV(event) {
 }
 
 // ─── EXPORTS ──────────────────────────────────────────────────
+// Encode correctement une cellule CSV : toujours entre guillemets (gère
+// virgules, points-virgules, guillemets, retours à la ligne), et neutralise
+// les débuts de formule Excel/LibreOffice (=, +, -, @) qui pourraient
+// autrement s'exécuter à l'ouverture du fichier.
+function csvCell(value) {
+  let text = String(value ?? '');
+  if (/^[=+\-@]/.test(text)) text = "'" + text;
+  return `"${text.replace(/"/g, '""')}"`;
+}
 function exportCSV() {
   const c = compute();
-  let csv = 'RÉSUMÉ L\'Or.angerie\n';
-  csv += `Revenus / CA;${c.ca.toFixed(2)} €\nDépenses pro;${c.depenses.toFixed(2)} €\nCoûts produits vendus;${c.coutVendus.toFixed(2)} €\nCharges sociales & impôts;${c.charges.toFixed(2)} €\nNet après impôt;${c.benef.toFixed(2)} €\nValeur nette du stock;${c.stockValue.toFixed(2)} €\nValeur vente potentielle du stock;${c.stockSaleValue.toFixed(2)} €\nCoût fabrication stock restant;${c.stockCostValue.toFixed(2)} €\n\n`;
+  let csv = 'RÉSUMÉ Ariane\n';
+  csv += `Revenus / CA;${c.ca.toFixed(2)} €\nDépenses pro;${c.depenses.toFixed(2)} €\nCoûts produits vendus;${c.coutVendus.toFixed(2)} €\nCharges sociales & impôts;${c.charges.toFixed(2)} €\nBénéfice net (après dépenses, coûts et charges);${c.benef.toFixed(2)} €\nValeur nette du stock;${c.stockValue.toFixed(2)} €\nValeur vente potentielle du stock;${c.stockSaleValue.toFixed(2)} €\nCoût fabrication stock restant;${c.stockCostValue.toFixed(2)} €\n\n`;
   csv += 'VENTES\nDate;Canal;Événement;Catégorie;Produit;Qté;Prix unitaire;Total\n';
   data.ventes.forEach(v=>{
     const canal = normalizeCanal(v.canal);
     const marche = v.marcheId && canal === 'evenement' ? data.marches.find(m=>m.id===v.marcheId) : null;
-    v.items.forEach(i=>{ csv+=`${v.date};${CANAUX[canal]||canal};"${marche?marche.nom:''}";${prodCategory(i.produit)};${prodLabel(i.produit)};${i.qte};${i.prix.toFixed(2)};${(i.qte*i.prix).toFixed(2)}\n`; });
+    v.items.forEach(i=>{ csv+=`${csvCell(v.date)};${csvCell(CANAUX[canal]||canal)};${csvCell(marche?marche.nom:'')};${csvCell(prodCategory(i.produit))};${csvCell(prodLabel(i.produit))};${i.qte};${i.prix.toFixed(2)};${(i.qte*i.prix).toFixed(2)}\n`; });
   });
   csv += '\nMARCHÉS\nNom;Date;Lieu;Frais stand;CA;Net\n';
-  data.marches.forEach(m=>{ const s=computeStatsMarche(m.id); csv+=`"${m.nom}";${m.debut};"${m.lieu||''}";${(parseFloat(m.frais)||0).toFixed(2)};${s.totalCA.toFixed(2)};${(s.totalCA-(parseFloat(m.frais)||0)).toFixed(2)}\n`; });
+  data.marches.forEach(m=>{ const s=computeStatsMarche(m.id); csv+=`${csvCell(m.nom)};${csvCell(m.debut)};${csvCell(m.lieu||'')};${(parseFloat(m.frais)||0).toFixed(2)};${s.totalCA.toFixed(2)};${(s.totalCA-(parseFloat(m.frais)||0)).toFixed(2)}\n`; });
   csv += '\nSTOCK\nCatégorie;Produit;Suivi;Stock actuel;Seuil;Coût fabrication;Prix vente;Marge unité;Valeur coût;Valeur vente\n';
   ensureStockData();
-  data.stocks.forEach(s=>{ const prix=prodPrix(s.produit); const cout=Number(s.cout)||0; const stock=Number(s.stock)||0; csv+=`"${prodCategory(s.produit)}";"${prodLabel(s.produit)}";${s.suivi?'Oui':'Non'};${s.suivi?stock:''};${s.suivi?Number(s.seuil)||0:''};${s.suivi?cout.toFixed(2):''};${prix.toFixed(2)};${s.suivi?(prix-cout).toFixed(2):''};${s.suivi?(stock*cout).toFixed(2):''};${s.suivi?(stock*prix).toFixed(2):''}\n`; });
+  data.stocks.forEach(s=>{ const prix=prodPrix(s.produit); const cout=Number(s.cout)||0; const stock=Number(s.stock)||0; csv+=`${csvCell(prodCategory(s.produit))};${csvCell(prodLabel(s.produit))};${s.suivi?'Oui':'Non'};${s.suivi?stock:''};${s.suivi?Number(s.seuil)||0:''};${s.suivi?cout.toFixed(2):''};${prix.toFixed(2)};${s.suivi?(prix-cout).toFixed(2):''};${s.suivi?(stock*cout).toFixed(2):''};${s.suivi?(stock*prix).toFixed(2):''}\n`; });
   csv += '\nDÉPENSES\nDate;Libellé;Catégorie;Type;Justif;Montant\n';
-  data.transactions.forEach(t=>{ csv+=`${t.date};"${t.libelle}";${catLabel(t.categorie)};${t.type};${t.justif?'Oui':'Non'};${t.montant.toFixed(2)}\n`; });
-  download(csv, 'lorangerie-export.csv', 'text/csv;charset=utf-8;');
+  data.transactions.forEach(t=>{ csv+=`${csvCell(t.date)};${csvCell(t.libelle)};${csvCell(catLabel(t.categorie))};${csvCell(t.type)};${t.justif?'Oui':'Non'};${t.montant.toFixed(2)}\n`; });
+  download(csv, 'ariane-export.csv', 'text/csv;charset=utf-8;');
 }
 function exportPDF() {
   const c = compute();
@@ -7644,21 +7752,21 @@ function exportPDF() {
   <div class="kpis">
     <div class="kpi"><div class="kpi-l">Revenus / CA</div><div class="kpi-v">${fmt(c.ca)}</div></div>
     <div class="kpi"><div class="kpi-l">Coûts hors charges</div><div class="kpi-v" style="color:#dc2626">${fmt(c.coutsCharges)}</div></div>
-    <div class="kpi"><div class="kpi-l">Net après impôt</div><div class="kpi-v" style="color:${c.benef>=0?'#059669':'#dc2626'}">${fmt(c.benef)}</div></div>
+    <div class="kpi"><div class="kpi-l">Bénéfice net</div><div class="kpi-v" style="color:${c.benef>=0?'#059669':'#dc2626'}">${fmt(c.benef)}</div></div>
     <div class="kpi"><div class="kpi-l">Valeur nette du stock</div><div class="kpi-v">${fmt(c.stockValue)}</div></div>
   </div>
   <p style="color:#6b7280;font-size:12px"><strong>Formule :</strong> Bénéfice = Revenus − (Coûts + Charges). Détail : dépenses pro ${fmt(c.depenses)} + coût matériel vendu ${fmt(c.coutVendus)} + charges ${fmt(c.charges)}. Stock : valeur nette ${fmt(c.stockValue)} = valeur vente ${fmt(c.stockSaleValue)} − coût restant ${fmt(c.stockCostValue)}.</p>
   <h2>Catégories les plus vendues</h2>
-  ${sortedP.map(([id,s],i)=>{const pct=totalCAP>0?Math.round(s.ca/totalCAP*100):0;return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between"><span>#${i+1} ${id}</span><span style="color:#2563eb;font-weight:600">${pct}% — ${fmt(s.ca)} (×${s.qte})</span></div><div class="bar-bg"><div class="bar" style="width:${pct}%"></div></div></div>`;}).join('')||'<p style="color:#9ca3af">Aucune vente</p>'}
+  ${sortedP.map(([id,s],i)=>{const pct=totalCAP>0?Math.round(s.ca/totalCAP*100):0;return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between"><span>#${i+1} ${escapeHtml(id)}</span><span style="color:#2563eb;font-weight:600">${pct}% — ${fmt(s.ca)} (×${s.qte})</span></div><div class="bar-bg"><div class="bar" style="width:${pct}%"></div></div></div>`;}).join('')||'<p style="color:#9ca3af">Aucune vente</p>'}
   <h2>Marchés & Événements</h2>
   <table><thead><tr><th>Événement</th><th>Date</th><th>CA</th><th>Frais</th><th>Net</th><th>Ventes</th></tr></thead><tbody>
-  ${data.marches.sort((a,b)=>b.debut.localeCompare(a.debut)).map(m=>{const s=computeStatsMarche(m.id);const f=parseFloat(m.frais)||0;return`<tr><td>${m.nom}</td><td>${m.debut}</td><td>${fmt(s.totalCA)}</td><td>${f>0?'-'+fmt(f):'-'}</td><td>${fmt(s.totalCA-f)}</td><td>${s.ventes.length}</td></tr>`;}).join('')||'<tr><td colspan="6" style="color:#9ca3af;text-align:center">Aucun marché</td></tr>'}
+  ${data.marches.sort((a,b)=>b.debut.localeCompare(a.debut)).map(m=>{const s=computeStatsMarche(m.id);const f=parseFloat(m.frais)||0;return`<tr><td>${escapeHtml(m.nom)}</td><td>${escapeHtml(m.debut)}</td><td>${fmt(s.totalCA)}</td><td>${f>0?'-'+fmt(f):'-'}</td><td>${fmt(s.totalCA-f)}</td><td>${s.ventes.length}</td></tr>`;}).join('')||'<tr><td colspan="6" style="color:#9ca3af;text-align:center">Aucun marché</td></tr>'}
   </tbody></table>
   <div class="footer">Ariane — version propre — Pour usage indicatif uniquement.</div>
   </body></html>`;
   const w=window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(()=>w.print(),600);
 }
-function exportJSON() { download(JSON.stringify(data,null,2),'lorangerie-sauvegarde.json','application/json'); }
+function exportJSON() { download(JSON.stringify(data,null,2),'ariane-sauvegarde.json','application/json'); }
 function restoreJSON(event) {
   const file=event.target.files[0]; if(!file) return;
   if (!/\.json$/i.test(file.name)) { alert('Merci de choisir un fichier .json (export "Sauvegarder" d\'Ariane).'); event.target.value=''; return; }
@@ -7769,7 +7877,7 @@ function icsEscape(str) {
 
 function itemToICS(i) {
   const d = icsDate(i.date);
-  const uidText = (i.id || uid()) + '@lorangerie-local';
+  const uidText = (i.id || uid()) + '@ariane-local';
   return [
     'BEGIN:VEVENT',
     'UID:' + uidText,
@@ -8105,7 +8213,8 @@ function exportSiteBuilderHTML(){const site=buildExportedSiteHTML();downloadBlob
 function render() { if (typeof ensureCalendarTypes === 'function') ensureCalendarTypes(); if (typeof ensureCalendarHidden === 'function') ensureCalendarHidden(); if (typeof ensureSiteBuilder === 'function') ensureSiteBuilder(); renderDashboard(); renderStock(); updateBadges(); if (typeof renderCalendrier === 'function') renderCalendrier(); if (typeof renderSiteBuilder === 'function') renderSiteBuilder(); }
 loadData();
 
-if (!data.ventes || data.ventes.length===0) {
+if (!data.params.demoInitialized) {
+  data.params.demoInitialized = true;
   const d=(offset)=>{const dt=new Date();dt.setDate(dt.getDate()-offset);return dt.toISOString().split('T')[0];};
   const m1id=uid(), m2id=uid(), m3id=uid();
   data.marches=[
@@ -8127,11 +8236,9 @@ if (!data.ventes || data.ventes.length===0) {
   ];
   data.transactions=[
     {id:uid(),date:d(50),libelle:'Résine époxy 5kg',montant:-42,type:'depense',categorie:'resine',justif:true},
-    {id:uid(),date:d(45),libelle:'Frais stand — Marché Blois',montant:-30,type:'depense',categorie:'stand',justif:true},
     {id:uid(),date:d(40),libelle:'Pigments et peintures',montant:-28.50,type:'depense',categorie:'peinture',justif:true},
     {id:uid(),date:d(30),libelle:'Moules silicone',montant:-55,type:'depense',categorie:'moules',justif:false},
     {id:uid(),date:d(25),libelle:'Emballages kraft',montant:-18,type:'depense',categorie:'emballage',justif:true},
-    {id:uid(),date:d(20),libelle:'Frais stand — MythoCon',montant:-80,type:'depense',categorie:'stand',justif:true},
     {id:uid(),date:d(15),libelle:'URSSAF T1',montant:-180,type:'depense',categorie:'charges-sociales',justif:true},
     {id:uid(),date:d(10),libelle:'Hébergement Orléans',montant:-65,type:'depense',categorie:'hebergement',justif:false},
     {id:uid(),date:d(6),libelle:'Colissimo envois',montant:-12.50,type:'depense',categorie:'expedition',justif:true},
@@ -13832,7 +13939,9 @@ showPage();
       return result;
     };
 
-    try { eval(name + " = window[name]"); } catch(e) {}
+    // window[name] = fn ci-dessus suffit déjà à mettre à jour la fonction
+    // globale (déclarations de fonction de premier niveau) — pas besoin
+    // d'eval() ici, qui empêcherait en plus une politique CSP stricte.
   }
 
   [
@@ -16762,7 +16871,20 @@ showPage();
     });
 
     const recettes = txs.filter(t => t.type === 'recette').reduce((s,t)=>s+Math.abs(Number(t.montant)||0),0);
-    const depenses = txs.filter(t => t.type === 'depense').reduce((s,t)=>s+Math.abs(Number(t.montant)||0),0);
+    // Chaque dépense compte dans SON PROPRE mois (date réelle du mouvement
+    // d'argent), qu'elle soit liée à un événement ou non. Seule la part des
+    // frais d'un événement qui n'est couverte par AUCUNE dépense liée reste
+    // rattachée au mois de l'événement (aucune autre date disponible pour
+    // cette part-là). Une dépense marquée "en plus" compte toujours en
+    // entier, jamais traitée comme un doublon des frais de l'événement.
+    const depensesTx = txs.filter(t => t.type === 'depense').reduce((s,t)=>s+Math.abs(Number(t.montant)||0),0);
+    const fraisMarchesRemainder = (data.marches || []).filter(m => monthKey18(m.debut) === month).reduce((s,m)=>{
+      const linkedNonAdditional = data.transactions
+        .filter(t => t.type === 'depense' && t.eventId === m.id && !t.additionalToEvent)
+        .reduce((a,t)=>a+Math.abs(Number(t.montant)||0), 0);
+      return s + Math.max(0, eventEffectiveFrais(m) - linkedNonAdditional);
+    }, 0);
+    const depenses = depensesTx + fraisMarchesRemainder;
     const ca = caVentes + recettes;
     const cotis = Number(data.params?.cotis)||0;
     const impot = Number(data.params?.impot)||0;
@@ -21788,21 +21910,16 @@ function respondHelp(entry, originalText) {
         closeFab435();
         return;
       }
-      try {
-        if(typeof eval(name) === 'function'){
-          eval(name)();
-          closeFab435();
-          return;
-        }
-      } catch(e) {}
+      // Pas de repli via eval() : toute fonction globale légitime est
+      // déjà accessible via window[name] ci-dessus (compatible CSP stricte).
     }
     alert("Action indisponible sur cette version.");
   }
 
   window.mobileQuickActionV435 = function(type){
-    if(type === 'vente') return callIfExists435(['openVenteModal','openModalVente','showVenteModal','addVente','ouvrirVente']);
-    if(type === 'stock') return callIfExists435(['openProduitModal','openStockModal','showProduitModal','addProduit','ouvrirProduit']);
-    if(type === 'facture') return callIfExists435(['openFactureModal','showFactureModal','addFacture','createFacture']);
+    if(type === 'vente') { closeFab435(); return openModal('modal-vente'); }
+    if(type === 'stock') { closeFab435(); return openModal('modal-stock'); }
+    if(type === 'facture') { closeFab435(); return openModal('modal-facture'); }
     if(type === 'assistant') {
       closeFab435();
       if(document.getElementById('page-assistant')) return safeGo435('assistant');
@@ -22047,7 +22164,7 @@ function respondHelp(entry, originalText) {
     updateOnlineStatusV437();
 
     if('serviceWorker' in navigator && isSecureForPwaV437()){
-      navigator.serviceWorker.register('./service-worker.js?v=516')
+      navigator.serviceWorker.register('./service-worker.js?v=520')
         .then(function(reg){
           if(reg && reg.update) reg.update();
         })
