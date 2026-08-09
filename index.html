@@ -22362,6 +22362,12 @@ function respondHelp(entry, originalText) {
     p.returnUrl = (document.getElementById('pay-v5-return-url')?.value || '').trim();
     saveSafeV5();
     renderPaymentsV5();
+    // Erreur fréquente : laisser un exemple de type example.com dans ce champ
+    // au lieu de la vraie adresse du site — le client atterrirait alors sur
+    // une page qui n'est pas la sienne après avoir payé.
+    if(p.returnUrl && /example\.com/i.test(p.returnUrl)){
+      paymentStatusV5('⚠️ L\'adresse de retour contient "example.com" — ce n\'est probablement pas ta vraie adresse. Remplace-la par l\'adresse réelle de ton site (ou laisse le champ vide pour revenir automatiquement sur Ariane).', 'warn');
+    }
   }
 
   async function testPaymentBackendV5(){
@@ -22933,7 +22939,7 @@ async function arianeCheckoutV5(btn, forcedProvider){
     window.location.href = json.url;
   } catch(e){
     console.error(e);
-    alert('Impossible de lancer le paiement.');
+    alert('Impossible de lancer le paiement.\n\n' + (e && e.message ? e.message : ''));
     btn.disabled = false;
     btn.innerHTML = old;
   }
