@@ -23015,9 +23015,74 @@ showPage();
     try { renderSiteBuilder = patchedRenderSiteV5; } catch(e){}
   }
 
+  // Va chercher les paiements reçus en ligne (Stripe/PayPal) pas encore
+  // transformés en vente dans Ariane, et les crée automatiquement : le
+  // serveur garde juste la liste "en attente", c'est Ariane qui crée la
+  // vente localement (avec sa propre logique de stock) puis confirme au
+  // serveur pour ne plus jamais revoir cette commande.
+  async function importPendingOrdersV5(){
+    try {
+      const p = data?.paymentsV5;
+      if(!p || !p.backendUrl || !p.sellerId || !p.sellerSecret) return;
+
+      const res = await fetch(p.backendUrl + '/api/orders/pending?sellerId=' + encodeURIComponent(p.sellerId), {
+        headers: { 'X-Seller-Secret': p.sellerSecret }
+      });
+      if(!res.ok) return;
+      const json = await res.json();
+      const pending = Array.isArray(json.orders) ? json.orders : [];
+      if(!pending.length) return;
+
+      ensureProductsData();
+      const ackIds = [];
+      let createdCount = 0;
+
+      pending.forEach(order => {
+        // On confirme la réception dans tous les cas (même produit non
+        // reconnu) pour ne jamais reboucler indéfiniment sur la même commande.
+        ackIds.push(order.orderId);
+
+        const productId = order.product?.id;
+        const matched = productId ? (data.products || []).find(pr => pr.id === productId) : null;
+        const qte = Math.max(1, Number(order.product?.quantity || 1));
+        const dateStr = (order.paidAt || new Date().toISOString()).slice(0, 10);
+        const prixUnitaire = matched ? Number(matched.prix) || 0 : (order.amountTotal ? (order.amountTotal / 100 / qte) : 0);
+
+        const vente = {
+          id: uid(),
+          date: dateStr,
+          canal: 'site',
+          marcheId: '',
+          note: 'Importée automatiquement depuis un paiement en ligne' + (matched ? '' : ' (produit non reconnu, à vérifier)'),
+          items: [{ produit: matched ? matched.id : (productId || ''), qte, prix: prixUnitaire }]
+        };
+        data.ventes.push(vente);
+        if(matched) { try { applyStockMovement(vente.items, -1); } catch(e){} }
+        createdCount++;
+      });
+
+      saveData();
+      try { renderDashboard(); } catch(e){}
+      try { renderVentes(); } catch(e){}
+      try { renderStock(); } catch(e){}
+
+      await fetch(p.backendUrl + '/api/orders/ack', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-Seller-Secret': p.sellerSecret},
+        body: JSON.stringify({ sellerId: p.sellerId, orderIds: ackIds })
+      }).catch(function(){});
+
+      if(createdCount > 0 && typeof paymentStatusV5 === 'function'){
+        paymentStatusV5(createdCount + ' vente(s) créée(s) automatiquement depuis un paiement en ligne — vérifie-les dans l\'onglet Ventes.', 'ok');
+      }
+    } catch(e){ /* ne doit jamais bloquer le chargement normal d'Ariane */ }
+  }
+  window.importPendingOrdersV5 = importPendingOrdersV5;
+
   window.addEventListener('load', function(){
     ensurePaymentV5();
     setTimeout(renderPaymentsV5, 350);
+    setTimeout(importPendingOrdersV5, 900);
 
     // Retour depuis la page Stripe ou PayPal (après connexion du compte vendeur).
     const hash = window.location.hash || '';
