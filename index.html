@@ -22939,7 +22939,7 @@ async function arianeCheckoutV5(btn, forcedProvider){
     window.location.href = json.url;
   } catch(e){
     console.error(e);
-    alert('Impossible de lancer le paiement.\n\n' + (e && e.message ? e.message : ''));
+    alert('Impossible de lancer le paiement.\\n\\n' + (e && e.message ? e.message : ''));
     btn.disabled = false;
     btn.innerHTML = old;
   }
