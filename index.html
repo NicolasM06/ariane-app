@@ -22589,10 +22589,21 @@ function respondHelp(entry, originalText) {
       if(res.ok){
         lastProductSyncV5 = payload;
         const json = await res.json().catch(function(){ return {}; });
-        if(json.sellerSecret && !p.sellerSecret){
+        // Si le serveur émet un nouveau secret, c'est qu'il considère ce
+        // vendeur comme neuf de son côté (ex: base réinitialisée/migrée) —
+        // on l'adopte toujours, même si on en avait déjà un (probablement
+        // périmé), sinon on reste bloqué en boucle avec un secret invalide.
+        if(json.sellerSecret && json.sellerSecret !== p.sellerSecret){
           p.sellerSecret = json.sellerSecret;
           if(typeof saveData === 'function') saveData();
         }
+      } else if(res.status === 401){
+        // Le secret qu'on tenait n'est plus valide (ex: migration serveur) :
+        // on l'efface pour permettre une resynchronisation propre au
+        // prochain essai, qui obtiendra un nouveau secret légitime.
+        p.sellerSecret = '';
+        if(typeof saveData === 'function') saveData();
+        lastProductSyncV5 = ''; // force une nouvelle tentative au prochain appel
       }
     } catch(e){ /* backend injoignable : on retentera au prochain rendu */ }
   }
