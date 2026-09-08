@@ -37,7 +37,23 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
 
   if (url.origin !== location.origin) {
-    event.respondWith(fetch(request).catch(() => caches.match(request)));
+    // Cache-first avec rafraîchissement en arrière-plan : utilisé par des
+    // ressources externes statiques et versionnées (ex. le module OCR
+    // Tesseract.js) - une fois chargées une première fois en ligne, elles
+    // restent disponibles hors-ligne, contrairement au réseau-prioritaire
+    // utilisé pour l'app elle-même (qui doit toujours refléter la dernière version).
+    event.respondWith(
+      caches.match(request).then(cached => {
+        const network = fetch(request).then(response => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(ARIANE_CACHE_V501).then(cache => cache.put(request, copy));
+          }
+          return response;
+        }).catch(() => cached);
+        return cached || network;
+      })
+    );
     return;
   }
 

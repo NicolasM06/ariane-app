@@ -156,6 +156,9 @@
   .divider { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.78rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
   /* Vente item in modal */
   .vente-item { display: grid; grid-template-columns: 1fr 1fr 72px 90px 28px; gap: 8px; align-items: center; margin-bottom: 8px; }
+  /* Ligne issue d'un scan OCR dont le produit n'a pas été reconnu : reste
+     visuellement signalée tant qu'un produit n'a pas été choisi à la main. */
+  .vente-item-ocr-unmatched { border: 1px solid var(--gold-dim); border-radius: 10px; padding: 6px; margin-left: -6px; margin-right: -6px; }
   .vente-list { margin-bottom: 10px; }
 
   /* Stock */
@@ -4996,6 +4999,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
   <div class="topbar">
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="topbar-actions" id="topbar-actions">
+      <button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')">📷 Scanner</button>
       <button class="btn btn-primary" onclick="openModal('modal-vente')">+ Vente</button>
     </div>
   </div>
@@ -5727,7 +5731,10 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
     </div>
     <div class="divider">Produits vendus</div>
     <div class="vente-list" id="vente-items-list"></div>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addVenteItem()">+ Ajouter un produit</button>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-ghost" style="flex:1" onclick="addVenteItem()">+ Ajouter un produit</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="openModal('modal-ocr-scan')">📷 Scanner un ticket</button>
+    </div>
     <div class="form-row">
       <label class="form-label">Note (optionnel)</label>
       <input type="text" class="form-input" id="vente-note" placeholder="Ex : commande spéciale, bon de réduction...">
@@ -5739,6 +5746,47 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-vente')">Annuler</button>
       <button class="btn btn-primary" onclick="saveVente()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SCAN OCR (ticket de caisse, étiquette, facture...) -->
+<div class="modal-overlay" id="modal-ocr-scan">
+  <div class="modal">
+    <div class="modal-title">📷 Scanner un document</div>
+    <p style="color:var(--text3);font-size:0.81rem;margin:-8px 0 14px">
+      Prends en photo (ou importe) un ticket de caisse, une étiquette ou une facture fournisseur.
+      Ariane essaie de reconnaître les produits, quantités et prix — tu pourras toujours corriger avant d'enregistrer la vente.
+    </p>
+
+    <div id="ocr-drop-zone" style="border:1px dashed var(--border2);border-radius:var(--radius-sm);padding:20px;text-align:center;cursor:pointer" onclick="document.getElementById('ocr-file-input').click()">
+      <div id="ocr-preview-wrap" style="display:none;margin-bottom:10px">
+        <img id="ocr-preview-img" alt="Aperçu du document" style="max-width:100%;max-height:220px;border-radius:8px">
+      </div>
+      <div id="ocr-drop-label">📷 Prendre une photo ou choisir un fichier</div>
+      <input type="file" id="ocr-file-input" accept="image/*" capture="environment" style="display:none" onchange="handleOcrFileSelect(event)">
+    </div>
+
+    <div id="ocr-progress-wrap" style="display:none;margin:14px 0">
+      <div class="prog-bar-bg"><div class="prog-bar" id="ocr-progress-bar" style="width:0%"></div></div>
+      <div id="ocr-progress-label" style="color:var(--text3);font-size:0.78rem;margin-top:6px">Préparation…</div>
+    </div>
+
+    <div id="ocr-result-wrap" style="display:none;margin:14px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:0.81rem;color:var(--text3)"><span id="ocr-items-count">0</span> ligne(s) détectée(s)</span>
+        <button class="btn btn-ghost" style="font-size:0.72rem;padding:4px 10px" onclick="toggleOcrRawText()">Voir le texte brut</button>
+      </div>
+      <pre id="ocr-raw-text" style="display:none;white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:10px;font-size:0.75rem;color:var(--text3);max-height:160px;overflow:auto"></pre>
+    </div>
+
+    <div id="ocr-error" style="display:none;color:var(--danger);font-size:0.81rem;margin:10px 0"></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-ocr-scan')">Annuler</button>
+      <button class="btn btn-secondary" id="ocr-retake-btn" style="display:none" onclick="resetOcrScan()">↺ Reprendre la photo</button>
+      <button class="btn btn-primary" id="ocr-analyze-btn" onclick="analyzeOcrPhoto()" disabled>Analyser</button>
+      <button class="btn btn-primary" id="ocr-continue-btn" style="display:none" onclick="proceedToVenteFromOcr()">Continuer vers la vente →</button>
     </div>
   </div>
 </div>
@@ -6395,14 +6443,14 @@ function goPage(page) {
   const titles = { dashboard:'Dashboard', ventes:'Ventes', stock:'Produits & stock', marches:'Marchés & Événements', 'produits-stats':'Stats par produit', transactions:'Dépenses & Compta', factures:'Factures', calendrier:'Calendrier', 'site-builder':'Site web', exports:'Exports', parametres:'Paramètres' };
   document.getElementById('topbar-title').textContent = titles[page]||'';
   const actions = document.getElementById('topbar-actions');
-  if (page==='ventes') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-vente')">+ Vente</button>`;
+  if (page==='ventes') actions.innerHTML = `<button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')">📷 Scanner</button><button class="btn btn-primary" onclick="openModal('modal-vente')">+ Vente</button>`;
   else if (page==='stock') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-stock')">+ Stock</button>`;
   else if (page==='marches') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-marche')">+ Événement</button>`;
   else if (page==='transactions') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-transaction')">+ Dépense</button>`;
   else if (page==='factures') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-facture')">+ Facture</button>`;
   else if (page==='calendrier') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-tache')">+ Tâche</button>`;
   else if (page==='site-builder') actions.innerHTML = `<button class="btn btn-primary" onclick="addBuilderElement('button')">+ Bouton</button>`;
-  else if (page==='dashboard') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-vente')">+ Vente</button>`;
+  else if (page==='dashboard') actions.innerHTML = `<button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')">📷 Scanner</button><button class="btn btn-primary" onclick="openModal('modal-vente')">+ Vente</button>`;
   else actions.innerHTML = '';
   if (page==='dashboard') renderDashboard();
   if (page==='ventes') renderVentes();
@@ -7098,6 +7146,9 @@ function openModal(id) {
     addVenteItem();
     updateVenteTotal();
   }
+  if (id==='modal-ocr-scan') {
+    resetOcrScan();
+  }
   if (id==='modal-marche') {
     document.getElementById('marche-edit-id').value='';
     document.getElementById('modal-marche-title').textContent='Nouveau marché / événement';
@@ -7266,7 +7317,7 @@ function toggleMarcheSelect() {
   const canal = document.getElementById('vente-canal').value;
   document.getElementById('row-marche-select').style.display = (canal==='evenement') ? '' : 'none';
 }
-function addVenteItem(produitId='', qte=1, prix=0) {
+function addVenteItem(produitId='', qte=1, prix=0, guessText=null) {
   ensureProductsData();
   const list = document.getElementById('vente-items-list');
   const itemId = uid();
@@ -7274,40 +7325,108 @@ function addVenteItem(produitId='', qte=1, prix=0) {
   div.className = 'vente-item';
   div.id = 'vitem-'+itemId;
   const products = data.products || [];
-  const selectedId = produitId || products[0]?.id || '';
+
+  // Ligne issue d'un scan OCR dont le produit n'a pas été reconnu avec
+  // certitude dans le catalogue : jamais de produit deviné au hasard (même
+  // règle que l'assistant chat, voir matchProductFromWords) — la sélection
+  // reste vide, mais un champ de recherche pré-rempli avec le texte lu sur
+  // la photo réduit le travail de correction de l'utilisateur.
+  const isUnmatchedOcr = !produitId && guessText !== null;
+
+  const selectedId = produitId || (isUnmatchedOcr ? '' : (products[0]?.id || ''));
   const selectedCategory = selectedId ? prodCategory(selectedId) : (categoryList()[0] || 'Autre');
-  const catOpts = categoryList().map(cat=>`<option value="${escapeHtml(cat)}" ${cat===selectedCategory?'selected':''}>${escapeHtml(cat)}</option>`).join('');
-  const prodOpts = productsByCategory(selectedCategory).length
-    ? productsByCategory(selectedCategory).map(p=>`<option value="${escapeHtml(p.id)}" ${p.id===selectedId?'selected':''}>${escapeHtml(p.label)}</option>`).join('')
-    : '<option value="">Aucun produit</option>';
+
+  const catOpts = isUnmatchedOcr
+    ? '<option value="">Toutes catégories</option>' + categoryList().map(cat=>`<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('')
+    : categoryList().map(cat=>`<option value="${escapeHtml(cat)}" ${cat===selectedCategory?'selected':''}>${escapeHtml(cat)}</option>`).join('');
+
+  const prodOpts = isUnmatchedOcr
+    ? '<option value="">— Choisir un produit —</option>' + buildFilteredProductOptions(guessText, '', '')
+    : (productsByCategory(selectedCategory).length
+      ? productsByCategory(selectedCategory).map(p=>`<option value="${escapeHtml(p.id)}" ${p.id===selectedId?'selected':''}>${escapeHtml(p.label)}</option>`).join('')
+      : '<option value="">Aucun produit</option>');
+
   const defaultPrix = selectedId ? prodPrix(selectedId) : 0;
+
+  const searchRow = isUnmatchedOcr
+    ? `<input type="text" class="form-input vente-produit-search" style="grid-column:1 / -1" placeholder="🔍 Rechercher un produit" value="${escapeHtml(guessText)}" oninput="filterVenteProduitSelect(this,'${itemId}')">`
+    : '';
+
   div.innerHTML = `
+    ${searchRow}
     <select class="form-select vente-cat" ${products.length?'':'disabled'} onchange="onCategorieChange(this,'${itemId}')">${catOpts}</select>
     <select class="form-select vente-produit" ${products.length?'':'disabled'} onchange="onProduitChange(this,'${itemId}')">${prodOpts}</select>
-    <input type="number" class="form-input" placeholder="Qté" min="1" value="${qte}" oninput="updateVenteTotal()">
-    <input type="number" class="form-input" placeholder="Prix €" step="0.01" value="${prix||defaultPrix}" oninput="updateVenteTotal()">
+    <input type="number" class="form-input vente-qte" placeholder="Qté" min="1" value="${qte}" oninput="updateVenteTotal()">
+    <input type="number" class="form-input vente-prix" placeholder="Prix €" step="0.01" value="${prix||defaultPrix}" oninput="updateVenteTotal()">
     <button class="action-btn" style="color:var(--danger);font-size:1rem" onclick="removeVenteItem('${itemId}')">✕</button>
   `;
+  if (isUnmatchedOcr) div.classList.add('vente-item-ocr-unmatched');
   list.appendChild(div);
+  updateVenteTotal();
+}
+// Construit la liste d'options <option> du select produit, filtrée par
+// texte libre (fautes de frappe tolérées, comme matchProductFromWords) et
+// optionnellement par catégorie. Utilisé par les lignes issues d'un scan
+// OCR : la recherche porte sur tout le catalogue (l'OCR ne connaît pas la
+// catégorie), la catégorie sert seulement à affiner si besoin.
+function buildFilteredProductOptions(query, categoryFilter, selectedId) {
+  ensureProductsData();
+  const q = normText(query || '').split(/\s+/).filter(w => w.length > 1);
+  let pool = data.products || [];
+  if (categoryFilter) pool = pool.filter(p => prodCategory(p.id) === categoryFilter);
+
+  const scored = pool.map(p => {
+    if (!q.length) return { p, score: 0 };
+    const labelWords = normText(p.label || '').split(/[\s/]+/).filter(Boolean);
+    let score = 0;
+    q.forEach(w => { if (labelWords.some(lw => wordsMatch(lw, w))) score++; });
+    return { p, score };
+  });
+
+  const list = q.length
+    ? scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score).map(s => s.p)
+    : scored.map(s => s.p).sort((a, b) => a.label.localeCompare(b.label));
+
+  if (!list.length) return '<option value="">Aucun résultat — essaie un autre mot-clé</option>';
+  return list.slice(0, 15).map(p => `<option value="${escapeHtml(p.id)}" ${p.id===selectedId?'selected':''}>${escapeHtml(p.label)} — ${escapeHtml(prodCategory(p.id))}</option>`).join('');
+}
+function filterVenteProduitSelect(searchInput, itemId) {
+  const div = document.getElementById('vitem-'+itemId);
+  if (!div) return;
+  const catSelect = div.querySelector('.vente-cat');
+  const prodSelect = div.querySelector('.vente-produit');
+  const categoryFilter = catSelect && catSelect.value ? catSelect.value : '';
+  prodSelect.innerHTML = '<option value="">— Choisir un produit —</option>' + buildFilteredProductOptions(searchInput.value, categoryFilter, '');
   updateVenteTotal();
 }
 function onCategorieChange(sel, itemId) {
   const div = document.getElementById('vitem-'+itemId);
   if (!div) return;
+  const searchInput = div.querySelector('.vente-produit-search');
+  if (searchInput) { filterVenteProduitSelect(searchInput, itemId); return; }
   const prodSelect = div.querySelector('.vente-produit');
   const prods = productsByCategory(sel.value);
   prodSelect.innerHTML = prods.length
     ? prods.map((p,idx)=>`<option value="${escapeHtml(p.id)}" ${idx===0?'selected':''}>${escapeHtml(p.label)}</option>`).join('')
     : '<option value="">Aucun produit</option>';
   prodSelect.disabled = !prods.length;
-  if (prods.length) div.querySelectorAll('input')[1].value = prodPrix(prods[0].id);
+  if (prods.length) div.querySelector('.vente-prix').value = prodPrix(prods[0].id);
   updateVenteTotal();
 }
 function onProduitChange(sel, itemId) {
   const div = document.getElementById('vitem-'+itemId);
   if (!div) return;
   const prix = prodPrix(sel.value);
-  div.querySelectorAll('input')[1].value = prix;
+  div.querySelector('.vente-prix').value = prix;
+  const searchInput = div.querySelector('.vente-produit-search');
+  if (searchInput && sel.value) {
+    // Un produit a été choisi via la recherche : la ligne n'est plus "non
+    // reconnue", et la catégorie affichée se resynchronise sur sa vraie
+    // catégorie (elle pouvait être sur "Toutes catégories" pendant la recherche).
+    div.classList.remove('vente-item-ocr-unmatched');
+    const catSelect = div.querySelector('.vente-cat');
+    if (catSelect) catSelect.value = prodCategory(sel.value);
+  }
   updateVenteTotal();
 }
 function removeVenteItem(itemId) {
@@ -7318,8 +7437,9 @@ function removeVenteItem(itemId) {
 function getVenteItems() {
   return Array.from(document.getElementById('vente-items-list').children).map(div=>{
     const prodSelect = div.querySelector('.vente-produit');
-    const inputs = div.querySelectorAll('input');
-    return { produit: prodSelect.value, qte: parseInt(inputs[0].value)||1, prix: parseFloat(inputs[1].value)||0 };
+    const qte = parseInt(div.querySelector('.vente-qte')?.value)||1;
+    const prix = parseFloat(div.querySelector('.vente-prix')?.value)||0;
+    return { produit: prodSelect.value, qte, prix };
   }).filter(i => i.produit);
 }
 function updateVenteTotal() {
@@ -7379,6 +7499,301 @@ function deleteVente(id) {
   renderVentes();
   renderStock();
   updateBadges();
+}
+
+// ─── SCAN OCR (ticket de caisse, étiquette, facture...) ────────────────
+// Tout se passe dans le navigateur (Tesseract.js), rien n'est envoyé à un
+// serveur : ça marche même sans compte et hors-ligne (après un premier
+// chargement en ligne). Le module OCR (~2-5 Mo) n'est chargé qu'au moment
+// où l'utilisateur ouvre vraiment cette modale, jamais au démarrage de
+// l'app, pour ne pas ralentir tout le monde pour une fonctionnalité que
+// beaucoup n'utiliseront jamais.
+let ocrSelectedFile = null;
+let ocrRawText = '';
+let ocrParsedItems = null;
+let ocrTotalWarning = null;
+let tesseractLoadPromise = null;
+
+function loadTesseract() {
+  if (window.Tesseract) return Promise.resolve();
+  if (tesseractLoadPromise) return tesseractLoadPromise;
+  tesseractLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    script.onload = () => resolve();
+    script.onerror = () => { tesseractLoadPromise = null; reject(new Error("Impossible de charger le module de reconnaissance de texte (vérifie ta connexion internet).")); };
+    document.head.appendChild(script);
+  });
+  return tesseractLoadPromise;
+}
+
+function handleOcrFileSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  resetOcrScan(false);
+  if (!file) return;
+  ocrSelectedFile = file;
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.getElementById('ocr-preview-img').src = reader.result;
+    document.getElementById('ocr-preview-wrap').style.display = '';
+    document.getElementById('ocr-drop-label').textContent = '📷 Reprendre une autre photo';
+    document.getElementById('ocr-analyze-btn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetOcrScan(clearInput = true) {
+  ocrSelectedFile = null;
+  ocrRawText = '';
+  ocrParsedItems = null;
+  ocrTotalWarning = null;
+  const preview = document.getElementById('ocr-preview-wrap');
+  if (preview) preview.style.display = 'none';
+  const previewImg = document.getElementById('ocr-preview-img');
+  if (previewImg) previewImg.src = '';
+  const dropLabel = document.getElementById('ocr-drop-label');
+  if (dropLabel) dropLabel.textContent = '📷 Prendre une photo ou choisir un fichier';
+  const analyzeBtn = document.getElementById('ocr-analyze-btn');
+  if (analyzeBtn) { analyzeBtn.disabled = true; analyzeBtn.style.display = ''; }
+  const continueBtn = document.getElementById('ocr-continue-btn');
+  if (continueBtn) continueBtn.style.display = 'none';
+  const retakeBtn = document.getElementById('ocr-retake-btn');
+  if (retakeBtn) retakeBtn.style.display = 'none';
+  const progressWrap = document.getElementById('ocr-progress-wrap');
+  if (progressWrap) progressWrap.style.display = 'none';
+  const resultWrap = document.getElementById('ocr-result-wrap');
+  if (resultWrap) resultWrap.style.display = 'none';
+  const errorEl = document.getElementById('ocr-error');
+  if (errorEl) errorEl.style.display = 'none';
+  const rawTextEl = document.getElementById('ocr-raw-text');
+  if (rawTextEl) { rawTextEl.textContent = ''; rawTextEl.style.display = 'none'; }
+  if (clearInput) { const input = document.getElementById('ocr-file-input'); if (input) input.value = ''; }
+}
+
+function toggleOcrRawText() {
+  const el = document.getElementById('ocr-raw-text');
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function setOcrProgress(pct, label) {
+  const bar = document.getElementById('ocr-progress-bar');
+  if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  const lbl = document.getElementById('ocr-progress-label');
+  if (lbl) lbl.textContent = label;
+}
+
+// Réduit la taille et renforce le contraste en niveaux de gris avant l'OCR :
+// une photo de téléphone brute (souvent 3000-4000px) ralentit énormément
+// Tesseract, et le contraste aide beaucoup sur un ticket thermique délavé.
+function preprocessOcrImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(img.src);
+      const maxDim = 1600;
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      const imageData = ctx.getImageData(0, 0, width, height);
+      const d = imageData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const gray = d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114;
+        const contrasted = Math.min(255, Math.max(0, (gray - 128) * 1.3 + 128));
+        d[i] = d[i+1] = d[i+2] = contrasted;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => reject(new Error('Photo illisible.'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// Ignore les lignes de ticket qui ne sont presque jamais un article vendu
+// (total, TVA, moyen de paiement...) — elles contiennent souvent des
+// nombres décimaux qui seraient sinon pris à tort pour un prix d'article.
+const OCR_NOISE_LINE_RE = /\b(total|tva|ht|ttc|especes?|especes|cb|carte bancaire|carte|monnaie|rendu|merci|siret|siren|tel|telephone|caisse|ticket|remise|reduction|solde|nombre d.?articles?|nb articles?)\b/i;
+
+// Extrait des lignes candidates {guessText, qte, prix} d'un texte OCR brut
+// de ticket/étiquette/facture. Volontairement simple et prudent : le texte
+// brut reste toujours affiché à côté pour vérification, en filet de sécurité
+// si le parsing rate une ligne inhabituelle.
+function parseReceiptText(rawText) {
+  const lines = String(rawText || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const priceRe = /(\d{1,4}[.,]\d{2})(?!\d)/g;
+  const items = [];
+
+  lines.forEach(line => {
+    if (OCR_NOISE_LINE_RE.test(line)) return;
+    const prices = [...line.matchAll(priceRe)].map(m => parseFloat(m[1].replace(',', '.')));
+    if (!prices.length) return; // pas de prix reconnaissable : probablement pas un article
+
+    // Le prix retenu est le DERNIER nombre décimal de la ligne : sur un
+    // ticket, c'est presque toujours le montant (jamais une quantité ou un
+    // code produit, qui apparaissent plutôt en début de ligne).
+    const prix = prices[prices.length - 1];
+    if (!(prix > 0) || prix > 9999) return;
+
+    // Quantité : uniquement un "2x" / "2 x" en tout DÉBUT de ligne, pour ne
+    // pas confondre avec un code produit numérique au milieu du texte.
+    let qte = 1;
+    let name = line;
+    const qteMatch = line.match(/^(\d{1,2})\s*[x×]\s*/i);
+    if (qteMatch) {
+      qte = parseInt(qteMatch[1], 10) || 1;
+      name = line.slice(qteMatch[0].length);
+    }
+
+    name = name.replace(priceRe, ' ').replace(/\b\d{3,}\b/g, ' ').replace(/[€$*]/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    if (name.length < 2) return; // rien d'exploitable comme nom de produit
+
+    items.push({ guessText: name, qte, prix });
+  });
+
+  return items;
+}
+
+// Repère une éventuelle ligne "Total" du ticket, pour la comparer à la
+// somme des lignes reconnues — un simple garde-fou, pas un blocage.
+function findReceiptTotal(rawText) {
+  let candidate = null;
+  String(rawText || '').split(/\r?\n/).forEach(line => {
+    if (/total/i.test(line) && !/sous[- ]?total/i.test(line)) {
+      const m = [...line.matchAll(/(\d{1,4}[.,]\d{2})(?!\d)/g)];
+      if (m.length) candidate = parseFloat(m[m.length - 1][1].replace(',', '.'));
+    }
+  });
+  return candidate;
+}
+
+// Associe un texte lu par l'OCR à un produit du catalogue. Priorité à une
+// correspondance EXACTE (un mot du texte reconnu identique à un mot du nom
+// produit) avant de retomber sur la tolérance aux fautes de frappe de
+// matchProductFromWords (assistant chat) : sur un texte OCR, un mot mal
+// reconnu peut sinon, par hasard, se trouver à la même distance d'édition
+// d'un autre produit que le bon mot exact, et lui voler la place au hasard
+// de l'ordre du catalogue (ex: "badge" vs "cadre", 2 lettres d'écart).
+function matchOcrItemToProduct(guessText) {
+  ensureProductsData();
+  const words = normText(guessText).split(/[\s/]+/).filter(w => w.length > 2);
+  if (!words.length) return null;
+
+  let exact = null;
+  (data.products || []).forEach(p => {
+    if (exact) return;
+    const labelWords = normText(p.label || '').split(/[\s/]+/).filter(Boolean);
+    if (words.some(w => labelWords.includes(w))) exact = p;
+  });
+  if (exact) return exact;
+
+  return matchProductFromWords(words);
+}
+function matchOcrItemsToProducts(items) {
+  return items.map(item => {
+    const best = matchOcrItemToProduct(item.guessText);
+    return { ...item, produit: best ? best.id : null, productLabel: best ? best.label : null };
+  });
+}
+
+async function analyzeOcrPhoto() {
+  if (!ocrSelectedFile) return;
+  const analyzeBtn = document.getElementById('ocr-analyze-btn');
+  const continueBtn = document.getElementById('ocr-continue-btn');
+  const errorEl = document.getElementById('ocr-error');
+  errorEl.style.display = 'none';
+  analyzeBtn.disabled = true;
+  continueBtn.style.display = 'none';
+  document.getElementById('ocr-retake-btn').style.display = 'none';
+  document.getElementById('ocr-result-wrap').style.display = 'none';
+  document.getElementById('ocr-progress-wrap').style.display = '';
+  setOcrProgress(0, 'Préparation de la photo…');
+
+  try {
+    const processedDataUrl = await preprocessOcrImage(ocrSelectedFile);
+    setOcrProgress(5, 'Chargement du module de reconnaissance…');
+    await loadTesseract();
+
+    setOcrProgress(10, 'Analyse en cours…');
+    const result = await Tesseract.recognize(processedDataUrl, 'fra', {
+      logger: m => {
+        if (m.status === 'recognizing text' && typeof m.progress === 'number') {
+          setOcrProgress(10 + Math.round(m.progress * 90), 'Analyse en cours…');
+        }
+      }
+    });
+
+    ocrRawText = (result && result.data && result.data.text) || '';
+    const parsed = parseReceiptText(ocrRawText);
+    const items = matchOcrItemsToProducts(parsed);
+
+    document.getElementById('ocr-raw-text').textContent = ocrRawText.trim() || '(aucun texte détecté)';
+    document.getElementById('ocr-items-count').textContent = items.length;
+    document.getElementById('ocr-progress-wrap').style.display = 'none';
+    document.getElementById('ocr-result-wrap').style.display = '';
+    document.getElementById('ocr-retake-btn').style.display = '';
+
+    if (!items.length) {
+      errorEl.textContent = "Aucune ligne de produit détectée. Reprends la photo (plus net, mieux cadrée, bien éclairée) ou consulte le texte brut ci-dessus pour saisir la vente à la main.";
+      errorEl.style.display = '';
+      analyzeBtn.disabled = false;
+      return;
+    }
+
+    const declaredTotal = findReceiptTotal(ocrRawText);
+    const computedTotal = items.reduce((s, i) => s + i.qte * i.prix, 0);
+    ocrParsedItems = items;
+    ocrTotalWarning = (declaredTotal !== null && Math.abs(declaredTotal - computedTotal) > 0.01)
+      ? `⚠️ Le total lu sur le document (${declaredTotal.toFixed(2)}€) ne correspond pas à la somme des lignes reconnues (${computedTotal.toFixed(2)}€).\n\nVérifie les quantités et prix ci-dessous avant d'enregistrer.`
+      : null;
+
+    // Étape "Continuer" volontairement séparée du clic sur "Analyser" (pas
+    // d'enchaînement automatique) : sur un appareil lent, l'analyse peut
+    // bloquer le thread assez longtemps pour qu'un clic resté "en attente"
+    // se retrouve livré par le navigateur une fois la page libérée — s'il
+    // enchaînait directement sur modal-vente, ce clic pourrait atterrir sur
+    // "Enregistrer" et sauvegarder une vente jamais relue.
+    analyzeBtn.style.display = 'none';
+    continueBtn.style.display = '';
+  } catch (err) {
+    console.error('OCR error:', err);
+    document.getElementById('ocr-progress-wrap').style.display = 'none';
+    errorEl.textContent = 'Erreur pendant l\'analyse : ' + (err?.message || 'réessaie ou reprends la photo.');
+    errorEl.style.display = '';
+    analyzeBtn.disabled = false;
+    document.getElementById('ocr-retake-btn').style.display = '';
+  }
+}
+
+// Ouvre le formulaire de vente pré-rempli à partir des lignes détectées —
+// jamais d'enregistrement automatique : l'utilisateur relit et valide
+// toujours lui-même via le bouton "Enregistrer" habituel de modal-vente.
+function openPrefilledVenteFromOcr(items) {
+  goPage('ventes');
+  openModal('modal-vente'); // réinitialise déjà le formulaire (date du jour, 1 ligne vide)
+  document.getElementById('vente-items-list').innerHTML = '';
+  items.forEach(i => {
+    if (i.produit) addVenteItem(i.produit, i.qte, i.prix);
+    else addVenteItem('', i.qte, i.prix, i.guessText);
+  });
+  updateVenteTotal();
+}
+
+// Appelé par le clic explicite sur "Continuer vers la vente" — jamais
+// automatiquement à la fin de l'analyse (voir commentaire dans analyzeOcrPhoto).
+function proceedToVenteFromOcr() {
+  if (!ocrParsedItems) return;
+  const items = ocrParsedItems;
+  const warning = ocrTotalWarning;
+  closeModal('modal-ocr-scan');
+  openPrefilledVenteFromOcr(items);
+  if (warning) alert(warning);
 }
 
 // ─── SAVE MARCHÉ ──────────────────────────────────────────────
@@ -21927,6 +22342,7 @@ function respondHelp(entry, originalText) {
 
   window.mobileQuickActionV435 = function(type){
     if(type === 'vente') { closeFab435(); return openModal('modal-vente'); }
+    if(type === 'scan') { closeFab435(); return openModal('modal-ocr-scan'); }
     if(type === 'stock') { closeFab435(); return openModal('modal-stock'); }
     if(type === 'facture') { closeFab435(); return openModal('modal-facture'); }
     if(type === 'assistant') {
@@ -21948,6 +22364,7 @@ function respondHelp(entry, originalText) {
       menu.innerHTML = `
         <div class="mobile-fab-panel-v435">
           <button type="button" class="btn btn-primary" onclick="mobileQuickActionV435('vente')">＋ Ajouter une vente</button>
+          <button type="button" class="btn btn-secondary" onclick="mobileQuickActionV435('scan')">📷 Scanner un ticket</button>
           <button type="button" class="btn btn-secondary" onclick="mobileQuickActionV435('stock')">▣ Ajouter un produit</button>
           <button type="button" class="btn btn-secondary" onclick="mobileQuickActionV435('facture')">◻ Créer une facture</button>
           <button type="button" class="btn btn-ghost" onclick="mobileQuickActionV435('assistant')">? Ouvrir l’aide</button>
