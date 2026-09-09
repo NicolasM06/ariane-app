@@ -949,10 +949,10 @@ body.sidebar-open #sidebar-overlay {
 /* Nouveau bloc haut unique */
 .hero-full {
   width: 100% !important;
-  min-height: 330px !important;
+  min-height: 0 !important;
   display: grid !important;
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, .75fr) !important;
-  grid-template-rows: 1fr auto !important;
+  grid-template-rows: 1fr !important;
   gap: 18px !important;
   padding: 28px !important;
   border-radius: 28px !important;
@@ -2755,16 +2755,16 @@ label[for="builder-canvas-zoom"] {
 .ariane-help-card {
   margin-bottom: 18px;
   padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(59,130,246,.20);
-  background: rgba(59,130,246,.08);
-  color: #bfdbfe;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text2);
   line-height: 1.55;
   font-size: .87rem;
 }
 
 .ariane-help-card strong {
-  color: #dbeafe;
+  color: var(--text);
 }
 
 .pro-invoice-btn {
@@ -9363,7 +9363,7 @@ function renderDesignHero() {
       '<div class="hero-full-left">' +
         '<div class="hero-kicker">Tableau de bord</div>' +
         '<div class="hero-title">Une gestion plus claire, plus rapide et plus agréable.</div>' +
-        '<div class="hero-text">L’essentiel est mis en avant : revenus, charges, bénéfice, stock, alertes, événements et prochain rappel du calendrier. Les éléments passés ne remontent plus dans le tableau de bord.</div>' +
+        '<div class="hero-text">Revenus, charges, bénéfice et stock en un coup d’œil ci-dessous.</div>' +
         '<div class="hero-actions">' +
           '<button class="btn btn-primary" onclick="openModal(&quot;modal-vente&quot;)"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter une vente</button>' +
           '<button class="btn btn-secondary" onclick="goPage(&quot;stock&quot;)">Voir le stock</button>' +
@@ -9379,11 +9379,6 @@ function renderDesignHero() {
             ? ('<div class="hero-side-meta">' + escapeHtml(nextCal.date || '') + ' · ' + escapeHtml(typeof calTypeLabel === "function" ? calTypeLabel(nextCal.type) : (nextCal.type || '')) + '</div><span>' + escapeHtml(nextCal.title || 'Élément du calendrier') + '</span><div class="hero-side-cta"><button class="btn btn-secondary" onclick="goPage(&quot;calendrier&quot;)">Voir calendrier</button></div>')
             : '<span>Aucun élément à venir dans le calendrier.</span><div class="hero-side-cta"><button class="btn btn-secondary" onclick="goPage(&quot;calendrier&quot;)">Ouvrir calendrier</button></div>') +
         '</div>' +
-      '</div>' +
-      '<div class="hero-full-bottom">' +
-        '<div class="hero-mini-card"><div class="hero-mini-label">Net</div><div class="hero-mini-value">' + fmt(c.netApresCharges || 0) + '</div></div>' +
-        '<div class="hero-mini-card"><div class="hero-mini-label">Bénéfice</div><div class="hero-mini-value">' + fmt(c.benef || 0) + '</div></div>' +
-        '<div class="hero-mini-card"><div class="hero-mini-label">Stock net</div><div class="hero-mini-value">' + fmt(c.stockValue || 0) + '</div></div>' +
       '</div>' +
     '</div>';
 }
@@ -17883,16 +17878,25 @@ showPage();
     }
 
     const dashboard = document.querySelector('#page-dashboard .page-content');
-    if(dashboard && !document.getElementById('dashboard-commercial-v418')){
+    if(dashboard && !document.getElementById('dashboard-commercial-v418') && !data.params?.conseilDismissed){
       dashboard.insertAdjacentHTML('afterbegin', `
         <div id="dashboard-commercial-v418" class="ariane-help-card">
           <strong>Conseil :</strong> commence par le mode exemple pour faire une démo, puis passe en mode réel avant de configurer le client.
           <button class="btn btn-secondary" style="margin-left:10px;min-height:34px;padding:7px 10px" onclick="goPage('parametres')">Configurer</button>
           ${data.params?.demoMode ? '<span class="mode-badge">Mode exemple actif</span>' : '<span class="mode-badge">Mode réel</span>'}
+          <button class="action-btn" style="float:right" title="Masquer" onclick="dismissDashboardConseil()"><svg class="icon icon-sm"><use href="#icon-close"/></svg></button>
         </div>
       `);
     }
   }
+
+  function dismissDashboardConseil(){
+    if(!data.params) data.params = {};
+    data.params.conseilDismissed = true;
+    saveData();
+    document.getElementById('dashboard-commercial-v418')?.remove();
+  }
+  window.dismissDashboardConseil = dismissDashboardConseil;
 
   function injectHelp18(page){
     const map = {
