@@ -5910,6 +5910,9 @@ body {
               <button class="btn btn-secondary" onclick="accountLogin()">Se connecter</button>
               <a href="#" onclick="toggleForgotPassword();return false" style="font-size:0.8rem;color:var(--text3);margin-left:4px">Mot de passe oublié ?</a>
             </div>
+            <div style="margin-top:12px;color:var(--text3);font-size:.74rem;line-height:1.5">
+              Ariane est en bêta gratuite : le service est fourni sans garantie, peut évoluer ou être interrompu, et tes données peuvent être réinitialisées à l'occasion. Exporte régulièrement une sauvegarde (Exports &gt; Sauvegarde complète) pour ne rien perdre. En créant un compte, tu acceptes ces conditions.
+            </div>
             <div id="forgot-password-box" style="display:none;margin-top:14px;padding:14px;background:var(--surface2);border-radius:var(--radius-sm)">
               <div class="form-row" style="margin-bottom:10px">
                 <label class="form-label">Email du compte</label>
@@ -5930,6 +5933,10 @@ body {
                 <button class="btn btn-secondary" onclick="accountSyncNow()">Sauvegarder maintenant</button>
                 <button class="btn btn-ghost" onclick="accountLogout()">Se déconnecter</button>
               </div>
+            </div>
+            <div id="account-verify-row" style="display:none;margin-top:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--gold-dim);color:var(--gold);font-size:.82rem;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <span>Email non confirmé — vérifie ta boîte de réception (le lien peut être dans les spams).</span>
+              <button class="btn btn-secondary" style="min-height:30px;padding:5px 10px;font-size:.78rem" onclick="resendVerificationEmail()">Renvoyer l'email</button>
             </div>
           </div>
 
@@ -24379,6 +24386,16 @@ showPage();
       }, 400);
     } else if(hash.indexOf('paiement-paypal-erreur') !== -1){
       setTimeout(function(){ paymentStatusV5('La connexion PayPal a échoué. Réessaie.', 'err'); }, 400);
+    } else if(hash.indexOf('email-verifie') !== -1){
+      setTimeout(function(){
+        const acc = loadAccount();
+        acc.emailVerified = true;
+        saveAccount(acc);
+        renderAccountUI();
+        alert('Email confirmé, merci !');
+      }, 400);
+    } else if(hash.indexOf('email-verification-erreur') !== -1){
+      setTimeout(function(){ alert("Ce lien de vérification est invalide ou a expiré. Tu peux en redemander un depuis Paramètres > Compte."); }, 400);
     } else {
       // Vérification silencieuse au chargement pour tenir les indicateurs à jour.
       setTimeout(function(){
@@ -24817,6 +24834,8 @@ showPage();
       if(emailEl) emailEl.textContent = acc.email;
       const syncEl = document.getElementById('account-sync-status');
       if(syncEl) syncEl.textContent = acc.lastSync ? ('Dernière sauvegarde en ligne : ' + new Date(acc.lastSync).toLocaleString('fr-FR')) : 'Pas encore synchronisé.';
+      const verifyRow = document.getElementById('account-verify-row');
+      if(verifyRow) verifyRow.style.display = acc.emailVerified ? 'none' : 'flex';
     } else {
       loggedOut.style.display = 'block';
       loggedIn.style.display = 'none';
@@ -24824,17 +24843,58 @@ showPage();
   }
 
   // Relie le vendeur (Stripe/PayPal) de cet appareil au compte qui vient de
-  // se connecter — nécessite le secret du vendeur, qu'Ariane a déjà en
-  // local. Silencieux : ne bloque jamais la connexion si ça échoue.
+  // se connecter. Si ce compte a déjà un vendeur rattaché ailleurs (ex:
+  // connecté depuis un autre appareil avant), c'est CE vendeur-là qui fait
+  // désormais autorité — Ariane adopte son sellerId/secret pour que le
+  // compte ne pointe jamais que sur une seule identité vendeur. Si ce
+  // navigateur n'a pas encore de vendeur local (nouvel appareil), on
+  // récupère directement celui du compte. Silencieux : ne bloque jamais la
+  // connexion si ça échoue (ex: backend d'une version plus ancienne).
+  async function resendVerificationEmail(){
+    const acc = loadAccount();
+    if(!acc.token) return;
+    accountStatus('Envoi...', null);
+    try {
+      const res = await fetch(accountBackendUrl() + '/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + acc.token }
+      });
+      const json = await res.json().catch(function(){ return {}; });
+      if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
+      accountStatus(json.message || 'Email renvoyé.', 'ok');
+    } catch(e){
+      accountStatus('Erreur : ' + e.message, 'err');
+    }
+  }
+  window.resendVerificationEmail = resendVerificationEmail;
+
   async function claimSellerIfAny(token){
     try {
       const p = data?.paymentsV5;
-      if(!p || !p.sellerId || !p.sellerSecret) return;
-      await fetch(accountBackendUrl() + '/api/sellers/claim', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json', Authorization: 'Bearer ' + token},
-        body: JSON.stringify({ sellerId: p.sellerId, sellerSecret: p.sellerSecret })
-      });
+      let json = null;
+      if(p && p.sellerId && p.sellerSecret){
+        const res = await fetch(accountBackendUrl() + '/api/sellers/claim', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json', Authorization: 'Bearer ' + token},
+          body: JSON.stringify({ sellerId: p.sellerId, sellerSecret: p.sellerSecret })
+        });
+        json = await res.json().catch(function(){ return null; });
+      }
+      // Pas de vendeur local, ou secret local invalide côté serveur (ex:
+      // nouvel appareil dont l'identifiant local n'a jamais servi) : on
+      // récupère quand même le vendeur déjà rattaché à ce compte, s'il
+      // existe (ou on lui en crée un).
+      if(!json || !json.ok){
+        const res = await fetch(accountBackendUrl() + '/api/seller/mine', {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        json = await res.json().catch(function(){ return null; });
+      }
+      if(json && json.ok && json.sellerId && json.sellerSecret && data?.paymentsV5){
+        data.paymentsV5.sellerId = json.sellerId;
+        data.paymentsV5.sellerSecret = json.sellerSecret;
+        saveData();
+      }
     } catch(e){ /* pas bloquant */ }
   }
 
@@ -24855,7 +24915,7 @@ showPage();
       });
       const json = await res.json().catch(function(){ return {}; });
       if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
-      const acc = { token: json.token, email: json.user.email, businessName: json.user.businessName, lastSync: new Date().toISOString() };
+      const acc = { token: json.token, email: json.user.email, businessName: json.user.businessName, emailVerified: Boolean(json.user.emailVerified), lastSync: new Date().toISOString() };
       saveAccount(acc);
       await claimSellerIfAny(json.token);
       renderAccountUI();
@@ -24882,7 +24942,7 @@ showPage();
       const json = await res.json().catch(function(){ return {}; });
       if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
 
-      const acc = { token: json.token, email: json.user.email, businessName: json.user.businessName };
+      const acc = { token: json.token, email: json.user.email, businessName: json.user.businessName, emailVerified: Boolean(json.user.emailVerified) };
       saveAccount(acc);
 
       // Récupère les données déjà en ligne pour ce compte, s'il y en a.
