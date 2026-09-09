@@ -5121,6 +5121,7 @@ body {
     <symbol id="icon-depenses" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 10.5h18"/><path d="M16.2 14.2v.1"/></symbol>
     <symbol id="icon-factures" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7Z"/><path d="M14 3v4h4"/><path d="M9.5 12h5M9.5 16h5"/></symbol>
     <symbol id="icon-clients" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><path d="M16 9a2.8 2.8 0 1 0 0-5.6"/><path d="M21 20c0-3-1.8-5.2-4.5-5.8"/></symbol>
+    <symbol id="icon-commandes" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1Z"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/></symbol>
     <symbol id="icon-calendrier" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9.5h18"/><path d="M8 3v4M16 3v4"/></symbol>
     <symbol id="icon-paiements" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10.2h20"/><path d="M6 15h4"/></symbol>
     <symbol id="icon-site" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.8 2.8 2.8 15.2 0 18M12 3c-2.8 2.8-2.8 15.2 0 18"/></symbol>
@@ -5278,6 +5279,7 @@ body {
   <div class="sidebar-nav">
     <div class="nav-item active" data-page="dashboard" onclick="goPage('dashboard')"><span class="nav-icon"><svg class="icon"><use href="#icon-dashboard"/></svg></span> Dashboard</div>
     <div class="nav-item" data-page="ventes" onclick="goPage('ventes')"><span class="nav-icon"><svg class="icon"><use href="#icon-ventes"/></svg></span> Ventes <span id="badge-ventes" class="badge" style="display:none"></span></div>
+    <div class="nav-item" data-page="commandes" onclick="goPage('commandes')"><span class="nav-icon"><svg class="icon"><use href="#icon-commandes"/></svg></span> Commandes <span id="badge-commandes" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="stock" onclick="goPage('stock')"><span class="nav-icon"><svg class="icon"><use href="#icon-stock"/></svg></span> Stock <span id="badge-stock" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="marches" onclick="goPage('marches')"><span class="nav-icon"><svg class="icon"><use href="#icon-marches"/></svg></span> Marchés & Événements</div>
     <div class="nav-item" data-page="produits-stats" onclick="goPage('produits-stats')"><span class="nav-icon"><svg class="icon"><use href="#icon-stats"/></svg></span> Stats produits</div>
@@ -5362,7 +5364,22 @@ body {
     </div>
   </div>
 
-
+  <!-- COMMANDES -->
+  <div id="page-commandes" class="page">
+    <div class="page-content">
+      <div class="alert alert-info" style="margin-bottom:16px">Une commande payée en ligne (Stripe/PayPal) arrive ici automatiquement, en plus de créer la vente. Tu peux aussi en ajouter une manuellement (téléphone, email...).</div>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">Commandes <span id="commandes-count" style="color:var(--text3);font-size:0.78rem;font-weight:400"></span></div>
+          <button class="btn btn-primary" onclick="openCommandeModal()"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter une commande</button>
+        </div>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Date</th><th>Client</th><th>Produit</th><th>Total</th><th>Origine</th><th>Statut</th><th>Livraison</th><th></th></tr></thead>
+          <tbody id="commandes-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
 
   <!-- STOCK -->
   <div id="page-stock" class="page">
@@ -6356,6 +6373,52 @@ body {
   </div>
 </div>
 
+<!-- MODAL COMMANDE -->
+<div class="modal-overlay" id="modal-commande">
+  <div class="modal">
+    <div class="modal-title" id="modal-commande-title">Nouvelle commande</div>
+    <input type="hidden" id="commande-edit-id">
+    <div class="form-row-grid">
+      <div class="form-row"><label class="form-label">Client</label><input type="text" class="form-input" id="commande-client" list="clients-datalist" placeholder="Nom du client"></div>
+      <div class="form-row"><label class="form-label">Date</label><input type="date" class="form-input" id="commande-date"></div>
+    </div>
+    <div class="form-row-grid3">
+      <div class="form-row"><label class="form-label">Produit</label><input type="text" class="form-input" id="commande-produit" placeholder="Nom du produit"></div>
+      <div class="form-row"><label class="form-label">Quantité</label><input type="number" class="form-input" id="commande-qte" value="1" min="1"></div>
+      <div class="form-row"><label class="form-label">Total (€)</label><input type="number" class="form-input" id="commande-total" step="0.01" min="0"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Statut</label>
+      <select class="form-select" id="commande-statut">
+        <option value="nouvelle">Nouvelle</option>
+        <option value="preparation">En préparation</option>
+        <option value="expediee">Expédiée</option>
+        <option value="livree">Livrée</option>
+        <option value="annulee">Annulée</option>
+        <option value="remboursee">Remboursée</option>
+      </select>
+    </div>
+    <div class="divider">Livraison</div>
+    <div class="form-row"><label class="form-label">Adresse de livraison</label><input type="text" class="form-input" id="commande-adresse" placeholder="12 rue Exemple, 75001 Paris"></div>
+    <div class="form-row-grid">
+      <div class="form-row"><label class="form-label">Mode de livraison</label>
+        <select class="form-select" id="commande-mode-livraison">
+          <option value="">Non précisé</option>
+          <option value="retrait">Retrait en main propre</option>
+          <option value="colissimo">Colissimo</option>
+          <option value="chronopost">Chronopost</option>
+          <option value="mondial-relay">Mondial Relay</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="form-row"><label class="form-label">N° de suivi</label><input type="text" class="form-input" id="commande-suivi" placeholder="Optionnel"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-commande')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveCommande()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- MODAL TÂCHE CALENDRIER -->
 <div class="modal-overlay" id="modal-tache">
@@ -6810,10 +6873,11 @@ function goPage(page) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.querySelector(`[data-page="${page}"]`).classList.add('active');
-  const titles = { dashboard:'Dashboard', ventes:'Ventes', stock:'Produits & stock', marches:'Marchés & Événements', 'produits-stats':'Stats par produit', transactions:'Dépenses & Compta', factures:'Factures', clients:'Clients', calendrier:'Calendrier', 'site-builder':'Site web', exports:'Exports', parametres:'Paramètres' };
+  const titles = { dashboard:'Dashboard', ventes:'Ventes', commandes:'Commandes', stock:'Produits & stock', marches:'Marchés & Événements', 'produits-stats':'Stats par produit', transactions:'Dépenses & Compta', factures:'Factures', clients:'Clients', calendrier:'Calendrier', 'site-builder':'Site web', exports:'Exports', parametres:'Paramètres' };
   document.getElementById('topbar-title').textContent = titles[page]||'';
   const actions = document.getElementById('topbar-actions');
   if (page==='ventes') actions.innerHTML = `<button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner</button><button class="btn btn-primary" onclick="openModal('modal-vente')"><svg class="icon"><use href="#icon-plus"/></svg> Vente</button>`;
+  else if (page==='commandes') actions.innerHTML = `<button class="btn btn-primary" onclick="openCommandeModal()"><svg class="icon"><use href="#icon-plus"/></svg> Commande</button>`;
   else if (page==='stock') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-stock')"><svg class="icon"><use href="#icon-plus"/></svg> Stock</button>`;
   else if (page==='marches') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-marche')"><svg class="icon"><use href="#icon-plus"/></svg> Événement</button>`;
   else if (page==='transactions') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-transaction')"><svg class="icon"><use href="#icon-plus"/></svg> Dépense</button>`;
@@ -6825,6 +6889,7 @@ function goPage(page) {
   else actions.innerHTML = '';
   if (page==='dashboard') renderDashboard();
   if (page==='ventes') renderVentes();
+  if (page==='commandes') renderCommandes();
   if (page==='stock') renderStock();
   if (page==='marches') renderMarches();
   if (page==='produits-stats') renderStatsPage();
@@ -7015,6 +7080,8 @@ function updateBadges() {
   const bc = document.getElementById('badge-classer'); bc.style.display=c.aClasser>0?'':'none'; bc.textContent=c.aClasser;
   const bf = document.getElementById('badge-factures'); bf.style.display=(c.facImpayees+c.facRetard)>0?'':'none'; bf.textContent=c.facImpayees+c.facRetard;
   const bs = document.getElementById('badge-stock'); if (bs) { const n=c.stockFaible+c.stockRupture; bs.style.display=n>0?'':'none'; bs.textContent=n; }
+  const bo = document.getElementById('badge-commandes');
+  if (bo) { const n=(data.commandes||[]).filter(o=>o.statut==='nouvelle').length; bo.style.display=n>0?'':'none'; bo.textContent=n; }
 }
 
 // ─── RENDER VENTES ────────────────────────────────────────────
@@ -7624,6 +7691,116 @@ function showClientDetail(id) {
       </tr>`).join('')}</tbody>
     </table></div>` : `<div class="empty-state">Aucune facture pour ce client.</div>`}
   `;
+}
+
+// ─── COMMANDES ──────────────────────────────────────────────────
+const COMMANDE_STATUTS = {
+  nouvelle: { label: 'Nouvelle' },
+  preparation: { label: 'En préparation' },
+  expediee: { label: 'Expédiée' },
+  livree: { label: 'Livrée' },
+  annulee: { label: 'Annulée' },
+  remboursee: { label: 'Remboursée' }
+};
+const LIVRAISON_LABELS = { retrait: 'Retrait en main propre', colissimo: 'Colissimo', chronopost: 'Chronopost', 'mondial-relay': 'Mondial Relay', autre: 'Autre' };
+
+function ensureCommandesData() {
+  if (!Array.isArray(data.commandes)) data.commandes = [];
+}
+
+function renderCommandes() {
+  ensureCommandesData();
+  const commandes = [...data.commandes].sort((a,b) => String(b.date||'').localeCompare(String(a.date||'')));
+  const countEl = document.getElementById('commandes-count');
+  if (countEl) countEl.textContent = `(${commandes.length})`;
+  const tbody = document.getElementById('commandes-tbody');
+  if (!tbody) return;
+  if (!commandes.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-commandes"/></svg></div>Aucune commande</td></tr>`;
+    updateBadges();
+    return;
+  }
+  tbody.innerHTML = commandes.map(c => {
+    const livraison = [c.modeLivraison ? (LIVRAISON_LABELS[c.modeLivraison]||c.modeLivraison) : '', c.numeroSuivi].filter(Boolean).join(' · ') || '—';
+    return `<tr>
+      <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${escapeHtml(c.date||'-')}</td>
+      <td style="color:var(--text)">${escapeHtml(c.client||'—')}</td>
+      <td style="color:var(--text2);font-size:0.82rem">${escapeHtml(c.produit||'—')}${c.qte>1?' ×'+c.qte:''}</td>
+      <td class="amount-neutral">${fmt(c.total||0)}</td>
+      <td><span class="tag ${c.source==='site'?'tag-site':'tag-perso'}">${c.source==='site'?'En ligne':'Manuelle'}</span></td>
+      <td>
+        <select class="form-select" style="width:auto;font-size:0.78rem;padding:5px 8px" onchange="updateCommandeStatut('${escapeHtml(c.id)}', this.value)">
+          ${Object.entries(COMMANDE_STATUTS).map(([k,v]) => `<option value="${k}" ${c.statut===k?'selected':''}>${v.label}</option>`).join('')}
+        </select>
+      </td>
+      <td style="color:var(--text3);font-size:0.78rem">${escapeHtml(livraison)}</td>
+      <td>
+        <button class="action-btn" onclick="openCommandeModal('${escapeHtml(c.id)}')" title="Modifier"><svg class="icon icon-sm"><use href="#icon-edit"/></svg></button>
+        <button class="action-btn" onclick="deleteCommande('${escapeHtml(c.id)}')" title="Supprimer" style="color:var(--danger)"><svg class="icon icon-sm"><use href="#icon-delete"/></svg></button>
+      </td>
+    </tr>`;
+  }).join('');
+  updateBadges();
+}
+
+function updateCommandeStatut(id, statut) {
+  const c = data.commandes.find(x => x.id === id); if (!c) return;
+  c.statut = statut;
+  saveData();
+  renderCommandes();
+}
+
+function openCommandeModal(id) {
+  ensureClientsData();
+  document.getElementById('commande-edit-id').value = id || '';
+  document.getElementById('modal-commande-title').textContent = id ? 'Modifier la commande' : 'Nouvelle commande';
+  const c = id ? data.commandes.find(x => x.id === id) : null;
+  document.getElementById('commande-client').value = c?.client || '';
+  document.getElementById('commande-date').value = c?.date || new Date().toISOString().slice(0,10);
+  document.getElementById('commande-produit').value = c?.produit || '';
+  document.getElementById('commande-qte').value = c?.qte || 1;
+  document.getElementById('commande-total').value = c?.total || '';
+  document.getElementById('commande-statut').value = c?.statut || 'nouvelle';
+  document.getElementById('commande-adresse').value = c?.adresseLivraison || '';
+  document.getElementById('commande-mode-livraison').value = c?.modeLivraison || '';
+  document.getElementById('commande-suivi').value = c?.numeroSuivi || '';
+  openModal('modal-commande');
+}
+
+function saveCommande() {
+  ensureCommandesData();
+  const id = document.getElementById('commande-edit-id').value;
+  const client = document.getElementById('commande-client').value.trim();
+  const produit = document.getElementById('commande-produit').value.trim();
+  if (!client || !produit) { alert('Renseigne au moins le client et le produit.'); return; }
+  ensureClientForName(client);
+  const fields = {
+    client, produit,
+    date: document.getElementById('commande-date').value || new Date().toISOString().slice(0,10),
+    qte: Math.max(1, parseInt(document.getElementById('commande-qte').value) || 1),
+    total: parseFloat(document.getElementById('commande-total').value) || 0,
+    statut: document.getElementById('commande-statut').value,
+    adresseLivraison: document.getElementById('commande-adresse').value.trim(),
+    modeLivraison: document.getElementById('commande-mode-livraison').value,
+    numeroSuivi: document.getElementById('commande-suivi').value.trim()
+  };
+  if (id) {
+    const idx = data.commandes.findIndex(c => c.id === id);
+    if (idx >= 0) data.commandes[idx] = { ...data.commandes[idx], ...fields };
+  } else {
+    data.commandes.push({ id: uid(), source: 'manuel', createdAt: new Date().toISOString(), ...fields });
+  }
+  saveData();
+  closeModal('modal-commande');
+  renderCommandes();
+}
+
+function deleteCommande(id) {
+  const c = data.commandes.find(x => x.id === id); if (!c) return;
+  if (!confirm(`Supprimer cette commande (${c.produit||'—'}) ?`)) return;
+  data.commandes = data.commandes.filter(x => x.id !== id);
+  saveData();
+  renderCommandes();
 }
 
 function renderParams() {
@@ -9200,7 +9377,7 @@ function normalizeBuilderHex(value){if(!value||String(value).includes('00000000'
 function exportSiteBuilderHTML(){const site=buildExportedSiteHTML();downloadBlob(new Blob([site],{type:'text/html;charset=utf-8'}),slugify(data.siteBuilder?.title||'site-ariane')+'.html');}
 
 // ─── INIT + DEMO DATA ─────────────────────────────────────────
-function render() { if (typeof ensureCalendarTypes === 'function') ensureCalendarTypes(); if (typeof ensureCalendarHidden === 'function') ensureCalendarHidden(); if (typeof ensureSiteBuilder === 'function') ensureSiteBuilder(); if (typeof ensureClientsData === 'function') ensureClientsData(); renderDashboard(); renderStock(); updateBadges(); if (typeof renderCalendrier === 'function') renderCalendrier(); if (typeof renderSiteBuilder === 'function') renderSiteBuilder(); }
+function render() { if (typeof ensureCalendarTypes === 'function') ensureCalendarTypes(); if (typeof ensureCalendarHidden === 'function') ensureCalendarHidden(); if (typeof ensureSiteBuilder === 'function') ensureSiteBuilder(); if (typeof ensureClientsData === 'function') ensureClientsData(); if (typeof ensureCommandesData === 'function') ensureCommandesData(); renderDashboard(); renderStock(); updateBadges(); if (typeof renderCalendrier === 'function') renderCalendrier(); if (typeof renderSiteBuilder === 'function') renderSiteBuilder(); }
 loadData();
 
 if (!data.params.demoInitialized) {
@@ -24128,12 +24305,36 @@ showPage();
         data.ventes.push(vente);
         if(matched) { try { applyStockMovement(vente.items, -1); } catch(e){} }
         createdCount++;
+
+        try {
+          if (typeof ensureCommandesData === 'function') ensureCommandesData();
+          if (Array.isArray(data.commandes)) {
+            data.commandes.push({
+              id: uid(),
+              source: 'site',
+              orderId: order.orderId,
+              venteId: vente.id,
+              client: order.customerEmail || '',
+              produit: matched ? matched.label : (order.product?.name || productId || 'Produit'),
+              qte,
+              total: prixUnitaire * qte,
+              statut: 'nouvelle',
+              adresseLivraison: '',
+              modeLivraison: '',
+              numeroSuivi: '',
+              date: dateStr,
+              createdAt: new Date().toISOString()
+            });
+          }
+        } catch(e){}
       });
 
       saveData();
       try { renderDashboard(); } catch(e){}
       try { renderVentes(); } catch(e){}
       try { renderStock(); } catch(e){}
+      try { if (typeof renderCommandes === 'function') renderCommandes(); } catch(e){}
+      try { updateBadges(); } catch(e){}
 
       await fetch(p.backendUrl + '/api/orders/ack', {
         method: 'POST',
