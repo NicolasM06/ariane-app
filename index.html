@@ -5387,8 +5387,15 @@ body {
         <div class="section-card" style="flex:1">
           <div class="section-header">
             <div class="section-title">Marchés & Événements</div>
-            <button class="btn btn-primary" onclick="openModal('modal-marche')"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter</button>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select class="form-select" id="marches-sort" style="width:auto" onchange="renderMarches()">
+                <option value="date">Trier : date</option>
+                <option value="net">Trier : rentabilité (net)</option>
+              </select>
+              <button class="btn btn-primary" onclick="openModal('modal-marche')"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter</button>
+            </div>
           </div>
+          <div id="marches-ranking-recap" style="display:none;padding:16px 16px 0;grid-template-columns:1fr 1fr;gap:12px"></div>
           <div style="padding:16px" id="marches-list"></div>
         </div>
       </div>
@@ -5814,6 +5821,16 @@ body {
   <div id="page-parametres" class="page">
     <div class="page-content">
       <div class="params-grid">
+        <div class="param-card" id="reminders-card" style="grid-column:1/-1">
+          <div class="param-title">Rappels</div>
+          <div style="color:var(--text3);font-size:.82rem;margin-bottom:14px;line-height:1.5">
+            Reçois une notification de ce navigateur quand une tâche, une facture à relancer ou un événement du calendrier arrive à échéance. Fonctionne tant que ce navigateur reste ouvert quelque part — ce n'est pas une notification serveur qui te suit une fois l'appareil éteint.
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-secondary" id="reminders-toggle-btn" onclick="toggleReminders()">Activer les rappels</button>
+            <span id="reminders-status" style="font-size:.78rem;color:var(--text3)"></span>
+          </div>
+        </div>
         <div class="param-card" id="account-card" style="grid-column:1/-1">
           <div class="param-title">Compte & sauvegarde en ligne</div>
           <div style="color:var(--text3);font-size:.82rem;margin-bottom:14px;line-height:1.5">
@@ -7011,12 +7028,38 @@ function renderVentes() {
 // ─── RENDER MARCHÉS ───────────────────────────────────────────
 function renderMarches() {
   const list = document.getElementById('marches-list');
-  const sorted = [...data.marches].sort((a,b)=>b.debut.localeCompare(a.debut));
-  if (!sorted.length) { list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-marches"/></svg></div>Aucun marché enregistré</div>`; return; }
-  list.innerHTML = sorted.map(m => {
+  const sortMode = document.getElementById('marches-sort')?.value || 'date';
+
+  const withStats = data.marches.map(m => {
     const stats = computeStatsMarche(m.id);
     const frais = parseFloat(m.frais)||0;
     const net = stats.totalCA - frais;
+    return { m, stats, frais, net };
+  });
+
+  const recap = document.getElementById('marches-ranking-recap');
+  if (recap) {
+    const withVentes = withStats.filter(x => x.stats.ventes.length > 0);
+    if (withVentes.length >= 2) {
+      const best = [...withVentes].sort((a,b)=>b.net-a.net)[0];
+      const worst = [...withVentes].sort((a,b)=>a.net-b.net)[0];
+      recap.style.display = 'grid';
+      recap.innerHTML = best.m.id === worst.m.id ? '' : `
+        <div class="hero-side-item"><strong>Meilleur événement</strong><span>${escapeHtml(best.m.nom)} — net ${fmt(best.net)}</span></div>
+        <div class="hero-side-item"><strong>Moins rentable</strong><span>${escapeHtml(worst.m.nom)} — net ${fmt(worst.net)}</span></div>
+      `;
+    } else {
+      recap.style.display = 'none';
+      recap.innerHTML = '';
+    }
+  }
+
+  const sorted = sortMode === 'net'
+    ? [...withStats].sort((a,b) => b.net - a.net)
+    : [...withStats].sort((a,b) => b.m.debut.localeCompare(a.m.debut));
+
+  if (!sorted.length) { list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-marches"/></svg></div>Aucun marché enregistré</div>`; return; }
+  list.innerHTML = sorted.map(({ m, stats, frais, net }) => {
     const panierMoyen = stats.ventes.length > 0 ? stats.totalCA / stats.ventes.length : 0;
     const fraisDetail = [];
     if (m.fraisTrajet > 0) fraisDetail.push(`${fmt(m.fraisTrajet)}`);
@@ -8983,6 +9026,68 @@ if (!data.params.demoInitialized) {
   saveData();
 }
 render();
+
+// ─── RAPPELS (notification navigateur) ─────────────────────────
+// Fonctionne uniquement tant que ce navigateur/onglet est ouvert quelque
+// part (pas de serveur de push) : ce n'est pas une notification qui suit
+// hors ligne, juste un rappel plus visible que le badge du menu.
+function remindersSupported() { return 'Notification' in window; }
+
+function updateRemindersUI() {
+  const btn = document.getElementById('reminders-toggle-btn');
+  const status = document.getElementById('reminders-status');
+  if (!btn || !status) return;
+  if (!remindersSupported()) {
+    btn.disabled = true;
+    status.textContent = "Non pris en charge par ce navigateur.";
+    return;
+  }
+  const enabled = !!data.params?.remindersEnabled && Notification.permission === 'granted';
+  btn.textContent = enabled ? 'Désactiver les rappels' : 'Activer les rappels';
+  status.textContent = Notification.permission === 'denied'
+    ? 'Notifications bloquées dans les réglages du navigateur.'
+    : (enabled ? 'Actifs sur cet appareil.' : '');
+}
+
+function toggleReminders() {
+  if (!remindersSupported()) return;
+  if (!data.params) data.params = {};
+  if (data.params.remindersEnabled) {
+    data.params.remindersEnabled = false;
+    saveData();
+    updateRemindersUI();
+    return;
+  }
+  Notification.requestPermission().then(function(perm){
+    if (perm === 'granted') {
+      data.params.remindersEnabled = true;
+      saveData();
+      checkDueReminders(true);
+    }
+    updateRemindersUI();
+  });
+}
+
+function checkDueReminders(force) {
+  if (!remindersSupported() || Notification.permission !== 'granted' || !data.params?.remindersEnabled) return;
+  if (typeof buildCalendarItems !== 'function') return;
+  const today = new Date().toISOString().slice(0,10);
+  if (!force && data.params.lastReminderNotifDate === today) return;
+  const due = buildCalendarItems().filter(i => i.date <= today && !i.done);
+  if (!due.length) return;
+  const body = due.length === 1
+    ? due[0].title
+    : due.length + ' éléments à traiter : ' + due.slice(0,3).map(i=>i.title).join(', ') + (due.length > 3 ? '…' : '');
+  try { new Notification('Ariane — à faire', { body: body, tag: 'ariane-reminders' }); } catch(e) {}
+  data.params.lastReminderNotifDate = today;
+  saveData();
+}
+
+window.toggleReminders = toggleReminders;
+window.checkDueReminders = checkDueReminders;
+window.updateRemindersUI = updateRemindersUI;
+updateRemindersUI();
+checkDueReminders();
 
 // ─── BIENVENUE + CONFIGURATION RAPIDE ──────────────────────────
 (function(){
