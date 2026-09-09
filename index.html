@@ -128,7 +128,7 @@
   .page { display: none; } .page.active { display: block; }
   .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
   .filter-bar .form-input, .filter-bar .form-select { width: auto; font-size: 0.81rem; padding: 7px 10px; }
-  .badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: var(--danger); color: white; border-radius: 50%; font-size: 0.63rem; font-weight: 700; font-family: 'DM Mono', monospace; margin-left: 5px; }
+  .badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: var(--danger); color: white; border-radius: 50%; font-size: 0.63rem; font-weight: 500; font-family: 'DM Mono', monospace; margin-left: 5px; }
   /* Progress bar */
   .prog-bar-bg { background: var(--surface2); border-radius: 4px; height: 8px; overflow: hidden; }
   .prog-bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s; }
@@ -837,8 +837,8 @@ body.sidebar-open #sidebar-overlay {
   font-family: 'DM Mono', monospace !important;
   font-size: 1.82rem !important;
   line-height: 1.08 !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.055em !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
   white-space: nowrap !important;
   font-variant-numeric: tabular-nums !important;
   font-feature-settings: "tnum" 1, "lnum" 1 !important;
@@ -851,8 +851,8 @@ body.sidebar-open #sidebar-overlay {
   font-family: 'DM Mono', monospace !important;
   font-size: 1.16rem !important;
   line-height: 1.1 !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.04em !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
   white-space: nowrap !important;
   font-variant-numeric: tabular-nums !important;
 }
@@ -1043,7 +1043,8 @@ body.sidebar-open #sidebar-overlay {
   font-family: 'DM Mono', monospace !important;
   font-size: 1.3rem !important;
   line-height: 1.1 !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
   white-space: nowrap !important;
   font-variant-numeric: tabular-nums !important;
 }
@@ -7169,7 +7170,7 @@ function renderStatsPage() {
               <summary style="cursor:pointer;list-style:none">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
                   <div style="display:flex;align-items:center;gap:8px">
-                    <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:${col};font-weight:700;min-width:20px">#${i+1}</span>
+                    <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:${col};font-weight:500;min-width:20px">#${i+1}</span>
                     <span style="font-size:0.84rem;color:var(--text)">${escapeHtml(cat)}</span>
                     <span style="font-size:0.72rem;color:var(--text3)">ouvrir ▾</span>
                   </div>
