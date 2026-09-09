@@ -270,11 +270,26 @@ body {
 }
 
 .nav-item.active {
+  position: relative;
   color: #e9d5ff;
   background:
     linear-gradient(90deg, rgba(79,140,255,.22), rgba(139,92,246,.08)),
     rgba(255,255,255,.035);
   border-color: rgba(79,140,255,.25);
+  box-shadow: 0 8px 20px rgba(79,140,255,.14);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--accent), #8b5cf6);
+  box-shadow: 0 0 12px rgba(79,140,255,.6);
 }
 
 .sidebar-footer {
@@ -322,9 +337,13 @@ body {
   border: 1px solid rgba(255,255,255,.24);
 }
 
+.btn-primary {
+  box-shadow: 0 12px 28px rgba(79,140,255,.24), inset 0 1px 0 rgba(255,255,255,.35);
+}
+
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 18px 38px rgba(79,140,255,.22);
+  box-shadow: 0 18px 40px rgba(79,140,255,.34), inset 0 1px 0 rgba(255,255,255,.4);
 }
 
 .btn-secondary, .btn-ghost {
@@ -466,14 +485,16 @@ body {
 
 .kpi-card {
   padding: 22px;
-  box-shadow: 0 10px 28px rgba(0,0,0,.16);
+  background: linear-gradient(165deg, rgba(255,255,255,.05), rgba(255,255,255,0) 40%), linear-gradient(180deg, rgba(26,29,42,.98), rgba(17,19,29,.98));
+  border-color: rgba(255,255,255,.09);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 16px 40px rgba(0,0,0,.32);
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
 .kpi-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--border2);
-  box-shadow: 0 20px 46px rgba(0,0,0,.24);
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 24px 56px rgba(0,0,0,.4);
 }
 
 .kpi-card::before {
@@ -500,12 +521,14 @@ body {
 .section-card {
   margin-bottom: 22px;
   overflow: hidden;
-  box-shadow: 0 10px 28px rgba(0,0,0,.14);
-  transition: box-shadow .18s ease, border-color .18s ease;
+  background: linear-gradient(180deg, rgba(26,29,42,.96), rgba(17,19,29,.96));
+  border-color: rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 16px 40px rgba(0,0,0,.3);
+  transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease;
 }
 .section-card:hover {
-  border-color: var(--border2);
-  box-shadow: 0 16px 38px rgba(0,0,0,.2);
+  border-color: rgba(255,255,255,.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 22px 50px rgba(0,0,0,.36);
 }
 
 .section-header {
@@ -3571,8 +3594,8 @@ label[for="builder-canvas-zoom"] {
   }
 
   .mobile-bottom-nav-v432 button.active {
-    background: rgba(79,140,255,.20) !important;
-    color: #bfdbfe !important;
+    background: var(--accent-dim) !important;
+    color: var(--accent2) !important;
   }
 }
 
@@ -4824,7 +4847,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
   font-weight:950;
   line-height:1.15;
 }
-.builder-pay-inner-v5::before{content:"🛒";font-size:.95em}
+.builder-pay-inner-v5::before{content:"";font-size:.95em}
 .builder-pay-mini-v5{display:flex;flex-direction:column;gap:2px;min-width:0}
 .builder-pay-label-v5,.builder-pay-sub-v5{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .builder-pay-sub-v5{font-size:.68em;opacity:.78;font-weight:700}
@@ -4839,6 +4862,232 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
 @media (max-width:880px){
   .builder-pay-v5-grid,.pay-v5-form,.pay-v5-mini-grid{grid-template-columns:1fr}
 }
+
+/* =========================================================================
+   DIRECTION ARTISTIQUE — STUDIO SOBRE
+   Reskin visuel : palette neutre/encre + accent unique, suppression des
+   dégradés "glow", des ombres colorées et des blurs décoratifs, cartes et
+   boutons à plat. Ne touche à aucune classe/structure : uniquement les
+   propriétés visuelles, en fin de cascade pour surclasser les couches
+   précédentes (V4.x) sans les supprimer.
+   ========================================================================= */
+:root, body :root {
+  --bg: #0b0c10 !important;
+  --surface: #16171c !important;
+  --surface2: #1c1d23 !important;
+  --surface3: rgba(255,255,255,.03) !important;
+  --border: #24252c !important;
+  --border2: #313239 !important;
+  --text: #edeef1 !important;
+  --text2: #8d909c !important;
+  --text3: #5a5d68 !important;
+  --accent: #3d5fc4 !important;
+  --accent-dim: rgba(61,95,196,.14) !important;
+  --accent2: #6b84d6 !important;
+  --accent2-dim: rgba(107,132,214,.12) !important;
+  --gold: #b8863f !important;
+  --gold-dim: rgba(184,134,63,.14) !important;
+  --green: #3f8f68 !important;
+  --green-dim: rgba(63,143,104,.14) !important;
+  --danger: #b3564a !important;
+  --danger-dim: rgba(179,86,74,.14) !important;
+  --blue: #6b84d6 !important;
+  --blue-dim: rgba(107,132,214,.12) !important;
+  --radius: 10px !important;
+  --radius-sm: 7px !important;
+}
+
+/* Fond : plat, sans halo radial */
+body {
+  background: var(--bg) !important;
+}
+@media (max-width:860px){
+  body { background: var(--bg) !important; }
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(61,95,196,.5) !important;
+}
+
+/* Sidebar / topbar : surfaces planes, sans flou ni ombre portée */
+#sidebar {
+  background: var(--surface) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-right: 1px solid var(--border) !important;
+}
+.logo-mark { color: var(--text) !important; }
+.topbar {
+  background: var(--surface) !important;
+  backdrop-filter: none !important;
+}
+@media (max-width:860px){
+  .topbar { background: var(--surface) !important; backdrop-filter: none !important; }
+}
+#sidebar-overlay { backdrop-filter: none !important; background: rgba(4,5,8,.6) !important; }
+
+.nav-item.active {
+  background: var(--accent-dim) !important;
+  border-color: transparent !important;
+  color: var(--accent2) !important;
+  box-shadow: none !important;
+}
+.nav-item.active::before {
+  background: var(--accent) !important;
+  box-shadow: none !important;
+}
+.nav-item:hover { transform: none !important; }
+
+/* Boutons : à plat, pas de dégradé ni de halo coloré */
+.btn {
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+.btn-primary {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border: 1px solid var(--accent) !important;
+  box-shadow: none !important;
+}
+.btn-primary:hover {
+  background: var(--accent2) !important;
+  border-color: var(--accent2) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.btn-secondary, .btn-ghost {
+  background: transparent !important;
+  border: 1px solid var(--border2) !important;
+}
+.btn-secondary:hover, .btn-ghost:hover {
+  background: var(--surface2) !important;
+}
+
+/* Cartes : surface plate, bordure fine, ombre discrète, pas de lift au survol */
+.kpi-card, .section-card, .param-card, .export-card, .marche-card, .commercial-card, .hero-panel, .hero-full {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  border-radius: var(--radius) !important;
+}
+.kpi-card:hover, .section-card:hover, .export-card:hover, .marche-card:hover {
+  transform: none !important;
+  border-color: var(--border2) !important;
+  background: var(--surface) !important;
+}
+.kpi-card::before,
+.kpi-card.purple::before, .kpi-card.gold::before, .kpi-card.green::before,
+.kpi-card.red::before, .kpi-card.blue::before,
+.commercial-card::before {
+  display: none !important;
+}
+.kpi-value.purple, .kpi-value.blue, .kpi-value.gold { color: var(--text) !important; }
+.kpi-value.green { color: var(--green) !important; }
+.kpi-value.red { color: var(--danger) !important; }
+
+.hero-panel, .hero-full {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+.hero-kicker { color: var(--accent2) !important; }
+
+/* Modale : overlay net, surface plate, ombre mesurée */
+.modal-overlay { backdrop-filter: blur(2px) !important; }
+.modal {
+  background: var(--surface) !important;
+  border: 1px solid var(--border2) !important;
+  box-shadow: 0 20px 48px rgba(0,0,0,.4) !important;
+  border-radius: var(--radius) !important;
+}
+
+/* Alertes : couleurs sobres au lieu des pastels */
+.alert-info { color: var(--accent2) !important; }
+.alert-warn { color: var(--gold) !important; }
+.alert-danger { color: var(--danger) !important; }
+.alert-success { color: var(--green) !important; }
+
+/* Tags de canal : neutres, une seule identité (l'info est dans le texte, pas la couleur) */
+.tag-evenement, .tag-marche, .tag-convention, .tag-instagram, .tag-autre-canal, .tag-site {
+  background: var(--surface2) !important;
+  color: var(--text2) !important;
+}
+.mode-badge {
+  border-color: var(--border2) !important;
+  background: var(--surface2) !important;
+  color: var(--text2) !important;
+}
+
+/* Types de calendrier : distinction discrète (pastille + texte), pas de badge néon */
+.cal-type-marche, .cal-type-facture, .cal-type-fiscal, .cal-type-stock, .cal-type-production, .cal-type-checklist {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+}
+.cal-type-marche { color: var(--accent2) !important; }
+.cal-type-facture { color: var(--gold) !important; }
+.cal-type-fiscal { color: var(--danger) !important; }
+.cal-type-stock { color: var(--accent2) !important; }
+.cal-type-production { color: var(--green) !important; }
+.cal-type-checklist { color: var(--text2) !important; }
+
+/* Écran de bienvenue / setup : fond plat, ombre mesurée */
+#welcome-screen { background: var(--bg) !important; }
+.welcome-card { box-shadow: 0 20px 60px rgba(0,0,0,.4) !important; }
+
+/* Boutons "template" du générateur de site et variantes V4.x : à plat */
+.builder-square-template-btn,
+.builder-beautiful-template-btn,
+.builder-clean-template-btn,
+.builder-showcase-template-btn,
+.builder-pro-pack .btn-pro-main,
+.mode-active-v424,
+.builder-template-unique-v424,
+#commercial-panel-v418 .btn.active-choice-v426,
+#template-unique-v427,
+#template-only-final-v431,
+.mobile-fab-v435,
+#pwa-install-btn-v437,
+.logo-file-label-v439 {
+  background: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+#commercial-panel-v418 .btn.active-danger-v426 {
+  background: var(--danger) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.snap-toggle-btn-v430.on {
+  background: var(--green) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.mobile-bottom-nav-v432, .mobile-shell-v435 {
+  box-shadow: 0 -1px 0 var(--border) !important;
+  backdrop-filter: none !important;
+}
+.mobile-fab-menu-v435 { backdrop-filter: none !important; }
+.mobile-fab-panel-v435 { box-shadow: 0 20px 50px rgba(0,0,0,.4) !important; }
+#pwa-offline-badge-v437 { box-shadow: none !important; backdrop-filter: none !important; }
+
+.pay-v5-card, .builder-pay-v5-box {
+  background: var(--surface) !important;
+}
+
+/* Icônes SVG en remplacement des emojis retirés : tailles cohérentes par contexte */
+.export-icon svg.icon, .welcome-stat-icon svg.icon {
+  width: 26px !important;
+  height: 26px !important;
+  stroke-width: 1.5 !important;
+  color: var(--accent2) !important;
+}
+.empty-icon svg.icon {
+  width: 30px !important;
+  height: 30px !important;
+  stroke-width: 1.4 !important;
+  opacity: .55;
+}
+.alert svg.icon { flex-shrink: 0; margin-top: 1px; }
+#help-fab-icon svg.icon { width: 20px !important; height: 20px !important; }
 
 </style>
 
@@ -4895,10 +5144,10 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
     <div class="welcome-title">Bienvenue sur Ariane</div>
     <div class="welcome-sub">Ton outil pour gérer ventes, stock, factures et dépenses au même endroit — sans tableur, sans prise de tête.</div>
     <div class="welcome-grid">
-      <div class="welcome-stat"><div class="welcome-stat-icon">🛒</div><div class="welcome-stat-label">Ventes aujourd'hui</div><div class="welcome-stat-value" id="welcome-stat-ventes">0 €</div></div>
-      <div class="welcome-stat"><div class="welcome-stat-icon">📦</div><div class="welcome-stat-label">Stock faible</div><div class="welcome-stat-value" id="welcome-stat-stock">0</div></div>
-      <div class="welcome-stat"><div class="welcome-stat-icon">◻</div><div class="welcome-stat-label">Factures à faire</div><div class="welcome-stat-value" id="welcome-stat-factures">0</div></div>
-      <div class="welcome-stat"><div class="welcome-stat-icon">💸</div><div class="welcome-stat-label">Dépenses du mois</div><div class="welcome-stat-value" id="welcome-stat-depenses">0 €</div></div>
+      <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-ventes"/></svg></div><div class="welcome-stat-label">Ventes aujourd'hui</div><div class="welcome-stat-value" id="welcome-stat-ventes">0 €</div></div>
+      <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-stock"/></svg></div><div class="welcome-stat-label">Stock faible</div><div class="welcome-stat-value" id="welcome-stat-stock">0</div></div>
+      <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-factures"/></svg></div><div class="welcome-stat-label">Factures à faire</div><div class="welcome-stat-value" id="welcome-stat-factures">0</div></div>
+      <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-depenses"/></svg></div><div class="welcome-stat-label">Dépenses du mois</div><div class="welcome-stat-value" id="welcome-stat-depenses">0 €</div></div>
     </div>
     <div class="welcome-actions">
       <button class="btn btn-primary" style="padding:12px 26px;font-size:0.9rem" onclick="startQuickSetup()">Commencer →</button>
@@ -4929,14 +5178,14 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div class="form-row-grid">
         <div class="form-row">
           <label class="form-label">Logo texte court</label>
-          <input type="text" class="form-input" id="setup-logo" placeholder="🗿 ou LO" maxlength="4">
+          <input type="text" class="form-input" id="setup-logo" placeholder="Ex : LO" maxlength="4">
 
           <div class="logo-picker-v439">
             <div class="logo-picker-title-v439">Logo image local</div>
             <div class="logo-picker-help-v439">Choisis une image depuis ton ordinateur ou ton téléphone. Elle remplacera le logo Ariane dans l'interface.</div>
 
             <label class="logo-file-label-v439">
-              📷 Choisir une image
+              Choisir une image
               <input type="file" id="setup-logo-file-v439" accept="image/*" onchange="handleSetupLogoFileV439(event)">
             </label>
 
@@ -5056,16 +5305,16 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div id="alerts-section" style="margin-bottom:20px"></div>
       <div class="stats-2col">
         <div class="section-card">
-          <div class="section-header"><div class="section-title">🏷️ Ventes par catégorie</div></div>
+          <div class="section-header"><div class="section-title">Ventes par catégorie</div></div>
           <div style="padding:16px" id="dash-produits"></div>
         </div>
         <div class="section-card">
-          <div class="section-header"><div class="section-title">📍 Ventes par canal</div></div>
+          <div class="section-header"><div class="section-title">Ventes par canal</div></div>
           <div style="padding:16px" id="dash-canaux"></div>
         </div>
       </div>
       <div class="section-card">
-        <div class="section-header"><div class="section-title">📅 Résumé mensuel</div></div>
+        <div class="section-header"><div class="section-title">Résumé mensuel</div></div>
         <div style="padding:16px" id="dash-mensuel"></div>
       </div>
       <div class="section-card">
@@ -5091,7 +5340,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
           <option value="">Tous produits</option>
         </select>
         <label style="padding:7px 14px;border:1px dashed var(--border2);border-radius:var(--radius-sm);font-size:0.81rem;color:var(--text3);cursor:pointer" onclick="document.getElementById('import-csv').click()">
-          📥 Import CSV <input type="file" id="import-csv" accept=".csv" style="display:none" onchange="importCSV(event)">
+          Import CSV <input type="file" id="import-csv" accept=".csv" style="display:none" onchange="importCSV(event)">
         </label>
       </div>
       <div class="section-card">
@@ -5115,7 +5364,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div class="kpi-grid" id="stock-kpis"></div>
       <div class="section-card">
         <div class="section-header">
-          <div class="section-title">📦 Produits & stock <span id="stock-count" style="color:var(--text3);font-size:0.78rem;font-weight:400"></span></div>
+          <div class="section-title">Produits & stock <span id="stock-count" style="color:var(--text3);font-size:0.78rem;font-weight:400"></span></div>
           <button class="btn btn-primary" onclick="openModal('modal-stock')"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter un produit</button>
         </div>
         <div class="table-scroll"><table>
@@ -5124,7 +5373,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
         </table></div>
       </div>
       <div class="alert alert-info" style="margin-top:12px">
-        <span>ℹ️</span>
+        <span>ℹ</span>
         Les produits créés ici apparaissent automatiquement dans le menu déroulant des ventes. Si tu supprimes un produit non utilisé, il disparaît aussi des ventes.
       </div>
     </div>
@@ -5136,7 +5385,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div style="display:flex;gap:16px;margin-bottom:20px">
         <div class="section-card" style="flex:1">
           <div class="section-header">
-            <div class="section-title">⛺ Marchés & Événements</div>
+            <div class="section-title">Marchés & Événements</div>
             <button class="btn btn-primary" onclick="openModal('modal-marche')"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter</button>
           </div>
           <div style="padding:16px" id="marches-list"></div>
@@ -5207,7 +5456,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div class="section-card calendar-intro">
         <div class="section-header">
           <div>
-            <div class="section-title">📅 Calendrier & organisation</div>
+            <div class="section-title">Calendrier & organisation</div>
             <div style="color:var(--text3);font-size:.85rem;margin-top:4px">Marchés, factures à relancer, déclarations, tâches et préparation d’événements.</div>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -5232,9 +5481,9 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
           <div class="section-card">
             <div class="section-header"><div class="section-title">Actions rapides</div></div>
             <div style="padding:18px;display:grid;gap:12px" id="quick-actions-list">
-              <button class="btn btn-secondary" onclick="quickTask('Préparer le stock pour le prochain marché','stock')">📦 Préparer stock</button>
-              <button class="btn btn-secondary" onclick="quickTask('Faire la checklist événement','checklist')">✅ Checklist événement</button>
-              <button class="btn btn-secondary" onclick="quickTask('Planifier la production de la semaine','production')">🛠️ Planning production</button>
+              <button class="btn btn-secondary" onclick="quickTask('Préparer le stock pour le prochain marché','stock')">Préparer stock</button>
+              <button class="btn btn-secondary" onclick="quickTask('Faire la checklist événement','checklist')">Checklist événement</button>
+              <button class="btn btn-secondary" onclick="quickTask('Planifier la production de la semaine','production')">Planning production</button>
               <button class="btn btn-secondary" onclick="quickTask('Vérifier les factures à relancer','facture')">◻ Factures à relancer</button>
             </div>
           </div>
@@ -5245,7 +5494,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
               <div class="form-row-grid3">
                 <div class="form-row">
                   <label class="form-label">Emoji</label>
-                  <input class="form-input" id="cal-type-emoji" maxlength="4" placeholder="📌">
+                  <input class="form-input" id="cal-type-emoji" maxlength="4" placeholder="">
                 </div>
                 <div class="form-row">
                   <label class="form-label">Nom</label>
@@ -5278,8 +5527,8 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
             Connecte ton compte bancaire et/ou PayPal une fois, et c'est tout. Ariane s'occupe de créer le paiement, d'encaisser la carte du client, et de virer l'argent directement chez toi — comme Shopify Payments ou SumUp.
           </div>
           <div class="pay-v5-actions" style="flex-wrap:wrap">
-            <button class="btn btn-primary" onclick="openStripeConnectV5()" style="font-size:1.02rem;padding:14px 24px">🔗 Connecter mon compte bancaire</button>
-            <button class="btn btn-secondary" onclick="openPayPalConnectV5()" style="font-size:1.02rem;padding:14px 24px">🅿️ Connecter mon compte PayPal</button>
+            <button class="btn btn-primary" onclick="openStripeConnectV5()" style="font-size:1.02rem;padding:14px 24px">Connecter mon compte bancaire</button>
+            <button class="btn btn-secondary" onclick="openPayPalConnectV5()" style="font-size:1.02rem;padding:14px 24px">🅿 Connecter mon compte PayPal</button>
           </div>
           <div id="pay-v5-status" class="pay-v5-status" style="margin-top:14px">Compte non connecté.</div>
         </div>
@@ -5300,7 +5549,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
           <div class="pay-v5-panel">
             <div class="section-header">
               <div>
-                <div class="section-title">📊 État paiement</div>
+                <div class="section-title">État paiement</div>
                 <div style="color:var(--text3);font-size:.82rem;margin-top:4px">Vue simple pour savoir si Ariane peut vendre.</div>
               </div>
             </div>
@@ -5318,7 +5567,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
             <div class="pay-v5-panel">
               <div class="section-header">
                 <div>
-                  <div class="section-title">⚙️ Connexion technique</div>
+                  <div class="section-title">Connexion technique</div>
                   <div style="color:var(--text3);font-size:.82rem;margin-top:4px">Utile seulement si tu héberges ton propre backend ou si tu dépannes.</div>
                 </div>
               </div>
@@ -5355,7 +5604,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
             <div class="pay-v5-panel">
               <div class="section-header">
                 <div>
-                  <div class="section-title">🧪 Test paiement</div>
+                  <div class="section-title">Test paiement</div>
                   <div style="color:var(--text3);font-size:.82rem;margin-top:4px">Crée une session checkout avec un produit Ariane.</div>
                 </div>
               </div>
@@ -5368,8 +5617,8 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
                   <div class="form-row">
                     <label class="form-label">Moyen de paiement</label>
                     <select class="form-select" id="pay-v5-test-provider">
-                      <option value="stripe">💳 Stripe (carte bancaire)</option>
-                      <option value="paypal">🅿️ PayPal</option>
+                      <option value="stripe">Stripe (carte bancaire)</option>
+                      <option value="paypal">🅿 PayPal</option>
                     </select>
                   </div>
                 </div>
@@ -5381,7 +5630,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
           <div>
             <div class="pay-v5-panel">
               <div class="section-header">
-                <div class="section-title">🔌 Code bouton exporté</div>
+                <div class="section-title">Code bouton exporté</div>
               </div>
               <div class="pay-v5-panel-body">
                 <textarea class="pay-v5-code" spellcheck="false" readonly id="pay-v5-example-code"></textarea>
@@ -5403,7 +5652,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div class="section-card site-builder-intro">
         <div class="section-header">
           <div>
-            <div class="section-title">🌐 Créateur de site personnalisable</div>
+            <div class="section-title">Créateur de site personnalisable</div>
             <div style="color:var(--text3);font-size:.85rem;margin-top:4px">Ajoute des blocs, déplace-les librement, personnalise le style et exporte ton site.</div>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -5418,12 +5667,12 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div class="builder-pay-v5-box" id="builder-pay-v5-box">
         <div class="builder-pay-v5-head">
           <div>
-            <div class="builder-pay-v5-title">💳 Vente directe Ariane</div>
+            <div class="builder-pay-v5-title">Vente directe Ariane</div>
             <div class="builder-pay-v5-sub">
               Même logique que Shopify/SumUp côté utilisateur : choisis un produit, clique “Ajouter au site”. Le bouton utilisera le backend paiement.
             </div>
           </div>
-          <button class="btn btn-primary" type="button" onclick="addPaymentButtonToBuilderV5()">🛒 Ajouter bouton acheter</button>
+          <button class="btn btn-primary" type="button" onclick="addPaymentButtonToBuilderV5()">Ajouter bouton acheter</button>
         </div>
         <div class="builder-pay-v5-grid">
           <div class="form-row">
@@ -5452,12 +5701,12 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
 
           <div class="builder-divider">Blocs prêts à l'emploi</div>
           <div class="builder-tool-grid">
-            <button class="btn btn-primary" onclick="addBuilderBlock('hero')">🎯 Bloc En-tête</button>
-            <button class="btn btn-primary" onclick="addBuilderBlock('features3')">🧩 3 services / atouts</button>
-            <button class="btn btn-primary" onclick="addBuilderBlock('cta')">📣 Appel à l'action</button>
-            <button class="btn btn-primary" onclick="addBuilderBlock('testimonial')">💬 Témoignage</button>
-            <button class="btn btn-primary" onclick="addBuilderBlock('contact')">✉️ Contact</button>
-            <button class="btn btn-primary" onclick="addBuilderBlock('footer')">⬇️ Pied de page</button>
+            <button class="btn btn-primary" onclick="addBuilderBlock('hero')">Bloc En-tête</button>
+            <button class="btn btn-primary" onclick="addBuilderBlock('features3')">3 services / atouts</button>
+            <button class="btn btn-primary" onclick="addBuilderBlock('cta')">Appel à l'action</button>
+            <button class="btn btn-primary" onclick="addBuilderBlock('testimonial')">Témoignage</button>
+            <button class="btn btn-primary" onclick="addBuilderBlock('contact')">Contact</button>
+            <button class="btn btn-primary" onclick="addBuilderBlock('footer')">Pied de page</button>
           </div>
           <details class="builder-details">
             <summary class="builder-divider" style="cursor:pointer;border-top:1px solid var(--border)">Éléments simples</summary>
@@ -5543,15 +5792,15 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
     <div class="page-content">
       <p style="color:var(--text2);font-size:0.87rem;margin-bottom:20px;line-height:1.6">Exporte tes données pour les archiver ou les transmettre à ton comptable.</p>
       <div class="export-grid">
-        <div class="export-card" onclick="exportCSV()"><div class="export-icon">📊</div><div class="export-title">Export CSV complet</div><div class="export-desc">Ventes, dépenses, factures et résumé financier.</div></div>
-        <div class="export-card" onclick="exportPDF()"><div class="export-icon">📄</div><div class="export-title">Rapport PDF</div><div class="export-desc">Rapport imprimable avec stats, alertes et détails.</div></div>
-        <div class="export-card" onclick="exportJSON()"><div class="export-icon">💾</div><div class="export-title">Sauvegarde complète</div><div class="export-desc">Fichier JSON pour restaurer toutes tes données.</div></div>
-        <div class="export-card" onclick="document.getElementById('restore-file').click()"><div class="export-icon">🔄</div><div class="export-title">Restaurer</div><div class="export-desc">Recharge une sauvegarde JSON précédente.</div><input type="file" id="restore-file" accept=".json" style="display:none" onchange="restoreJSON(event)"></div>
+        <div class="export-card" onclick="exportCSV()"><div class="export-icon"><svg class="icon"><use href="#icon-exports"/></svg></div><div class="export-title">Export CSV complet</div><div class="export-desc">Ventes, dépenses, factures et résumé financier.</div></div>
+        <div class="export-card" onclick="exportPDF()"><div class="export-icon"><svg class="icon"><use href="#icon-factures"/></svg></div><div class="export-title">Rapport PDF</div><div class="export-desc">Rapport imprimable avec stats, alertes et détails.</div></div>
+        <div class="export-card" onclick="exportJSON()"><div class="export-icon"><svg class="icon"><use href="#icon-duplicate"/></svg></div><div class="export-title">Sauvegarde complète</div><div class="export-desc">Fichier JSON pour restaurer toutes tes données.</div></div>
+        <div class="export-card" onclick="document.getElementById('restore-file').click()"><div class="export-icon"><svg class="icon"><use href="#icon-undo"/></svg></div><div class="export-title">Restaurer</div><div class="export-desc">Recharge une sauvegarde JSON précédente.</div><input type="file" id="restore-file" accept=".json" style="display:none" onchange="restoreJSON(event)"></div>
       </div>
 
       <div style="margin-top:28px;padding:16px;border-radius:14px;background:var(--surface);border:1px solid var(--border)">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px">
-          <div style="font-weight:700;font-size:0.95rem;color:var(--text)">🛟 Sauvegardes automatiques</div>
+          <div style="font-weight:700;font-size:0.95rem;color:var(--text)">Sauvegardes automatiques</div>
           <div id="auto-backup-status" style="font-size:0.78rem;color:var(--text2)"></div>
         </div>
         <p style="color:var(--text2);font-size:0.82rem;margin:6px 0 14px;line-height:1.5">Ariane garde automatiquement plusieurs copies récentes de tes données dans ce navigateur, en plus de ton export JSON. Utile si tu fais une fausse manipulation — ce n'est pas un remplacement de l'export JSON, qui reste ta seule vraie copie hors du navigateur.</p>
@@ -5565,7 +5814,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
     <div class="page-content">
       <div class="params-grid">
         <div class="param-card" id="account-card" style="grid-column:1/-1">
-          <div class="param-title">☁️ Compte & sauvegarde en ligne</div>
+          <div class="param-title">Compte & sauvegarde en ligne</div>
           <div style="color:var(--text3);font-size:.82rem;margin-bottom:14px;line-height:1.5">
             Optionnel — Ariane fonctionne très bien sans compte (tout reste dans ce navigateur). Créer un compte ajoute une sauvegarde en ligne et te permet de retrouver tes données sur un autre appareil.
           </div>
@@ -5617,7 +5866,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
         </div>
 
         <div class="param-card" id="legal-card" style="grid-column:1/-1">
-          <div class="param-title">🧾 Informations légales (pour tes factures)</div>
+          <div class="param-title">Informations légales (pour tes factures)</div>
           <div style="color:var(--text3);font-size:.82rem;margin-bottom:14px;line-height:1.5">
             Obligatoires sur toute facture en France : ton identité complète et ton numéro SIRET. Sans ça, une facture n'est pas valide légalement.
           </div>
@@ -5693,8 +5942,8 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
         </div>
       </div>
       <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-secondary" onclick="relaunchQuickSetup()">⚡ Relancer la configuration rapide</button>
-        <button class="btn btn-danger" onclick="if(confirm('Supprimer TOUTES les données ?'))clearAll()">🗑 Effacer toutes les données</button>
+        <button class="btn btn-secondary" onclick="relaunchQuickSetup()">Relancer la configuration rapide</button>
+        <button class="btn btn-danger" onclick="if(confirm('Supprimer TOUTES les données ?'))clearAll()">Effacer toutes les données</button>
       </div>
     </div>
   </div>
@@ -5761,8 +6010,8 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div class="form-row">
         <label class="form-label">Canal de vente</label>
         <select class="form-select" id="vente-canal" onchange="toggleMarcheSelect()">
-          <option value="evenement">🎪 Événement</option>
-          <option value="site">🌐 Site web</option>
+          <option value="evenement">Événement</option>
+          <option value="site">Site web</option>
           <option value="autre-canal">Autre</option>
         </select>
       </div>
@@ -5857,9 +6106,9 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
     <div class="form-row">
       <label class="form-label">Type</label>
       <select class="form-select" id="marche-type">
-        <option value="marche">🏕️ Marché artisanal</option>
-        <option value="convention">🏰 Convention / Festival fantastique</option>
-        <option value="brocante">🪙 Brocante / Vide-greniers</option>
+        <option value="marche">Marché artisanal</option>
+        <option value="convention">Convention / Festival fantastique</option>
+        <option value="brocante">Brocante / Vide-greniers</option>
         <option value="autre-canal">Autre événement</option>
       </select>
     </div>
@@ -5871,15 +6120,15 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <label class="form-label">Frais</label>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         <div>
-          <label class="form-label" style="font-size:0.68rem">🚗 Trajet (€)</label>
+          <label class="form-label" style="font-size:0.68rem">Trajet (€)</label>
           <input type="number" class="form-input" id="marche-frais-trajet" placeholder="0" step="0.01" oninput="updateMarcheTotal()">
         </div>
         <div>
-          <label class="form-label" style="font-size:0.68rem">🏠 Location (€)</label>
+          <label class="form-label" style="font-size:0.68rem">Location (€)</label>
           <input type="number" class="form-input" id="marche-frais-location" placeholder="0" step="0.01" oninput="updateMarcheTotal()">
         </div>
         <div>
-          <label class="form-label" style="font-size:0.68rem">⛺ Prix du stand (€)</label>
+          <label class="form-label" style="font-size:0.68rem">Prix du stand (€)</label>
           <input type="number" class="form-input" id="marche-frais-stand" placeholder="0" step="0.01" oninput="updateMarcheTotal()">
         </div>
       </div>
@@ -5887,7 +6136,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
         <span style="font-size:0.78rem;color:var(--text3)">Total des frais</span>
         <span class="amount-neg" id="marche-frais-total" style="font-size:0.88rem">0,00 €</span>
       </div>
-      <div style="font-size:0.72rem;color:var(--text3);margin-top:6px">⚠️ Ce total est déjà compté dans ton bénéfice. Ne le rajoute pas en plus comme dépense dans "Dépenses & Compta" — ça compterait le même frais deux fois.</div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:6px">Ce total est déjà compté dans ton bénéfice. Ne le rajoute pas en plus comme dépense dans "Dépenses & Compta" — ça compterait le même frais deux fois.</div>
     </div>
     <div class="form-row">
       <label class="form-label">Nb de jours</label>
@@ -5927,27 +6176,27 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
       <div class="form-row">
         <label class="form-label">Catégorie</label>
         <select class="form-select" id="tx-categorie" onchange="toggleTxMarcheField()">
-          <optgroup label="🎨 Matières premières">
+          <optgroup label="Matières premières">
             <option value="resine">Résine / matériaux</option>
             <option value="peinture">Peintures / pigments</option>
             <option value="moules">Moules / silicone</option>
             <option value="fournitures">Fournitures diverses</option>
           </optgroup>
-          <optgroup label="🏕️ Marchés & Événements">
+          <optgroup label="Marchés & Événements">
             <option value="stand">Frais de stand</option>
             <option value="transport-marche">Transport marché</option>
             <option value="hebergement">Hébergement</option>
           </optgroup>
-          <optgroup label="💻 Digital & Communication">
+          <optgroup label="Digital & Communication">
             <option value="site-web">Site web / hébergement</option>
             <option value="logiciel">Logiciel / abonnement</option>
             <option value="publicite">Publicité / promotion</option>
           </optgroup>
-          <optgroup label="📦 Emballage & Expédition">
+          <optgroup label="Emballage & Expédition">
             <option value="emballage">Emballages / étiquettes</option>
             <option value="expedition">Frais d'expédition</option>
           </optgroup>
-          <optgroup label="⚙️ Charges">
+          <optgroup label="Charges">
             <option value="charges-sociales">Charges sociales (URSSAF)</option>
             <option value="frais-bancaires">Frais bancaires</option>
             <option value="formation">Formation</option>
@@ -5963,7 +6212,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
         <input type="checkbox" id="tx-additional">
         <label for="tx-additional" style="font-size:0.84rem;color:var(--text2)">C'est une dépense EN PLUS des frais déjà saisis sur l'événement (pas un doublon)</label>
       </div>
-      <div style="font-size:0.72rem;color:var(--text3);margin-top:4px">⚠️ Ne coche rien ci-dessus si cette dépense correspond déjà aux frais que tu as saisis pour cet événement — elle ne sera alors comptée qu'une seule fois. Coche la case si c'est un coût supplémentaire non prévu.</div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:4px">Ne coche rien ci-dessus si cette dépense correspond déjà aux frais que tu as saisis pour cet événement — elle ne sera alors comptée qu'une seule fois. Coche la case si c'est un coût supplémentaire non prévu.</div>
     </div>
     <div class="form-row toggle-row">
       <input type="checkbox" id="tx-justif">
@@ -6071,26 +6320,26 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
 <script>
 // ─── PRODUITS / CATALOGUE ────────────────────────────────────
 const LEGACY_PRODUCTS = [
-  { id: 'sculpture', label: '🗿 Sculpture / Figurine fantasy', prix: 85 },
-  { id: 'gardien-clefs', label: '🗝️ Gardien de Clefs', prix: 35 },
-  { id: 'gardien-livre', label: '📚 Gardien de Livre', prix: 45 },
-  { id: 'tasse', label: '☕ Tasse', prix: 25 },
-  { id: 'blason', label: '🛡️ Blason', prix: 30 },
-  { id: 'cadre', label: '🖼️ Cadre', prix: 40 },
-  { id: 'sticker', label: '✨ Sticker', prix: 3 },
-  { id: 'badge', label: '🏅 Badge', prix: 3 },
-  { id: 'papeterie', label: '📄 Papeterie', prix: 8 },
-  { id: 'stage', label: '🎨 Stage / Cours', prix: 80 },
-  { id: 'autre-produit', label: '📦 Autre produit', prix: 0 },
+  { id: 'sculpture', label: 'Sculpture / Figurine fantasy', prix: 85 },
+  { id: 'gardien-clefs', label: 'Gardien de Clefs', prix: 35 },
+  { id: 'gardien-livre', label: 'Gardien de Livre', prix: 45 },
+  { id: 'tasse', label: 'Tasse', prix: 25 },
+  { id: 'blason', label: 'Blason', prix: 30 },
+  { id: 'cadre', label: 'Cadre', prix: 40 },
+  { id: 'sticker', label: 'Sticker', prix: 3 },
+  { id: 'badge', label: 'Badge', prix: 3 },
+  { id: 'papeterie', label: 'Papeterie', prix: 8 },
+  { id: 'stage', label: 'Stage / Cours', prix: 80 },
+  { id: 'autre-produit', label: 'Autre produit', prix: 0 },
 ];
 const LEGACY_MAP = Object.fromEntries(LEGACY_PRODUCTS.map(p => [p.id, p]));
 const CANAUX = {
-  evenement: '🎪 Événement',
-  site: '🌐 Site web',
+  evenement: 'Événement',
+  site: 'Site web',
   'autre-canal': 'Autre',
-  marche: '🏕️ Marché',
-  convention: '🏰 Convention',
-  instagram: '📱 Instagram'
+  marche: 'Marché',
+  convention: 'Convention',
+  instagram: 'Instagram'
 };
 const OLD_EVENT_CANAUX = ['marche', 'convention', 'instagram'];
 function normalizeCanal(canal) { return OLD_EVENT_CANAUX.includes(canal) ? 'evenement' : (canal || 'autre-canal'); }
@@ -6532,8 +6781,8 @@ function renderDashboard() {
   if (c.stockRupture>0) alerts.push({t:'danger', m:`${c.stockRupture} produit(s) suivi(s) en rupture de stock.`});
   if (c.stockFaible>0) alerts.push({t:'warn', m:`${c.stockFaible} produit(s) bientôt en rupture.`});
   if (c.benef<0) alerts.push({t:'danger', m:`Attention : bénéfice négatif après charges, frais et coût produits.`});
-  if (!alerts.length) alerts.push({t:'success', m:'Tout est en ordre ✨ Bonne gestion !'});
-  document.getElementById('alerts-section').innerHTML = alerts.map(a=>`<div class="alert alert-${a.t}"><span>${a.t==='danger'?'🚨':a.t==='warn'?'⚠️':a.t==='success'?'✅':'ℹ️'}</span>${a.m}</div>`).join('');
+  if (!alerts.length) alerts.push({t:'success', m:'Tout est en ordre Bonne gestion !'});
+  document.getElementById('alerts-section').innerHTML = alerts.map(a=>`<div class="alert alert-${a.t}"><svg class="icon icon-sm"><use href="#icon-${a.t==='danger'?'warning':a.t==='warn'?'warning':a.t==='success'?'check':'help'}"/></svg>${a.m}</div>`).join('');
   // Stats produits
   const sp = computeStatsProduits();
   const totalCA = Object.values(sp).reduce((s,p)=>s+p.ca,0);
@@ -6656,7 +6905,7 @@ function renderDashboard() {
             <div style="font-size:0.78rem;color:var(--text2)">${topProd ? escapeHtml(prodLabel(topProd[0])) : '—'}</div>
           </div>
         </div>
-        ${evts.length ? `<div style="font-size:0.75rem;color:var(--text3)">⛺ ${evts.map(escapeHtml).join(' · ')}</div>` : ''}
+        ${evts.length ? `<div style="font-size:0.75rem;color:var(--text3)">${evts.map(escapeHtml).join(' · ')}</div>` : ''}
       </div>
     </details>`;
   }).join('') : '<div style="color:var(--text3);font-size:0.83rem">Aucune donnée mensuelle</div>';
@@ -6702,7 +6951,7 @@ function renderVentes() {
   document.getElementById('vente-count').textContent = `(${ventes.length} / ${data.ventes.length})`;
 
   if (!ventes.length) {
-    document.getElementById('ventes-tbody').innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-icon">🛒</div>Aucune vente enregistrée</td></tr>`;
+    document.getElementById('ventes-tbody').innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-ventes"/></svg></div>Aucune vente enregistrée</td></tr>`;
     return;
   }
 
@@ -6727,7 +6976,7 @@ function renderVentes() {
     // En-tête du jour
     rows.push(`<tr style="background:rgba(79,140,255,0.06)">
       <td colspan="4" style="padding:8px 14px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text2);font-weight:600;text-transform:capitalize">
-        📅 ${dateLabel} <span style="color:var(--text3);font-weight:400">· ${ventesJour.length} vente(s) · ${nbJour} article(s)</span>
+        ${dateLabel} <span style="color:var(--text3);font-weight:400">· ${ventesJour.length} vente(s) · ${nbJour} article(s)</span>
       </td>
       <td colspan="3" style="padding:8px 14px;text-align:right">
         <span style="font-family:'DM Mono',monospace;font-size:0.85rem;color:var(--gold);font-weight:600">Recette du jour : ${fmt(recetteJour)}</span>
@@ -6762,16 +7011,16 @@ function renderVentes() {
 function renderMarches() {
   const list = document.getElementById('marches-list');
   const sorted = [...data.marches].sort((a,b)=>b.debut.localeCompare(a.debut));
-  if (!sorted.length) { list.innerHTML = `<div class="empty-state"><div class="empty-icon">⛺</div>Aucun marché enregistré</div>`; return; }
+  if (!sorted.length) { list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-marches"/></svg></div>Aucun marché enregistré</div>`; return; }
   list.innerHTML = sorted.map(m => {
     const stats = computeStatsMarche(m.id);
     const frais = parseFloat(m.frais)||0;
     const net = stats.totalCA - frais;
     const panierMoyen = stats.ventes.length > 0 ? stats.totalCA / stats.ventes.length : 0;
     const fraisDetail = [];
-    if (m.fraisTrajet > 0) fraisDetail.push(`🚗 ${fmt(m.fraisTrajet)}`);
-    if (m.fraisLocation > 0) fraisDetail.push(`🏠 ${fmt(m.fraisLocation)}`);
-    if (m.fraisStand > 0) fraisDetail.push(`⛺ ${fmt(m.fraisStand)}`);
+    if (m.fraisTrajet > 0) fraisDetail.push(`${fmt(m.fraisTrajet)}`);
+    if (m.fraisLocation > 0) fraisDetail.push(`${fmt(m.fraisLocation)}`);
+    if (m.fraisStand > 0) fraisDetail.push(`${fmt(m.fraisStand)}`);
     // rétro-compat : anciens enregistrements avec seulement m.frais
     const fraisStr = fraisDetail.length > 0 ? fraisDetail.join(' · ') : (frais > 0 ? `Stand : ${fmt(frais)}` : '');
     return `<div class="marche-card" data-action="show-marche" data-id="${escapeHtml(m.id)}">
@@ -6808,11 +7057,11 @@ function showMarcheDetail(id) {
 
   // Frais détail
   const fraisBreakdown = [];
-  if (m.fraisTrajet > 0) fraisBreakdown.push(`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:0.8rem;color:var(--text2)">🚗 Trajet</span><span class="amount-neg">${fmt(m.fraisTrajet)}</span></div>`);
-  if (m.fraisLocation > 0) fraisBreakdown.push(`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:0.8rem;color:var(--text2)">🏠 Location</span><span class="amount-neg">${fmt(m.fraisLocation)}</span></div>`);
-  if (m.fraisStand > 0) fraisBreakdown.push(`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:0.8rem;color:var(--text2)">⛺ Stand</span><span class="amount-neg">${fmt(m.fraisStand)}</span></div>`);
+  if (m.fraisTrajet > 0) fraisBreakdown.push(`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:0.8rem;color:var(--text2)">Trajet</span><span class="amount-neg">${fmt(m.fraisTrajet)}</span></div>`);
+  if (m.fraisLocation > 0) fraisBreakdown.push(`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:0.8rem;color:var(--text2)">Location</span><span class="amount-neg">${fmt(m.fraisLocation)}</span></div>`);
+  if (m.fraisStand > 0) fraisBreakdown.push(`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:0.8rem;color:var(--text2)">Stand</span><span class="amount-neg">${fmt(m.fraisStand)}</span></div>`);
   // rétro-compat
-  if (!fraisBreakdown.length && frais > 0) fraisBreakdown.push(`<div style="display:flex;justify-content:space-between;padding:5px 0"><span style="font-size:0.8rem;color:var(--text2)">⛺ Frais stand</span><span class="amount-neg">${fmt(frais)}</span></div>`);
+  if (!fraisBreakdown.length && frais > 0) fraisBreakdown.push(`<div style="display:flex;justify-content:space-between;padding:5px 0"><span style="font-size:0.8rem;color:var(--text2)">Frais stand</span><span class="amount-neg">${fmt(frais)}</span></div>`);
 
   // Ventes groupées par jour
   const ventesParJour = {};
@@ -6835,14 +7084,14 @@ function showMarcheDetail(id) {
     return `${separator}
       <tr style="background:var(--surface2)">
         <td style="font-size:0.78rem;font-family:'DM Mono',monospace;color:var(--text2);font-weight:600;padding:8px 14px">
-          📅 ${new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}
+          ${new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}
         </td>
         <td style="font-family:'DM Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--gold)">Recette du jour : ${fmt(recetteJour)}</td>
       </tr>
       ${rows}`;
   }).join('') : `<tr><td colspan="2" style="color:var(--text3);text-align:center;padding:16px">Aucune vente liée à cet événement</td></tr>`;
 
-  document.getElementById('marche-detail-title').textContent = `📊 ${m.nom}`;
+  document.getElementById('marche-detail-title').textContent = `${m.nom}`;
   document.getElementById('marche-detail-content').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px">
       <div class="kpi-card purple" style="padding:14px"><div class="kpi-label">CA brut</div><div class="kpi-value purple" style="font-size:1.2rem">${fmt(totalCA)}</div></div>
@@ -6901,7 +7150,7 @@ function renderStatsPage() {
   document.getElementById('stats-produits-content').innerHTML = `
     <div class="stats-2col">
       <div class="section-card">
-        <div class="section-header"><div class="section-title">🏆 Classement des catégories</div></div>
+        <div class="section-header"><div class="section-title">Classement des catégories</div></div>
         <div style="padding:20px">
           ${sorted.length ? `<div style="font-size:0.78rem;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:14px">Sur ${fmt(totalCA)} de CA total. Clique sur une catégorie pour voir les produits vendus.</div>` + sorted.map(([cat,s],i)=>{
             const pct = totalCA>0?(s.ca/totalCA*100):0;
@@ -6937,11 +7186,11 @@ function renderStatsPage() {
                 ${productRows || '<div style="font-size:0.8rem;color:var(--text3)">Aucun produit vendu</div>'}
               </div>
             </details>`;
-          }).join('') : '<div class="empty-state"><div class="empty-icon">📊</div>Aucune vente enregistrée</div>'}
+          }).join('') : '<div class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-stats"/></svg></div>Aucune vente enregistrée</div>'}
         </div>
       </div>
       <div class="section-card">
-        <div class="section-header"><div class="section-title">📍 Performance par canal</div></div>
+        <div class="section-header"><div class="section-title">Performance par canal</div></div>
         <div style="padding:20px">
           ${Object.entries(sc).sort((a,b)=>b[1].ca-a[1].ca).map(([canal,s])=>{
             const pct = totalCaC>0?(s.ca/totalCaC*100):0;
@@ -6958,7 +7207,7 @@ function renderStatsPage() {
       </div>
     </div>
     <div class="section-card">
-      <div class="section-header"><div class="section-title">📅 Stats par événement</div></div>
+      <div class="section-header"><div class="section-title">Stats par événement</div></div>
       <table>
         <thead><tr><th>Événement</th><th>Date</th><th>CA</th><th>Frais stand</th><th>Net après frais</th><th>Nb ventes</th><th>Catégorie n°1</th><th>Produit n°1</th></tr></thead>
         <tbody>
@@ -7031,7 +7280,7 @@ function renderStock() {
     return rank(a) - rank(b) || prodCategory(a.produit).localeCompare(prodCategory(b.produit)) || prodLabel(a.produit).localeCompare(prodLabel(b.produit));
   });
   if (!ordered.length) {
-    tbody.innerHTML = `<tr><td colspan="11" class="empty-state"><div class="empty-icon">📦</div>Aucun produit. Clique sur “+ Ajouter un produit”.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-stock"/></svg></div>Aucun produit. Clique sur “+ Ajouter un produit”.</td></tr>`;
     return;
   }
 
@@ -7086,14 +7335,14 @@ function renderTransactions() {
         <button class="action-btn" data-action="edit-tx" data-id="${escapeHtml(t.id)}" title="Modifier"><svg class="icon icon-sm"><use href="#icon-edit"/></svg></button>
         <button class="action-btn" data-action="delete-tx" data-id="${escapeHtml(t.id)}" title="Supprimer" style="color:var(--danger)"><svg class="icon icon-sm"><use href="#icon-delete"/></svg></button>
       </td>
-    </tr>`).join('') : `<tr><td colspan="7" class="empty-state"><div class="empty-icon">↕</div>Aucune transaction</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="7" class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-paiements"/></svg></div>Aucune transaction</td></tr>`;
   updateBadges();
 }
 function renderFactures() {
   const facs = [...data.factures].sort((a,b)=>b.date.localeCompare(a.date));
   document.getElementById('fac-tbody').innerHTML = facs.length ? facs.map(f=>`
     <tr>
-      <td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:0.78rem">${f.locked ? '🔒 ' : ''}${escapeHtml(f.num)}${f.type==='avoir' ? ' <span style="color:var(--danger)">(avoir)</span>' : ''}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:0.78rem">${f.locked ? '' : ''}${escapeHtml(f.num)}${f.type==='avoir' ? ' <span style="color:var(--danger)">(avoir)</span>' : ''}</td>
       <td style="color:var(--text)">${escapeHtml(f.client)}</td>
       <td class="amount-neutral">${fmt(f.montant)}</td>
       <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text3)">${escapeHtml(f.echeance||'-')}</td>
@@ -7103,7 +7352,7 @@ function renderFactures() {
         ${(f.locked && f.type!=='avoir') ? `<button class="action-btn" data-action="avoir-fac" data-id="${escapeHtml(f.id)}" title="Créer un avoir"><svg class="icon icon-sm"><use href="#icon-refund"/></svg></button>` : ''}
         <button class="action-btn" data-action="delete-fac" data-id="${escapeHtml(f.id)}" title="${f.locked ? 'Verrouillée : passe par un avoir' : 'Supprimer'}" style="color:var(--danger)"><svg class="icon icon-sm"><use href="#icon-delete"/></svg></button>
       </td>
-    </tr>`).join('') : `<tr><td colspan="6" class="empty-state"><div class="empty-icon">◻</div>Aucune facture</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="6" class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-factures"/></svg></div>Aucune facture</td></tr>`;
   updateBadges();
 }
 function renderParams() {
@@ -7393,7 +7642,7 @@ function addVenteItem(produitId='', qte=1, prix=0, guessText=null) {
   const defaultPrix = selectedId ? prodPrix(selectedId) : 0;
 
   const searchRow = isUnmatchedOcr
-    ? `<input type="text" class="form-input vente-produit-search" style="grid-column:1 / -1" placeholder="🔍 Rechercher un produit" value="${escapeHtml(guessText)}" oninput="filterVenteProduitSelect(this,'${itemId}')">`
+    ? `<input type="text" class="form-input vente-produit-search" style="grid-column:1 / -1" placeholder="Rechercher un produit" value="${escapeHtml(guessText)}" oninput="filterVenteProduitSelect(this,'${itemId}')">`
     : '';
 
   div.innerHTML = `
@@ -7794,7 +8043,7 @@ async function analyzeOcrPhoto() {
     const computedTotal = items.reduce((s, i) => s + i.qte * i.prix, 0);
     ocrParsedItems = items;
     ocrTotalWarning = (declaredTotal !== null && Math.abs(declaredTotal - computedTotal) > 0.01)
-      ? `⚠️ Le total lu sur le document (${declaredTotal.toFixed(2)}€) ne correspond pas à la somme des lignes reconnues (${computedTotal.toFixed(2)}€).\n\nVérifie les quantités et prix ci-dessous avant d'enregistrer.`
+      ? `Le total lu sur le document (${declaredTotal.toFixed(2)}€) ne correspond pas à la somme des lignes reconnues (${computedTotal.toFixed(2)}€).\n\nVérifie les quantités et prix ci-dessous avant d'enregistrer.`
       : null;
 
     // Étape "Continuer" volontairement séparée du clic sur "Analyser" (pas
@@ -8216,7 +8465,7 @@ function exportPDF() {
   td{padding:7px 10px;border-bottom:1px solid #f3f4f6;font-size:12px}
   .bar-bg{background:#e5e7eb;border-radius:4px;height:7px;margin-top:3px}.bar{height:7px;border-radius:4px;background:#2563eb}
   .footer{margin-top:40px;color:#9ca3af;font-size:11px;text-align:center}</style></head><body>
-  <h1>🔮 Ariane — Rapport financier</h1><p style="color:#6b7280;font-size:12px">Généré le ${now}</p>
+  <h1>Ariane — Rapport financier</h1><p style="color:#6b7280;font-size:12px">Généré le ${now}</p>
   <div class="kpis">
     <div class="kpi"><div class="kpi-l">Revenus / CA</div><div class="kpi-v">${fmt(c.ca)}</div></div>
     <div class="kpi"><div class="kpi-l">Coûts hors charges</div><div class="kpi-v" style="color:#dc2626">${fmt(c.coutsCharges)}</div></div>
@@ -8434,7 +8683,7 @@ function addCalendarType() {
   const colorEl = document.getElementById('cal-type-color');
 
   const label = (labelEl?.value || '').trim();
-  const emoji = (emojiEl?.value || '📌').trim();
+  const emoji = (emojiEl?.value || '').trim();
   const color = colorEl?.value || '#4f8cff';
 
   if (!label) {
@@ -8494,13 +8743,13 @@ if (typeof openModal === 'function' && !window.__calTypeOpenModalHooked) {
 
 function defaultCalendarTypes() {
   return [
-    { id: 'tache', label: 'Tâche', emoji: '📌', color: '#60a5fa' },
-    { id: 'stock', label: 'Stock', emoji: '📦', color: '#3b82f6' },
-    { id: 'production', label: 'Production', emoji: '🛠️', color: '#10b981' },
-    { id: 'checklist', label: 'Checklist', emoji: '✅', color: '#8b5cf6' },
-    { id: 'facture', label: 'Facture', emoji: '◻', color: '#fbbf24' },
-    { id: 'fiscal', label: 'Fiscal', emoji: '🧮', color: '#f43f5e' },
-    { id: 'marche', label: 'Marché', emoji: '⛺', color: '#4f8cff' }
+    { id: 'tache', label: 'Tâche', emoji: '', color: '#60a5fa' },
+    { id: 'stock', label: 'Stock', emoji: '', color: '#3b82f6' },
+    { id: 'production', label: 'Production', emoji: '', color: '#10b981' },
+    { id: 'checklist', label: 'Checklist', emoji: '', color: '#8b5cf6' },
+    { id: 'facture', label: 'Facture', emoji: '', color: '#fbbf24' },
+    { id: 'fiscal', label: 'Fiscal', emoji: '', color: '#f43f5e' },
+    { id: 'marche', label: 'Marché', emoji: '', color: '#4f8cff' }
   ];
 }
 
@@ -8531,12 +8780,12 @@ function calTypeMeta(type) {
 
   // Fallback visuel pour les événements automatiques si leur type a été supprimé.
   const fallback = {
-    marche: { id:'marche', label:'Marché', emoji:'⛺', color:'#4f8cff' },
+    marche: { id:'marche', label:'Marché', emoji:'', color:'#4f8cff' },
     facture: { id:'facture', label:'Facture', emoji:'◻', color:'#fbbf24' },
-    fiscal: { id:'fiscal', label:'Fiscal', emoji:'🧮', color:'#f43f5e' }
+    fiscal: { id:'fiscal', label:'Fiscal', emoji:'', color:'#f43f5e' }
   };
 
-  return fallback[type] || { id: type || 'tache', label: type || 'Sans type', emoji:'📌', color:'#4f8cff' };
+  return fallback[type] || { id: type || 'tache', label: type || 'Sans type', emoji:'', color:'#4f8cff' };
 }
 
 function refreshCalendarTypeSelects(selectedTaskType) {
@@ -16904,9 +17153,9 @@ showPage();
     const html = `
       <div class="builder-pro-pack-title">Pack site pro</div>
       <div id="builder-pro-pack" class="builder-pro-pack">
-        <button class="btn btn-pro-main" onclick="applyBuilderTemplatePro('brand')">✨ Template marque premium</button>
-        <button class="btn btn-secondary" onclick="applyBuilderTemplatePro('service')">💼 Template service</button>
-        <button class="btn btn-secondary" onclick="applyBuilderTemplatePro('portfolio')">🖼️ Template portfolio</button>
+        <button class="btn btn-pro-main" onclick="applyBuilderTemplatePro('brand')">Template marque premium</button>
+        <button class="btn btn-secondary" onclick="applyBuilderTemplatePro('service')">Template service</button>
+        <button class="btn btn-secondary" onclick="applyBuilderTemplatePro('portfolio')">Template portfolio</button>
 
         <div class="builder-pro-mini-grid">
           <button class="btn btn-secondary" onclick="addBuilderReadySection('hero')">Hero</button>
@@ -16922,9 +17171,9 @@ showPage();
           <button class="btn btn-secondary" onclick="spaceBuilderElements('x')">↔ Espacer</button>
           <button class="btn btn-secondary" onclick="spaceBuilderElements('y')">↕ Espacer</button>
         </div>
-        <button class="btn btn-secondary" onclick="toggleBuilderSnap()">🧲 Aimantation</button>
-        <button class="btn btn-secondary" onclick="previewSiteBuilderMobile()">📱 Aperçu mobile</button>
-        <button class="btn btn-secondary" onclick="importLocalImageToBuilder()">🖼️ Import image locale</button>
+        <button class="btn btn-secondary" onclick="toggleBuilderSnap()">Aimantation</button>
+        <button class="btn btn-secondary" onclick="previewSiteBuilderMobile()">Aperçu mobile</button>
+        <button class="btn btn-secondary" onclick="importLocalImageToBuilder()">Import image locale</button>
       </div>
     `;
 
@@ -17020,7 +17269,7 @@ showPage();
   const BUSINESS_TEMPLATES_18 = {
     bijoux: {
       label: 'Bijoux',
-      icon: '💍',
+      icon: '',
       products: [
         ['bracelet-perles','Bracelet perles',18,12,4],
         ['collier-acier','Collier acier inoxydable',29,8,7],
@@ -17035,7 +17284,7 @@ showPage();
     },
     vetements: {
       label: 'Vêtements',
-      icon: '👕',
+      icon: '',
       products: [
         ['tshirt-signature','T-shirt signature',29,15,9],
         ['sweat-premium','Sweat premium',59,7,24],
@@ -17050,7 +17299,7 @@ showPage();
     },
     stickers: {
       label: 'Stickers',
-      icon: '✨',
+      icon: '',
       products: [
         ['sticker-pack','Pack stickers',6,50,1],
         ['print-a5','Print A5',12,30,3],
@@ -17065,7 +17314,7 @@ showPage();
     },
     artisan: {
       label: 'Artisanat',
-      icon: '🧵',
+      icon: '',
       products: [
         ['piece-unique','Pièce unique',65,4,22],
         ['creation-personnalisee','Création personnalisée',95,2,35],
@@ -17080,7 +17329,7 @@ showPage();
     },
     freelance: {
       label: 'Freelance',
-      icon: '💼',
+      icon: '',
       products: [
         ['audit-simple','Audit simple',79,0,0],
         ['pack-identite','Pack identité',249,0,0],
@@ -17095,7 +17344,7 @@ showPage();
     },
     marche: {
       label: 'Vendeur en marché',
-      icon: '🏕️',
+      icon: '',
       products: [
         ['produit-star','Produit star',35,12,11],
         ['petit-produit','Petit produit',8,40,2],
@@ -17616,7 +17865,7 @@ showPage();
               <div class="commercial-card-title">Templates métiers</div>
               <div class="commercial-card-text">Préremplit produits, coûts, stock, charges types et mini site adapté au métier.</div>
               <div class="template-business-grid">
-                ${Object.entries(BUSINESS_TEMPLATES_18).map(([k,t])=>`<button class="btn btn-secondary" onclick="applyBusinessTemplateV418('${k}')">${t.icon} ${t.label}</button>`).join('')}
+                ${Object.entries(BUSINESS_TEMPLATES_18).map(([k,t])=>`<button class="btn btn-secondary" onclick="applyBusinessTemplateV418('${k}')">${t.label}</button>`).join('')}
               </div>
             </div>
             <div class="commercial-card">
@@ -18672,7 +18921,7 @@ showPage();
     if(!pack || document.getElementById('beautiful-template-v421')) return;
 
     const html = `
-      <button id="beautiful-template-v421" class="btn builder-beautiful-template-btn" onclick="applyBeautifulTemplateV421('brand')">✨ Template vraiment beau</button>
+      <button id="beautiful-template-v421" class="btn builder-beautiful-template-btn" onclick="applyBeautifulTemplateV421('brand')">Template vraiment beau</button>
       <div class="builder-beautiful-note">Nouvelle base plus premium : accueil, boutique et contact mieux composés.</div>
     `;
 
@@ -19056,7 +19305,7 @@ showPage();
     if(!pack || document.getElementById('clean-premium-template-v422')) return;
 
     pack.insertAdjacentHTML('afterbegin', `
-      <button id="clean-premium-template-v422" class="btn builder-clean-template-btn" onclick="applyCleanPremiumTemplateV422('brand')">✨ Template clean premium corrigé</button>
+      <button id="clean-premium-template-v422" class="btn builder-clean-template-btn" onclick="applyCleanPremiumTemplateV422('brand')">Template clean premium corrigé</button>
       <div class="builder-beautiful-note">Corrige les chevauchements, les retours à la ligne et les cartes mal alignées.</div>
     `);
 
@@ -19391,7 +19640,7 @@ showPage();
     if(!pack || document.getElementById('showcase-template-v423')) return;
 
     pack.insertAdjacentHTML('afterbegin', `
-      <button id="showcase-template-v423" class="btn builder-showcase-template-btn" onclick="applyShowcaseTemplateV423()">✨ Template showcase premium</button>
+      <button id="showcase-template-v423" class="btn builder-showcase-template-btn" onclick="applyShowcaseTemplateV423()">Template showcase premium</button>
       <div class="builder-showcase-note">Montre toutes les fonctions du créateur : pages, menu, boutons, cartes, images, formes, boutique, contact et export.</div>
     `);
 
@@ -19749,10 +19998,10 @@ showPage();
 
     if(!document.getElementById('template-unique-v424')){
       pack.insertAdjacentHTML('afterbegin', `
-        <button id="template-unique-v424" class="btn builder-template-unique-v424" onclick="applyShowcaseTemplateV423()">✨ Template showcase premium</button>
-        <button id="template-artisanat-v1" class="btn builder-template-unique-v424" onclick="applyTemplateArtisanatV1()">🎨 Template Artisanat</button>
-        <button id="template-services-v1" class="btn builder-template-unique-v424" onclick="applyTemplateServicesV1()">🛠️ Template Services</button>
-        <button id="template-logiciel-v1" class="btn builder-template-unique-v424" onclick="applyTemplateLogicielV1()">💻 Template Logiciel</button>
+        <button id="template-unique-v424" class="btn builder-template-unique-v424" onclick="applyShowcaseTemplateV423()">Template showcase premium</button>
+        <button id="template-artisanat-v1" class="btn builder-template-unique-v424" onclick="applyTemplateArtisanatV1()">Template Artisanat</button>
+        <button id="template-services-v1" class="btn builder-template-unique-v424" onclick="applyTemplateServicesV1()">Template Services</button>
+        <button id="template-logiciel-v1" class="btn builder-template-unique-v424" onclick="applyTemplateLogicielV1()">Template Logiciel</button>
         <div id="template-unique-note-v424" class="builder-template-clean-note-v424">Choisis le template le plus proche de ton activité, puis personnalise-le. Le bouton "Acheter" utilise déjà ton vrai backend de paiement.</div>
       `);
     }
@@ -20494,11 +20743,11 @@ showPage();
       btn.id = 'template-unique-v427';
       btn.type = 'button';
       btn.className = 'btn';
-      btn.textContent = '✨ Template showcase premium';
+      btn.textContent = 'Template showcase premium';
       btn.onclick = runTemplateV427;
       pack.insertBefore(btn, pack.firstChild);
     } else {
-      btn.textContent = '✨ Template showcase premium';
+      btn.textContent = 'Template showcase premium';
       btn.onclick = runTemplateV427;
     }
 
@@ -21133,7 +21382,7 @@ showPage();
 
     btn.classList.toggle('on', on);
     btn.classList.toggle('off', !on);
-    btn.textContent = on ? '🧲 Aimantation Canva : ON' : 'Aimantation Canva : OFF';
+    btn.textContent = on ? 'Aimantation Canva : ON' : 'Aimantation Canva : OFF';
 
     if(note){
       note.textContent = on
@@ -21162,7 +21411,7 @@ showPage();
     if(!document.getElementById('snap-toggle-box-v430')){
       const html = `
         <div id="snap-toggle-box-v430" class="snap-toggle-box-v430">
-          <button id="snap-toggle-btn-v430" type="button" class="btn snap-toggle-btn-v430 on" onclick="toggleSnapCanvaV430()">🧲 Aimantation Canva : ON</button>
+          <button id="snap-toggle-btn-v430" type="button" class="btn snap-toggle-btn-v430 on" onclick="toggleSnapCanvaV430()">Aimantation Canva : ON</button>
           <div id="snap-toggle-note-v430" class="snap-toggle-note-v430"></div>
         </div>
       `;
@@ -21395,13 +21644,13 @@ showPage();
         finalBtn.id = 'template-only-final-v431';
         finalBtn.type = 'button';
         finalBtn.className = 'btn';
-        finalBtn.textContent = '✨ Template showcase premium';
+        finalBtn.textContent = 'Template showcase premium';
         finalBtn.onclick = runOnlyTemplateV431;
 
         // Le placer tout en haut du pack.
         pack.insertBefore(finalBtn, pack.firstChild);
       } else {
-        finalBtn.textContent = '✨ Template showcase premium';
+        finalBtn.textContent = 'Template showcase premium';
         finalBtn.onclick = runOnlyTemplateV431;
 
         if(finalBtn.parentElement !== pack){
@@ -21426,9 +21675,9 @@ showPage();
 
       // Trois templates par secteur, juste après le bouton showcase.
       let afterEl = document.getElementById('template-only-final-v431');
-      afterEl = ensureSectorButtonV431(pack, afterEl, 'template-artisanat-v1', '🎨 Template Artisanat', 'applyTemplateArtisanatV1');
-      afterEl = ensureSectorButtonV431(pack, afterEl, 'template-services-v1', '🛠️ Template Services', 'applyTemplateServicesV1');
-      afterEl = ensureSectorButtonV431(pack, afterEl, 'template-logiciel-v1', '💻 Template Logiciel', 'applyTemplateLogicielV1');
+      afterEl = ensureSectorButtonV431(pack, afterEl, 'template-artisanat-v1', 'Template Artisanat', 'applyTemplateArtisanatV1');
+      afterEl = ensureSectorButtonV431(pack, afterEl, 'template-services-v1', 'Template Services', 'applyTemplateServicesV1');
+      afterEl = ensureSectorButtonV431(pack, afterEl, 'template-logiciel-v1', 'Template Logiciel', 'applyTemplateLogicielV1');
 
       let note = document.getElementById('template-sector-note-v431');
       if(!note){
@@ -21551,11 +21800,11 @@ showPage();
     nav.id = 'mobile-bottom-nav-v432';
     nav.className = 'mobile-bottom-nav-v432';
     nav.innerHTML = `
-      <button type="button" data-page="dashboard" onclick="goPage('dashboard')"><span>⌂</span>Accueil</button>
-      <button type="button" data-page="ventes" onclick="goPage('ventes')"><span>＋</span>Ventes</button>
-      <button type="button" data-page="stock" onclick="goPage('stock')"><span>▣</span>Stock</button>
-      <button type="button" data-page="factures" onclick="goPage('factures')"><span>◻</span>Factures</button>
-      <button type="button" data-page="site-builder" onclick="goPage('site-builder')"><span>✦</span>Site</button>
+      <button type="button" data-page="dashboard" onclick="goPage('dashboard')"><span><svg class="icon"><use href="#icon-dashboard"/></svg></span>Accueil</button>
+      <button type="button" data-page="ventes" onclick="goPage('ventes')"><span><svg class="icon"><use href="#icon-ventes"/></svg></span>Ventes</button>
+      <button type="button" data-page="stock" onclick="goPage('stock')"><span><svg class="icon"><use href="#icon-stock"/></svg></span>Stock</button>
+      <button type="button" data-page="factures" onclick="goPage('factures')"><span><svg class="icon"><use href="#icon-factures"/></svg></span>Factures</button>
+      <button type="button" data-page="site-builder" onclick="goPage('site-builder')"><span><svg class="icon"><use href="#icon-site"/></svg></span>Site</button>
     `;
     document.body.appendChild(nav);
     updateMobileNav432();
@@ -21624,8 +21873,8 @@ showPage();
     box.id = 'builder-mobile-actions-v432';
     box.className = 'builder-mobile-actions-v432';
     box.innerHTML = `
-      <button type="button" class="btn btn-secondary" onclick="setBuilderMobileFormatV432('mobile')">📱 Format téléphone</button>
-      <button type="button" class="btn btn-secondary" onclick="setBuilderMobileFormatV432('desktop')">💻 Format ordinateur</button>
+      <button type="button" class="btn btn-secondary" onclick="setBuilderMobileFormatV432('mobile')">Format téléphone</button>
+      <button type="button" class="btn btn-secondary" onclick="setBuilderMobileFormatV432('desktop')">Format ordinateur</button>
     `;
 
     const snap = document.getElementById('snap-toggle-box-v430');
@@ -21699,12 +21948,12 @@ showPage();
 
 <!-- ASSISTANT D'AIDE (chatbot local) -->
 <button id="help-fab" onclick="toggleHelpChat()" aria-label="Besoin d'aide ?">
-  <span id="help-fab-icon">💬</span>
+  <span id="help-fab-icon"><svg class="icon"><use href="#icon-help"/></svg></span>
 </button>
 <div id="help-chat-panel" class="help-chat-panel">
   <div class="help-chat-header">
     <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:1.2rem">🤝</span>
+      <span style="font-size:1.2rem"></span>
       <div>
         <div style="font-weight:700;font-size:0.95rem">Assistant Ariane</div>
         <div style="font-size:0.72rem;color:var(--text2)">Réponses instantanées, hors ligne</div>
@@ -21788,10 +22037,10 @@ function toggleHelpChat(forceState) {
   const panel = document.getElementById('help-chat-panel');
   const open = typeof forceState === 'boolean' ? forceState : !panel.classList.contains('open');
   panel.classList.toggle('open', open);
-  document.getElementById('help-fab-icon').textContent = open ? '✕' : '💬';
+  document.getElementById('help-fab-icon').innerHTML = open ? '<svg class="icon"><use href="#icon-close"/></svg>' : '<svg class="icon"><use href="#icon-help"/></svg>';
   if (open && !helpChatOpened) {
     helpChatOpened = true;
-    addHelpMessage('bot', "Salut ! 👋 Je suis l'assistant d'Ariane. Pose-moi une question sur les ventes, le stock, les factures, ton site ou tes sauvegardes — ou dis-moi directement une vente, ex : « vendu 2 sculptures à 45€ », et je te prépare le formulaire.");
+    addHelpMessage('bot', "Salut ! Je suis l'assistant d'Ariane. Pose-moi une question sur les ventes, le stock, les factures, ton site ou tes sauvegardes — ou dis-moi directement une vente, ex : « vendu 2 sculptures à 45€ », et je te prépare le formulaire.");
     renderHelpQuickChips(HELP_QUICK_QUESTIONS);
     setTimeout(() => document.getElementById('help-chat-input').focus(), 200);
   }
@@ -22198,7 +22447,7 @@ function respondHelpSale(items) {
 
     // Tout est reconnu : on ajoute directement, avec un bouton pour annuler.
     const createdIds = autoCreateVentesFromChat(items);
-    const msg = "Ajouté ✅\n" + found.map(i => describeItemV5(i, true)).join('\n');
+    const msg = "Ajouté\n" + found.map(i => describeItemV5(i, true)).join('\n');
     addHelpMessageWithUndo(msg, createdIds);
   }, 350);
 }
@@ -22729,7 +22978,7 @@ function respondHelp(entry, originalText) {
       saveSafeV5();
       renderPaymentKpisV5();
       if(!silent){
-        paymentStatusV5(p.stripeConnected ? 'Compte bancaire connecté ✅' : 'Pas encore connecté.', p.stripeConnected ? 'ok' : 'warn');
+        paymentStatusV5(p.stripeConnected ? 'Compte bancaire connecté' : 'Pas encore connecté.', p.stripeConnected ? 'ok' : 'warn');
       }
     } catch(e){
       if(!silent) paymentStatusV5('Impossible de vérifier le statut (backend joignable ?).', 'err');
@@ -22748,7 +22997,7 @@ function respondHelp(entry, originalText) {
       saveSafeV5();
       renderPaymentKpisV5();
       if(!silent){
-        paymentStatusV5(p.paypalConnected ? 'Compte PayPal connecté ✅' : 'Pas encore connecté à PayPal.', p.paypalConnected ? 'ok' : 'warn');
+        paymentStatusV5(p.paypalConnected ? 'Compte PayPal connecté' : 'Pas encore connecté à PayPal.', p.paypalConnected ? 'ok' : 'warn');
       }
     } catch(e){
       if(!silent) paymentStatusV5('Impossible de vérifier le statut PayPal (backend joignable ?).', 'err');
@@ -22828,7 +23077,7 @@ function respondHelp(entry, originalText) {
     // au lieu de la vraie adresse du site — le client atterrirait alors sur
     // une page qui n'est pas la sienne après avoir payé.
     if(p.returnUrl && /example\.com/i.test(p.returnUrl)){
-      paymentStatusV5('⚠️ L\'adresse de retour contient "example.com" — ce n\'est probablement pas ta vraie adresse. Remplace-la par l\'adresse réelle de ton site (ou laisse le champ vide pour revenir automatiquement sur Ariane).', 'warn');
+      paymentStatusV5('L\'adresse de retour contient "example.com" — ce n\'est probablement pas ta vraie adresse. Remplace-la par l\'adresse réelle de ton site (ou laisse le champ vide pour revenir automatiquement sur Ariane).', 'warn');
     }
   }
 
@@ -22969,11 +23218,11 @@ function respondHelp(entry, originalText) {
     el.innerHTML = `
       <div class="pay-v5-mini">
         <div class="pay-v5-mini-label">Compte bancaire</div>
-        <div class="pay-v5-mini-value">${p.stripeConnected ? '✅ Connecté' : '⚠️ Non connecté'}</div>
+        <div class="pay-v5-mini-value">${p.stripeConnected ? 'Connecté' : 'Non connecté'}</div>
       </div>
       <div class="pay-v5-mini">
         <div class="pay-v5-mini-label">PayPal</div>
-        <div class="pay-v5-mini-value">${p.paypalConnected ? '✅ Connecté' : '⚠️ Non connecté'}</div>
+        <div class="pay-v5-mini-value">${p.paypalConnected ? 'Connecté' : 'Non connecté'}</div>
       </div>
       <div class="pay-v5-mini">
         <div class="pay-v5-mini-label">Produits en vente</div>
@@ -23258,13 +23507,13 @@ function respondHelp(entry, originalText) {
       const backendUrl = (el.backendUrl || '').replace(/\/$/, '');
       return '<div class="site-el ariane-payment-v5" data-backend="' + attrV5(backendUrl) + '" data-payload=\'' + attrV5(JSON.stringify(payload)) + '\' style="' + attrV5(baseStyle + ';padding:0;background:transparent') + '">' +
         '<button type="button" onclick="arianeCheckoutV5(this)" style="width:100%;height:100%;border:0;border-radius:inherit;background:' + attrV5(el.bg || '#34d399') + ';color:' + attrV5(el.color || '#05130d') + ';font:inherit;font-weight:950;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;box-shadow:0 16px 34px rgba(52,211,153,.20)">' +
-        '<span>🛒</span><span>' + escV5(el.label || el.text || 'Acheter maintenant') + '<br><small style="opacity:.78;font-size:.72em">' + escV5(el.productName || 'Produit') + ' · ' + escV5(priceText) + '</small></span>' +
+        '<span></span><span>' + escV5(el.label || el.text || 'Acheter maintenant') + '<br><small style="opacity:.78;font-size:.72em">' + escV5(el.productName || 'Produit') + ' · ' + escV5(priceText) + '</small></span>' +
         '</button></div>';
     }
     if(type === 'buy-button'){
       const checkout = el.buyCheckoutUrl || el.link || '#';
       return '<a class="site-el ariane-buy-v5" href="' + attrV5(checkout) + '" style="' + attrV5(baseStyle + ';padding:0;background:transparent;text-decoration:none') + '">' +
-        '<span style="width:100%;height:100%;border:0;border-radius:inherit;background:' + attrV5(el.bg || '#34d399') + ';color:' + attrV5(el.color || '#05130d') + ';font:inherit;font-weight:950;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;box-shadow:0 16px 34px rgba(52,211,153,.20)">🛒 ' + escV5(el.text || 'Acheter') + '</span></a>';
+        '<span style="width:100%;height:100%;border:0;border-radius:inherit;background:' + attrV5(el.bg || '#34d399') + ';color:' + attrV5(el.color || '#05130d') + ';font:inherit;font-weight:950;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;box-shadow:0 16px 34px rgba(52,211,153,.20)">' + escV5(el.text || 'Acheter') + '</span></a>';
     }
     if(type === 'shape-circle'){
       return '<div class="site-el site-shape" style="' + attrV5(baseStyle + ';border-radius:999px') + '"></div>';
@@ -23379,12 +23628,12 @@ async function arianeCheckoutV5(btn, forcedProvider){
       picker.style.cssText = 'display:flex;gap:8px;width:100%;height:100%';
       var b1 = document.createElement('button');
       b1.type = 'button';
-      b1.textContent = '💳 Carte bancaire';
+      b1.textContent = 'Carte bancaire';
       b1.style.cssText = btn.getAttribute('style') + ';flex:1;font-size:.85em';
       b1.onclick = function(){ arianeCheckoutV5(btn, 'stripe'); };
       var b2 = document.createElement('button');
       b2.type = 'button';
-      b2.textContent = '🅿️ PayPal';
+      b2.textContent = '🅿 PayPal';
       b2.style.cssText = btn.getAttribute('style') + ';flex:1;font-size:.85em;background:#ffc439;color:#111';
       b2.onclick = function(){ arianeCheckoutV5(btn, 'paypal'); };
       picker.appendChild(b1);
@@ -23762,9 +24011,9 @@ showPage();
 
         // Bandeau confiance
         el('shape-rect', {x:70,y:630,w:1060,h:100,bg:A.panel,radius:24}, 20),
-        el('text', {x:110,y:660,w:250,h:40,text:'✋ Fait main en France',bg:'transparent',color:A.ink,size:16,align:'left'}, 21),
-        el('text', {x:400,y:660,w:250,h:40,text:'🌿 Matières naturelles',bg:'transparent',color:A.ink,size:16,align:'left'}, 22),
-        el('text', {x:690,y:660,w:280,h:40,text:'📦 Envoi soigné sous 5 jours',bg:'transparent',color:A.ink,size:16,align:'left'}, 23),
+        el('text', {x:110,y:660,w:250,h:40,text:'Fait main en France',bg:'transparent',color:A.ink,size:16,align:'left'}, 21),
+        el('text', {x:400,y:660,w:250,h:40,text:'Matières naturelles',bg:'transparent',color:A.ink,size:16,align:'left'}, 22),
+        el('text', {x:690,y:660,w:280,h:40,text:'Envoi soigné sous 5 jours',bg:'transparent',color:A.ink,size:16,align:'left'}, 23),
 
         // Section boutique
         el('title', {x:70,y:790,w:400,h:46,text:'La boutique',bg:'transparent',color:A.ink,size:32,align:'left',anchorId:'boutique'}, 30),
@@ -23937,15 +24186,15 @@ showPage();
         el('title', {x:70,y:1030,w:500,h:46,text:'Tout ce qu’il faut, rien de superflu',bg:'transparent',color:L.ink,size:30,align:'left',anchorId:'fonctions'}, 40),
 
         el('shape-rect', {x:70,y:1100,w:330,h:200,bg:L.panel,radius:22}, 41),
-        el('title', {x:100,y:1130,w:270,h:32,text:'⚡ Rapide',bg:'transparent',color:L.ink,size:19,align:'left'}, 42),
+        el('title', {x:100,y:1130,w:270,h:32,text:'Rapide',bg:'transparent',color:L.ink,size:19,align:'left'}, 42),
         el('text', {x:100,y:1170,w:270,h:100,text:'Une interface pensée pour aller vite, sans clics inutiles ni menus cachés.',bg:'transparent',color:L.muted,size:15,align:'left'}, 43),
 
         el('shape-rect', {x:435,y:1100,w:330,h:200,bg:L.panel,radius:22}, 44),
-        el('title', {x:465,y:1130,w:270,h:32,text:'🔒 Sécurisé',bg:'transparent',color:L.ink,size:19,align:'left'}, 45),
+        el('title', {x:465,y:1130,w:270,h:32,text:'Sécurisé',bg:'transparent',color:L.ink,size:19,align:'left'}, 45),
         el('text', {x:465,y:1170,w:270,h:100,text:'Vos données sont chiffrées et sauvegardées automatiquement.',bg:'transparent',color:L.muted,size:15,align:'left'}, 46),
 
         el('shape-rect', {x:800,y:1100,w:330,h:200,bg:L.panel,radius:22}, 47),
-        el('title', {x:830,y:1130,w:270,h:32,text:'🔗 Connecté',bg:'transparent',color:L.ink,size:19,align:'left'}, 48),
+        el('title', {x:830,y:1130,w:270,h:32,text:'Connecté',bg:'transparent',color:L.ink,size:19,align:'left'}, 48),
         el('text', {x:830,y:1170,w:270,h:100,text:'S’intègre avec les outils que vous utilisez déjà, sans friction.',bg:'transparent',color:L.muted,size:15,align:'left'}, 49),
 
         // Tarifs (2 plans, avec vrai bouton de paiement sur le plan Pro)
@@ -24068,7 +24317,7 @@ showPage();
       saveAccount(acc);
       await claimSellerIfAny(json.token);
       renderAccountUI();
-      accountStatus('Compte créé et données sauvegardées en ligne ✅', 'ok');
+      accountStatus('Compte créé et données sauvegardées en ligne', 'ok');
     } catch(e){
       accountStatus('Erreur : ' + e.message, 'err');
     }
@@ -24133,7 +24382,7 @@ showPage();
       await claimSellerIfAny(json.token);
       await accountPush(true);
       renderAccountUI();
-      accountStatus('Connecté ✅', 'ok');
+      accountStatus('Connecté', 'ok');
     } catch(e){
       accountStatus('Erreur : ' + e.message, 'err');
     }
@@ -24194,7 +24443,7 @@ showPage();
       });
       const json = await res.json().catch(function(){ return {}; });
       if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
-      alert('Mot de passe changé ✅ Tu peux te connecter avec ton nouveau mot de passe.');
+      alert('Mot de passe changé Tu peux te connecter avec ton nouveau mot de passe.');
       if(typeof location !== 'undefined'){
         location.hash = '';
         goPage('parametres');
@@ -24232,7 +24481,7 @@ showPage();
       acc.lastSync = new Date().toISOString();
       saveAccount(acc);
       renderAccountUI();
-      if(!silent) accountStatus('Sauvegardé en ligne ✅', 'ok');
+      if(!silent) accountStatus('Sauvegardé en ligne', 'ok');
     } catch(e){
       if(!silent) accountStatus('Backend injoignable, réessaie plus tard.', 'err');
     }
