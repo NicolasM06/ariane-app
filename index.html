@@ -5120,6 +5120,7 @@ body {
     <symbol id="icon-stats" viewBox="0 0 24 24"><path d="M4 16l6-6 4 4 6-8"/><path d="M16 6h4v4"/></symbol>
     <symbol id="icon-depenses" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 10.5h18"/><path d="M16.2 14.2v.1"/></symbol>
     <symbol id="icon-factures" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7Z"/><path d="M14 3v4h4"/><path d="M9.5 12h5M9.5 16h5"/></symbol>
+    <symbol id="icon-clients" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><path d="M16 9a2.8 2.8 0 1 0 0-5.6"/><path d="M21 20c0-3-1.8-5.2-4.5-5.8"/></symbol>
     <symbol id="icon-calendrier" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9.5h18"/><path d="M8 3v4M16 3v4"/></symbol>
     <symbol id="icon-paiements" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10.2h20"/><path d="M6 15h4"/></symbol>
     <symbol id="icon-site" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.8 2.8 2.8 15.2 0 18M12 3c-2.8 2.8-2.8 15.2 0 18"/></symbol>
@@ -5282,6 +5283,7 @@ body {
     <div class="nav-item" data-page="produits-stats" onclick="goPage('produits-stats')"><span class="nav-icon"><svg class="icon"><use href="#icon-stats"/></svg></span> Stats produits</div>
     <div class="nav-item" data-page="transactions" onclick="goPage('transactions')"><span class="nav-icon"><svg class="icon"><use href="#icon-depenses"/></svg></span> Dépenses & Compta <span id="badge-classer" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="factures" onclick="goPage('factures')"><span class="nav-icon"><svg class="icon"><use href="#icon-factures"/></svg></span> Factures <span id="badge-factures" class="badge" style="display:none"></span></div>
+    <div class="nav-item" data-page="clients" onclick="goPage('clients')"><span class="nav-icon"><svg class="icon"><use href="#icon-clients"/></svg></span> Clients</div>
     <div class="nav-item" data-page="calendrier" onclick="goPage('calendrier')"><span class="nav-icon"><svg class="icon"><use href="#icon-calendrier"/></svg></span> Calendrier <span id="badge-calendrier" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="paiements-v5" onclick="goPage('paiements-v5')"><span class="nav-icon"><svg class="icon"><use href="#icon-paiements"/></svg></span> Paiements</div>
     <div class="nav-item" data-page="site-builder" onclick="goPage('site-builder')"><span class="nav-icon"><svg class="icon"><use href="#icon-site"/></svg></span> Site web</div>
@@ -5460,6 +5462,37 @@ body {
     </div>
   </div>
 
+  <!-- CLIENTS -->
+  <div id="page-clients" class="page">
+    <div class="page-content">
+      <div id="clients-list-view">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Clients <span id="clients-count" style="color:var(--text3);font-size:0.78rem;font-weight:400"></span></div>
+            <button class="btn btn-primary" onclick="openClientModal()"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter un client</button>
+          </div>
+          <div class="filter-bar" style="padding:14px 16px 0">
+            <input class="form-input" type="text" id="filter-client-search" placeholder="Rechercher un client..." oninput="renderClients()">
+          </div>
+          <div class="table-scroll"><table>
+            <thead><tr><th>Nom</th><th>Contact</th><th>Factures</th><th>Total facturé</th><th>Dernière facture</th><th></th></tr></thead>
+            <tbody id="clients-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+      <div id="client-detail" style="display:none">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title" id="client-detail-title">Fiche client</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost" onclick="document.getElementById('client-detail').style.display='none';document.getElementById('clients-list-view').style.display=''"><svg class="icon icon-sm"><use href="#icon-close"/></svg> Fermer</button>
+            </div>
+          </div>
+          <div style="padding:20px" id="client-detail-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- CALENDRIER -->
   <div id="page-calendrier" class="page">
@@ -6258,7 +6291,7 @@ body {
       </div>
     </div>
 
-    <div class="form-row"><label class="form-label">Client (nom)</label><input type="text" class="form-input" id="fac-client" placeholder="Nom du client ou de l'entreprise cliente"></div>
+    <div class="form-row"><label class="form-label">Client (nom)</label><input type="text" class="form-input" id="fac-client" list="clients-datalist" placeholder="Nom du client ou de l'entreprise cliente"><datalist id="clients-datalist"></datalist></div>
     <div class="form-row"><label class="form-label">Adresse du client</label><input type="text" class="form-input" id="fac-client-adresse" placeholder="12 rue Exemple"></div>
     <div class="form-row-grid">
       <div class="form-row"><label class="form-label">Code postal</label><input type="text" class="form-input" id="fac-client-cp" placeholder="75001"></div>
@@ -6296,6 +6329,29 @@ body {
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-facture')">Annuler</button>
       <button class="btn btn-primary" onclick="saveFac()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENT -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal">
+    <div class="modal-title" id="modal-client-title">Nouveau client</div>
+    <input type="hidden" id="client-edit-id">
+    <div class="form-row"><label class="form-label">Nom</label><input type="text" class="form-input" id="client-nom" placeholder="Nom du client ou de l'entreprise"></div>
+    <div class="form-row-grid">
+      <div class="form-row"><label class="form-label">Email</label><input type="email" class="form-input" id="client-email" placeholder="client@exemple.fr"></div>
+      <div class="form-row"><label class="form-label">Téléphone</label><input type="text" class="form-input" id="client-telephone" placeholder="06 12 34 56 78"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Adresse</label><input type="text" class="form-input" id="client-adresse" placeholder="12 rue Exemple"></div>
+    <div class="form-row-grid">
+      <div class="form-row"><label class="form-label">Code postal</label><input type="text" class="form-input" id="client-cp" placeholder="75001"></div>
+      <div class="form-row"><label class="form-label">Ville</label><input type="text" class="form-input" id="client-ville" placeholder="Paris"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Notes</label><textarea class="form-textarea" id="client-notes" rows="3" placeholder="Préférences, historique, remarques..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-client')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveClient()">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -6754,7 +6810,7 @@ function goPage(page) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.querySelector(`[data-page="${page}"]`).classList.add('active');
-  const titles = { dashboard:'Dashboard', ventes:'Ventes', stock:'Produits & stock', marches:'Marchés & Événements', 'produits-stats':'Stats par produit', transactions:'Dépenses & Compta', factures:'Factures', calendrier:'Calendrier', 'site-builder':'Site web', exports:'Exports', parametres:'Paramètres' };
+  const titles = { dashboard:'Dashboard', ventes:'Ventes', stock:'Produits & stock', marches:'Marchés & Événements', 'produits-stats':'Stats par produit', transactions:'Dépenses & Compta', factures:'Factures', clients:'Clients', calendrier:'Calendrier', 'site-builder':'Site web', exports:'Exports', parametres:'Paramètres' };
   document.getElementById('topbar-title').textContent = titles[page]||'';
   const actions = document.getElementById('topbar-actions');
   if (page==='ventes') actions.innerHTML = `<button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner</button><button class="btn btn-primary" onclick="openModal('modal-vente')"><svg class="icon"><use href="#icon-plus"/></svg> Vente</button>`;
@@ -6762,6 +6818,7 @@ function goPage(page) {
   else if (page==='marches') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-marche')"><svg class="icon"><use href="#icon-plus"/></svg> Événement</button>`;
   else if (page==='transactions') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-transaction')"><svg class="icon"><use href="#icon-plus"/></svg> Dépense</button>`;
   else if (page==='factures') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-facture')"><svg class="icon"><use href="#icon-plus"/></svg> Facture</button>`;
+  else if (page==='clients') actions.innerHTML = `<button class="btn btn-primary" onclick="openClientModal()"><svg class="icon"><use href="#icon-plus"/></svg> Client</button>`;
   else if (page==='calendrier') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-tache')"><svg class="icon"><use href="#icon-plus"/></svg> Tâche</button>`;
   else if (page==='site-builder') actions.innerHTML = `<button class="btn btn-primary" onclick="addBuilderElement('button')"><svg class="icon"><use href="#icon-plus"/></svg> Bouton</button>`;
   else if (page==='dashboard') actions.innerHTML = `<button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner</button><button class="btn btn-primary" onclick="openModal('modal-vente')"><svg class="icon"><use href="#icon-plus"/></svg> Vente</button>`;
@@ -6773,6 +6830,11 @@ function goPage(page) {
   if (page==='produits-stats') renderStatsPage();
   if (page==='transactions') renderTransactions();
   if (page==='factures') renderFactures();
+  if (page==='clients') {
+    document.getElementById('clients-list-view').style.display = '';
+    document.getElementById('client-detail').style.display = 'none';
+    renderClients();
+  }
   if (page==='calendrier') renderCalendrier();
   if (page==='site-builder') renderSiteBuilder();
   if (page==='parametres') renderParams();
@@ -7386,6 +7448,9 @@ function renderTransactions() {
   updateBadges();
 }
 function renderFactures() {
+  if (typeof ensureClientsData === 'function') ensureClientsData();
+  const datalist = document.getElementById('clients-datalist');
+  if (datalist) datalist.innerHTML = (data.clients||[]).map(c => `<option value="${escapeHtml(c.nom)}">`).join('');
   const facs = [...data.factures].sort((a,b)=>b.date.localeCompare(a.date));
   document.getElementById('fac-tbody').innerHTML = facs.length ? facs.map(f=>`
     <tr>
@@ -7402,6 +7467,165 @@ function renderFactures() {
     </tr>`).join('') : `<tr><td colspan="6" class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-factures"/></svg></div>Aucune facture</td></tr>`;
   updateBadges();
 }
+
+// ─── CLIENTS ────────────────────────────────────────────────────
+function ensureClientsData() {
+  if (!Array.isArray(data.clients)) data.clients = [];
+  if (!data.params) data.params = {};
+  if (!data.params.clientsMigrated) {
+    data.params.clientsMigrated = true;
+    (data.factures || []).forEach(f => {
+      const name = (f.client || '').trim();
+      if (!name) return;
+      let client = data.clients.find(c => c.nom.trim().toLowerCase() === name.toLowerCase());
+      if (!client) {
+        client = { id: uid(), nom: name, email: '', telephone: '', adresse: f.clientAdresse || '', cp: f.clientCp || '', ville: f.clientVille || '', notes: '', createdAt: f.date || new Date().toISOString().slice(0,10) };
+        data.clients.push(client);
+      }
+      f.clientId = client.id;
+    });
+    saveData();
+  }
+}
+
+function ensureClientForName(name) {
+  ensureClientsData();
+  const trimmed = (name || '').trim();
+  if (!trimmed) return null;
+  let client = data.clients.find(c => c.nom.trim().toLowerCase() === trimmed.toLowerCase());
+  if (!client) {
+    client = { id: uid(), nom: trimmed, email: '', telephone: '', adresse: '', cp: '', ville: '', notes: '', createdAt: new Date().toISOString().slice(0,10) };
+    data.clients.push(client);
+  }
+  return client;
+}
+
+function clientStats(clientId) {
+  const factures = (data.factures || []).filter(f => f.clientId === clientId).sort((a,b) => String(b.date||'').localeCompare(String(a.date||'')));
+  const total = factures.reduce((s,f) => s + (Number(f.montant)||0), 0);
+  const impayees = factures.filter(f => f.statut !== 'payee').length;
+  return { factures, total, impayees, derniere: factures[0]?.date || null };
+}
+
+function renderClients() {
+  ensureClientsData();
+  const search = (document.getElementById('filter-client-search')?.value || '').toLowerCase();
+  let clients = [...data.clients].sort((a,b) => a.nom.localeCompare(b.nom));
+  if (search) clients = clients.filter(c => c.nom.toLowerCase().includes(search) || (c.email||'').toLowerCase().includes(search) || (c.telephone||'').includes(search));
+  const countEl = document.getElementById('clients-count');
+  if (countEl) countEl.textContent = `(${clients.length} / ${data.clients.length})`;
+  const tbody = document.getElementById('clients-tbody');
+  if (!tbody) return;
+  if (!clients.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="empty-icon"><svg class="icon"><use href="#icon-clients"/></svg></div>Aucun client enregistré</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = clients.map(c => {
+    const stats = clientStats(c.id);
+    const contact = [c.email, c.telephone].filter(Boolean).join(' · ') || '—';
+    return `<tr style="cursor:pointer" onclick="showClientDetail('${escapeHtml(c.id)}')">
+      <td style="color:var(--text);font-weight:500">${escapeHtml(c.nom)}</td>
+      <td style="color:var(--text3);font-size:0.82rem">${escapeHtml(contact)}</td>
+      <td class="amount-neutral">${stats.factures.length}</td>
+      <td class="amount-neutral">${fmt(stats.total)}</td>
+      <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${stats.derniere ? escapeHtml(stats.derniere) : '—'}</td>
+      <td onclick="event.stopPropagation()">
+        <button class="action-btn" onclick="openClientModal('${escapeHtml(c.id)}')" title="Modifier"><svg class="icon icon-sm"><use href="#icon-edit"/></svg></button>
+        <button class="action-btn" onclick="deleteClient('${escapeHtml(c.id)}')" title="Supprimer" style="color:var(--danger)"><svg class="icon icon-sm"><use href="#icon-delete"/></svg></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openClientModal(id) {
+  ensureClientsData();
+  document.getElementById('client-edit-id').value = id || '';
+  document.getElementById('modal-client-title').textContent = id ? 'Modifier le client' : 'Nouveau client';
+  const c = id ? data.clients.find(x => x.id === id) : null;
+  document.getElementById('client-nom').value = c?.nom || '';
+  document.getElementById('client-email').value = c?.email || '';
+  document.getElementById('client-telephone').value = c?.telephone || '';
+  document.getElementById('client-adresse').value = c?.adresse || '';
+  document.getElementById('client-cp').value = c?.cp || '';
+  document.getElementById('client-ville').value = c?.ville || '';
+  document.getElementById('client-notes').value = c?.notes || '';
+  openModal('modal-client');
+}
+
+function saveClient() {
+  ensureClientsData();
+  const id = document.getElementById('client-edit-id').value;
+  const nom = document.getElementById('client-nom').value.trim();
+  if (!nom) { alert('Le nom du client est obligatoire.'); return; }
+  const fields = {
+    nom,
+    email: document.getElementById('client-email').value.trim(),
+    telephone: document.getElementById('client-telephone').value.trim(),
+    adresse: document.getElementById('client-adresse').value.trim(),
+    cp: document.getElementById('client-cp').value.trim(),
+    ville: document.getElementById('client-ville').value.trim(),
+    notes: document.getElementById('client-notes').value.trim()
+  };
+  if (id) {
+    const idx = data.clients.findIndex(c => c.id === id);
+    if (idx >= 0) data.clients[idx] = { ...data.clients[idx], ...fields };
+  } else {
+    data.clients.push({ id: uid(), ...fields, createdAt: new Date().toISOString().slice(0,10) });
+  }
+  saveData();
+  closeModal('modal-client');
+  renderClients();
+}
+
+function deleteClient(id) {
+  const c = data.clients.find(x => x.id === id); if (!c) return;
+  const stats = clientStats(id);
+  const msg = stats.factures.length
+    ? `Supprimer "${c.nom}" ? ${stats.factures.length} facture(s) resteront mais ne seront plus rattachées à ce client.`
+    : `Supprimer "${c.nom}" ?`;
+  if (!confirm(msg)) return;
+  data.clients = data.clients.filter(x => x.id !== id);
+  saveData();
+  renderClients();
+}
+
+function showClientDetail(id) {
+  const c = data.clients.find(x => x.id === id); if (!c) return;
+  const stats = clientStats(id);
+  document.getElementById('clients-list-view').style.display = 'none';
+  document.getElementById('client-detail').style.display = '';
+  document.getElementById('client-detail-title').textContent = c.nom;
+  const contactLines = [
+    c.email ? `Email : ${escapeHtml(c.email)}` : '',
+    c.telephone ? `Téléphone : ${escapeHtml(c.telephone)}` : '',
+    (c.adresse || c.cp || c.ville) ? `Adresse : ${escapeHtml([c.adresse, c.cp, c.ville].filter(Boolean).join(', '))}` : ''
+  ].filter(Boolean).join('<br>');
+  document.getElementById('client-detail-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div class="kpi-card"><div class="kpi-label">Total facturé</div><div class="kpi-value">${fmt(stats.total)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Factures</div><div class="kpi-value">${stats.factures.length}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Impayées</div><div class="kpi-value ${stats.impayees>0?'red':''}">${stats.impayees}</div></div>
+    </div>
+    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;font-size:0.85rem;color:var(--text2);line-height:1.7">
+      ${contactLines || 'Aucune information de contact.'}
+      ${c.notes ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${escapeHtml(c.notes)}</div>` : ''}
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="btn btn-secondary" onclick="openClientModal('${escapeHtml(c.id)}')"><svg class="icon icon-sm"><use href="#icon-edit"/></svg> Modifier</button>
+    </div>
+    <div class="divider">Factures</div>
+    ${stats.factures.length ? `<div class="table-scroll"><table>
+      <thead><tr><th>N°</th><th>Date</th><th>Montant</th><th>Statut</th></tr></thead>
+      <tbody>${stats.factures.map(f => `<tr>
+        <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${escapeHtml(f.num)}</td>
+        <td style="color:var(--text3);font-size:0.82rem">${escapeHtml(f.date||'-')}</td>
+        <td class="amount-neutral">${fmt(f.montant)}</td>
+        <td>${statutTag(f.statut)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>` : `<div class="empty-state">Aucune facture pour ce client.</div>`}
+  `;
+}
+
 function renderParams() {
   document.getElementById('param-regime').value = data.params.regime;
   document.getElementById('param-cotis').value = data.params.cotis;
@@ -8352,8 +8576,9 @@ function saveFac() {
         if (!client || !items.length) { alert('Renseigne le client et au moins une ligne de détail.'); return; }
         const t = facTotals(items);
         const l = ensureLegalInfo();
+        const clientRecord = ensureClientForName(client);
         data.factures[idx] = {
-          ...existing, client, clientAdresse, clientCp, clientVille, date, conditions, echeance,
+          ...existing, client, clientId: clientRecord?.id, clientAdresse, clientCp, clientVille, date, conditions, echeance,
           modePaiement, statut, items, montant: t.totalTTC, montantHT: t.totalHT, tva: t.tva,
           tvaApplicable: l.tvaApplicable, tvaTaux: l.tvaTaux
         };
@@ -8364,8 +8589,9 @@ function saveFac() {
     const t = facTotals(items);
     const l = ensureLegalInfo();
     const num = reserveFacNum(); // numéro définitif, verrouillé, seulement à la création
+    const clientRecord = ensureClientForName(client);
     data.factures.push({
-      id: uid(), num, type: 'facture', locked: true, client, clientAdresse, clientCp, clientVille, date, conditions, echeance,
+      id: uid(), num, type: 'facture', locked: true, client, clientId: clientRecord?.id, clientAdresse, clientCp, clientVille, date, conditions, echeance,
       modePaiement, statut, items, montant: t.totalTTC, montantHT: t.totalHT, tva: t.tva,
       tvaApplicable: l.tvaApplicable, tvaTaux: l.tvaTaux
     });
@@ -8974,7 +9200,7 @@ function normalizeBuilderHex(value){if(!value||String(value).includes('00000000'
 function exportSiteBuilderHTML(){const site=buildExportedSiteHTML();downloadBlob(new Blob([site],{type:'text/html;charset=utf-8'}),slugify(data.siteBuilder?.title||'site-ariane')+'.html');}
 
 // ─── INIT + DEMO DATA ─────────────────────────────────────────
-function render() { if (typeof ensureCalendarTypes === 'function') ensureCalendarTypes(); if (typeof ensureCalendarHidden === 'function') ensureCalendarHidden(); if (typeof ensureSiteBuilder === 'function') ensureSiteBuilder(); renderDashboard(); renderStock(); updateBadges(); if (typeof renderCalendrier === 'function') renderCalendrier(); if (typeof renderSiteBuilder === 'function') renderSiteBuilder(); }
+function render() { if (typeof ensureCalendarTypes === 'function') ensureCalendarTypes(); if (typeof ensureCalendarHidden === 'function') ensureCalendarHidden(); if (typeof ensureSiteBuilder === 'function') ensureSiteBuilder(); if (typeof ensureClientsData === 'function') ensureClientsData(); renderDashboard(); renderStock(); updateBadges(); if (typeof renderCalendrier === 'function') renderCalendrier(); if (typeof renderSiteBuilder === 'function') renderSiteBuilder(); }
 loadData();
 
 if (!data.params.demoInitialized) {
