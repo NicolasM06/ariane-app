@@ -4351,6 +4351,13 @@ label[for="builder-canvas-zoom"] {
     display: block !important;
   }
 
+  /* Le panneau du + (5 actions) remonte jusqu'à ~440px du bas et passe
+     juste sous le bouton d'installation PWA (z-index plus élevé) : on le
+     masque tant que le menu est ouvert pour éviter la superposition. */
+  body.mobile-fab-open-v435 #pwa-install-btn-v437 {
+    display: none !important;
+  }
+
   .mobile-fab-panel-v435 {
     position: absolute !important;
     left: 10px !important;
@@ -4544,7 +4551,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
 @media (max-width: 860px) {
   #pwa-install-btn-v437 {
     right: 16px;
-    bottom: calc(152px + env(safe-area-inset-bottom));
+    bottom: calc(166px + env(safe-area-inset-bottom));
     min-height: 44px;
     padding: 11px 14px;
     font-size: .78rem;
@@ -5155,8 +5162,9 @@ body {
       <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-factures"/></svg></div><div class="welcome-stat-label">Factures à faire</div><div class="welcome-stat-value" id="welcome-stat-factures">0</div></div>
       <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-depenses"/></svg></div><div class="welcome-stat-label">Dépenses du mois</div><div class="welcome-stat-value" id="welcome-stat-depenses">0 €</div></div>
     </div>
-    <div class="welcome-actions">
+    <div class="welcome-actions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
       <button class="btn btn-primary" style="padding:12px 26px;font-size:0.9rem" onclick="startQuickSetup()">Commencer →</button>
+      <button class="btn btn-secondary" style="padding:12px 22px;font-size:0.9rem" onclick="goCreateAccountFromWelcome()">Créer mon compte</button>
     </div>
     <button class="welcome-skip" onclick="skipQuickSetup()">Passer, je configurerai plus tard</button>
   </div>
@@ -5912,6 +5920,7 @@ body {
             </div>
             <div style="margin-top:12px;color:var(--text3);font-size:.74rem;line-height:1.5">
               Ariane est en bêta gratuite : le service est fourni sans garantie, peut évoluer ou être interrompu, et tes données peuvent être réinitialisées à l'occasion. Exporte régulièrement une sauvegarde (Exports &gt; Sauvegarde complète) pour ne rien perdre. En créant un compte, tu acceptes ces conditions.
+              Un souci, une idée ? <a href="#" onclick="reportArianeBug();return false">Écris-nous</a>.
             </div>
             <div id="forgot-password-box" style="display:none;margin-top:14px;padding:14px;background:var(--surface2);border-radius:var(--radius-sm)">
               <div class="form-row" style="margin-bottom:10px">
@@ -9607,6 +9616,15 @@ checkDueReminders();
     data.params.onboarded = true;
     saveData();
     hideWelcomeScreen();
+  };
+
+  window.goCreateAccountFromWelcome = function() {
+    ensureEntreprise();
+    data.params.onboarded = true;
+    saveData();
+    hideWelcomeScreen();
+    goPage('parametres');
+    setTimeout(() => document.getElementById('account-email')?.focus(), 150);
   };
 
   window.startQuickSetup = function() {
@@ -22486,6 +22504,9 @@ showPage();
     </div>
     <button class="help-chat-close" onclick="toggleHelpChat(false)"><svg class="icon icon-sm"><use href="#icon-close"/></svg></button>
   </div>
+  <div style="padding:6px 14px 0;text-align:right">
+    <a href="#" onclick="reportArianeBug();return false" style="font-size:0.72rem;color:var(--text3)">Signaler un bug</a>
+  </div>
   <div id="help-chat-messages" class="help-chat-messages"></div>
   <div id="help-chat-quick" class="help-chat-quick"></div>
   <div class="help-chat-input-row">
@@ -22495,6 +22516,24 @@ showPage();
 </div>
 
 <script>
+// ─── SIGNALEMENT DE BUG (bêta) ──────────────────────────────────
+function reportArianeBug(){
+  const subject = 'Ariane bêta — bug signalé';
+  const context = [
+    'Décris ici ce qui ne fonctionne pas (et ce que tu attendais à la place) :',
+    '',
+    '',
+    '',
+    '--- Infos techniques (laisse tel quel, ça aide au diagnostic) ---',
+    'Page : ' + (typeof location !== 'undefined' ? location.href : ''),
+    'Navigateur : ' + (typeof navigator !== 'undefined' ? navigator.userAgent : ''),
+    'Mode : ' + (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches ? 'App installée' : 'Navigateur')
+  ].join('\n');
+  const url = 'mailto:arianeapp.support@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(context);
+  window.open(url, '_blank');
+}
+window.reportArianeBug = reportArianeBug;
+
 // ─── ASSISTANT D'AIDE (chatbot local, sans IA externe) ─────────
 function stripAccents(s) { return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 function normText(s) { return stripAccents(String(s||'').toLowerCase()).replace(/[^a-z0-9\s]/g,' '); }
