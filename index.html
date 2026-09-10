@@ -4567,9 +4567,10 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
     display: none !important;
   }
 
-  body {
-    overscroll-behavior-y: contain;
-  }
+  /* overscroll-behavior-y: contain a déjà été retiré ici : sur certains
+     Android/Chrome, cette règle bloque entièrement le scroll tactile en
+     mode PWA installée (bug connu côté Chromium propre au display-mode
+     standalone), alors qu'elle est sans effet en onglet navigateur. */
 }
 
 
