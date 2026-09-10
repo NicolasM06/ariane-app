@@ -4573,6 +4573,30 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
      standalone), alors qu'elle est sans effet en onglet navigateur. */
 }
 
+/* Logo dans la barre du haut : uniquement sur mobile, là où la sidebar
+   (qui porte déjà le logo) est masquée et remplacée par la nav du bas. */
+.topbar-title-row-v51 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+#topbar-brand-logo-v51 {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  #topbar-brand-logo-v51 {
+    display: block;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+}
+
 
 /* =========================================================
    V4.39 — LOGO IMAGE LOCAL VISIBLE
@@ -5307,7 +5331,10 @@ body {
 
 <div id="main">
   <div class="topbar">
-    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-title-row-v51">
+      <img id="topbar-brand-logo-v51" alt="Ariane">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+    </div>
     <div class="topbar-actions" id="topbar-actions">
       <button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner</button>
       <button class="btn btn-primary" onclick="openModal('modal-vente')"><svg class="icon"><use href="#icon-plus"/></svg> Vente</button>
@@ -9541,8 +9568,11 @@ checkDueReminders();
 
   window.updateSidebarLogoV439 = function() {
     const ent = ensureEntreprise();
+    const src = ent.logoImage || DEFAULT_LOGO_IMAGE_V439;
     const img = document.getElementById('sidebar-brand-logo') || document.querySelector('.brand-logo-img');
-    if (img) img.src = ent.logoImage || DEFAULT_LOGO_IMAGE_V439;
+    if (img) img.src = src;
+    const topbarImg = document.getElementById('topbar-brand-logo-v51');
+    if (topbarImg) topbarImg.src = src;
   };
 
   window.handleSetupLogoFileV439 = function(event) {
