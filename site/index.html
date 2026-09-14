@@ -153,6 +153,12 @@
   .contact-line { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; font-size: 0.88rem; transition: border-color 0.2s, transform 0.2s; }
   .contact-line:hover { border-color: var(--accent); transform: translateX(4px); }
   .contact-line .ic { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .contact-line .copy-btn { margin-left: auto; background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); font-family: 'DM Mono', monospace; font-size: 0.72rem; padding: 5px 10px; border-radius: 7px; cursor: pointer; transition: color 0.2s, border-color 0.2s; flex-shrink: 0; }
+  .contact-line .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+  .fallback-panel { display: none; margin-top: 16px; border: 1px dashed var(--border2); border-radius: var(--radius-sm); padding: 16px; background: var(--surface2); }
+  .fallback-panel.show { display: block; }
+  .fallback-panel p { font-size: 0.8rem; color: var(--text2); margin-bottom: 10px; }
+  .fallback-panel textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text2); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 10px 12px; min-height: 90px; margin-bottom: 10px; }
 
   .contact-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px; }
   .form-row { margin-bottom: 16px; }
@@ -348,7 +354,8 @@
     <div class="wrap">
       <p class="review-note">Avis d'exemple — à remplacer par de vrais retours au fil des tests bêta.</p>
       <div class="reveal reviews-cta">
-        <a class="btn btn-ghost btn-sm" href="mailto:arianeapp.support@gmail.com?subject=Mon%20avis%20sur%20Ariane&body=Salut%2C%20voici%20mon%20avis%20sur%20Ariane%20%3A%0A%0A">Laisser mon avis</a>
+        <a class="btn btn-ghost btn-sm" href="mailto:arianeapp.support@gmail.com?subject=Mon%20avis%20sur%20Ariane&body=Salut%2C%20voici%20mon%20avis%20sur%20Ariane%20%3A%0A%0A" target="_blank" rel="noopener">Laisser mon avis</a>
+        <div style="margin-top:10px;font-size:0.76rem;color:var(--text3);font-family:'DM Mono',monospace">ou écris directement à arianeapp.support@gmail.com</div>
       </div>
     </div>
   </section>
@@ -376,8 +383,9 @@
         <div class="contact-info">
           <h3>Discutons</h3>
           <p>Ariane est faite par des gens qui lisent vraiment leurs messages. N'hésite pas à nous écrire pour une suggestion, un bug ou juste dire bonjour.</p>
-          <a class="contact-line" href="mailto:arianeapp.support@gmail.com">
+          <a class="contact-line" href="mailto:arianeapp.support@gmail.com" target="_blank" rel="noopener">
             <span class="ic">✉️</span> arianeapp.support@gmail.com
+            <button type="button" class="copy-btn" onclick="event.preventDefault();event.stopPropagation();copyText('arianeapp.support@gmail.com',this)">Copier</button>
           </a>
           <div class="contact-line">
             <span class="ic">⏱️</span> Réponse sous 24–48h en général
@@ -398,7 +406,12 @@
           </div>
           <div class="form-foot">
             <button type="submit" class="btn btn-primary">Envoyer le message</button>
-            <span class="form-status" id="form-status">Ouverture de ta messagerie…</span>
+            <span class="form-status" id="form-status">Ta messagerie n'a pas suivi ? Copie le message ci-dessous.</span>
+          </div>
+          <div class="fallback-panel" id="fallback-panel">
+            <p>Si aucune messagerie ne s'est ouverte, copie ce message et envoie-le manuellement à <strong>arianeapp.support@gmail.com</strong> :</p>
+            <textarea id="fallback-text" readonly></textarea>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="copyText(document.getElementById('fallback-text').value,this)">Copier le message</button>
           </div>
         </form>
       </div>
@@ -461,19 +474,40 @@
     });
   }
 
-  // Contact form -> mailto (static site, no backend)
+  // Copy-to-clipboard helper (fallback for when no mail client is configured)
+  function copyText(text, btn) {
+    const done = () => { if (btn) { const t = btn.textContent; btn.textContent = 'Copié !'; setTimeout(() => btn.textContent = t, 1800); } };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); done(); } catch (err) {}
+    document.body.removeChild(ta);
+  }
+
+  // Contact form -> mailto (static site, no backend), with a copy fallback
+  // for viewers who have no default mail client configured.
   const form = document.getElementById('contact-form');
   const status = document.getElementById('form-status');
+  const fallbackPanel = document.getElementById('fallback-panel');
+  const fallbackText = document.getElementById('fallback-text');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('cf-name').value.trim();
     const email = document.getElementById('cf-email').value.trim();
     const message = document.getElementById('cf-message').value.trim();
-    const subject = encodeURIComponent('Message depuis le site Ariane — ' + name);
-    const body = encodeURIComponent(message + '\n\n— ' + name + ' (' + email + ')');
-    window.location.href = `mailto:arianeapp.support@gmail.com?subject=${subject}&body=${body}`;
+    const subject = 'Message depuis le site Ariane — ' + name;
+    const plainBody = message + '\n\n— ' + name + ' (' + email + ')';
+    window.open(`mailto:arianeapp.support@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(plainBody)}`, '_blank');
+    fallbackText.value = 'À : arianeapp.support@gmail.com\nSujet : ' + subject + '\n\n' + plainBody;
     status.classList.add('show');
-    setTimeout(() => status.classList.remove('show'), 4000);
+    fallbackPanel.classList.add('show');
   });
 </script>
 
