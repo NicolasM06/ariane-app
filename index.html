@@ -5975,9 +5975,27 @@ body {
               <span>Email non confirmé — vérifie ta boîte de réception (le lien peut être dans les spams).</span>
               <button class="btn btn-secondary" style="min-height:30px;padding:5px 10px;font-size:.78rem" onclick="resendVerificationEmail()">Renvoyer l'email</button>
             </div>
+
+            <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+              <div id="account-delete-box" style="display:none;margin-bottom:10px;padding:14px;background:var(--danger-dim);border-radius:var(--radius-sm)">
+                <div style="color:var(--danger);font-size:.85rem;font-weight:600;margin-bottom:8px">Supprimer définitivement le compte et la sauvegarde en ligne ?</div>
+                <div style="color:var(--text2);font-size:.78rem;margin-bottom:10px;line-height:1.5">Tes données restées dans ce navigateur (localStorage) ne sont pas touchées. Cette action supprime uniquement ton compte et la copie en ligne — irréversible. Confirme avec ton mot de passe.</div>
+                <div class="form-row" style="margin-bottom:10px">
+                  <input class="form-input" type="password" id="account-delete-password" placeholder="Mot de passe">
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-danger" onclick="accountDeleteConfirm()">Supprimer définitivement</button>
+                  <button class="btn btn-ghost" onclick="document.getElementById('account-delete-box').style.display='none'">Annuler</button>
+                </div>
+              </div>
+              <a href="#" onclick="document.getElementById('account-delete-box').style.display='block';return false" style="font-size:.78rem;color:var(--danger)">Supprimer mon compte et mes données en ligne</a>
+            </div>
           </div>
 
           <div id="account-status" style="margin-top:12px;font-size:.82rem"></div>
+          <div style="margin-top:14px;color:var(--text3);font-size:.72rem;line-height:1.5">
+            Confidentialité : avec un compte, tes données Ariane (ventes, clients, factures) sont copiées sur notre base de données en ligne (Supabase, hébergée dans l'UE) pour la sauvegarde en ligne, en plus de ton navigateur. Sans compte, rien ne quitte cet appareil. Tu peux à tout moment exporter (Exports &gt; Sauvegarde JSON) ou supprimer tes données en ligne ci-dessus. Question ou demande RGPD (accès, rectification, suppression) : <a href="#" onclick="reportArianeBug();return false">écris-nous</a>.
+          </div>
         </div>
 
         <div class="param-card" id="legal-card" style="grid-column:1/-1">
@@ -23703,7 +23721,43 @@ function respondHelp(entry, originalText) {
     }
   }
 
-  function openStripeConnectV5(){
+  // Demande au backend un lien de connexion signé, en prouvant qu'on détient
+  // le secret vendeur (sans ça, n'importe qui connaissant le sellerId
+  // pourrait connecter SON compte à notre place et détourner les paiements).
+  // L'onglet est ouvert immédiatement (sinon le bloqueur de popups l'empêche
+  // après l'appel réseau), puis redirigé une fois le lien obtenu.
+  async function openConnectLinkV5(provider){
+    const p = ensurePaymentV5();
+    const tab = window.open('about:blank', '_blank');
+    try {
+      if(!p.sellerSecret){
+        lastProductSyncV5 = '';
+        await syncProductsToBackendV5(); // obtient le secret vendeur s'il manque
+      }
+      if(!p.sellerSecret) throw new Error('Backend injoignable ou vendeur non initialisé. Réessaie dans un instant.');
+      const res = await fetch(p.backendUrl + '/api/' + provider + '/connect/link', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-Seller-Secret': p.sellerSecret},
+        body: JSON.stringify({ sellerId: p.sellerId })
+      });
+      const json = await res.json().catch(function(){ return {}; });
+      if(res.status === 401){
+        p.sellerSecret = '';
+        lastProductSyncV5 = '';
+        if(typeof saveData === 'function') saveData();
+      }
+      if(!res.ok || !json.url) throw new Error(json.error || 'Impossible d\'obtenir le lien de connexion.');
+      if(tab){ tab.opener = null; tab.location.href = json.url; }
+      else window.location.href = json.url;
+      return true;
+    } catch(e){
+      if(tab) tab.close();
+      paymentStatusV5(e.message || 'Erreur de connexion.', 'warn');
+      return false;
+    }
+  }
+
+  async function openStripeConnectV5(){
     const p = ensurePaymentV5();
     savePaymentSettingsV5();
     if(!ARIANE_BACKEND_URL_DEFAULT && p.backendUrl === 'http://localhost:4242'){
@@ -23712,7 +23766,8 @@ function respondHelp(entry, originalText) {
     }
     // 1 clic → page Stripe hébergée par Stripe lui-même (comme Shopify Payments/SumUp).
     // Le vendeur s'y connecte ou crée son compte. Ariane ne demande jamais de clé API.
-    window.open(p.backendUrl + '/api/stripe/connect/start?sellerId=' + encodeURIComponent(p.sellerId), '_blank', 'noopener');
+    paymentStatusV5('Ouverture de la connexion Stripe…', 'warn');
+    if(!(await openConnectLinkV5('stripe'))) return;
     paymentStatusV5('Termine la connexion dans l\'onglet ouvert, puis reviens ici.', 'warn');
 
     // Dès que l'utilisateur revient sur cet onglet, on revérifie automatiquement.
@@ -23724,14 +23779,15 @@ function respondHelp(entry, originalText) {
   }
 
   // Même principe pour PayPal : 1 clic → page PayPal hébergée par PayPal.
-  function openPayPalConnectV5(){
+  async function openPayPalConnectV5(){
     const p = ensurePaymentV5();
     savePaymentSettingsV5();
     if(!ARIANE_BACKEND_URL_DEFAULT && p.backendUrl === 'http://localhost:4242'){
       paymentStatusV5('Backend paiement pas encore configuré (voir backend-paiements/README).', 'warn');
       return;
     }
-    window.open(p.backendUrl + '/api/paypal/connect/start?sellerId=' + encodeURIComponent(p.sellerId), '_blank', 'noopener');
+    paymentStatusV5('Ouverture de la connexion PayPal…', 'warn');
+    if(!(await openConnectLinkV5('paypal'))) return;
     paymentStatusV5('Termine la connexion PayPal dans l\'onglet ouvert, puis reviens ici.', 'warn');
 
     const onFocus = function(){
@@ -24860,29 +24916,52 @@ showPage();
 </script>
 
 <script>
-// ─── COMPTES & SAUVEGARDE EN LIGNE ───────────────────────────────────────
+// ─── COMPTES & SAUVEGARDE EN LIGNE (Supabase) ────────────────────────────
 // Fonctionnalité optionnelle : Ariane marche très bien sans compte (tout
 // reste dans le navigateur, comme avant). Créer un compte ajoute une copie
-// en ligne des données (sur le même backend que les paiements) et permet de
-// les retrouver depuis un autre appareil.
+// en ligne des données (via Supabase) et permet de les retrouver depuis un
+// autre appareil.
+//
+// À CONFIGURER avant de mettre en ligne : renseigne l'URL et la clé "anon"
+// de ton projet Supabase (Project Settings > API) ci-dessous. La clé "anon"
+// est faite pour être publique côté navigateur — la sécurité vient des
+// règles RLS définies dans supabase/schema.sql, pas du secret de cette clé.
+window.ARIANE_SUPABASE_URL = window.ARIANE_SUPABASE_URL || '';
+window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || '';
+
 (function(){
 
-  const ACCOUNT_KEY = 'ariane-account-v1';
+  let supabaseClient = null;
+  let supabaseLoadPromise = null;
+  let currentSession = null;
+  const LAST_SYNC_KEY = 'ariane-account-last-sync';
 
-  function accountBackendUrl(){
-    try {
-      const p = data?.paymentsV5?.backendUrl;
-      if(p) return p;
-    } catch(e){}
-    return window.ARIANE_BACKEND_URL_DEFAULT || 'http://localhost:4242';
-  }
-
-  function loadAccount(){
-    try { return JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null') || {}; }
-    catch(e){ return {}; }
-  }
-  function saveAccount(acc){
-    try { localStorage.setItem(ACCOUNT_KEY, JSON.stringify(acc)); } catch(e){}
+  function loadSupabase(){
+    if(supabaseClient) return Promise.resolve(supabaseClient);
+    if(supabaseLoadPromise) return supabaseLoadPromise;
+    supabaseLoadPromise = new Promise(function(resolve, reject){
+      if(!window.ARIANE_SUPABASE_URL || !window.ARIANE_SUPABASE_ANON_KEY){
+        supabaseLoadPromise = null;
+        reject(new Error('Supabase non configuré (ARIANE_SUPABASE_URL / ARIANE_SUPABASE_ANON_KEY manquants).'));
+        return;
+      }
+      if(window.supabase && window.supabase.createClient){
+        supabaseClient = window.supabase.createClient(window.ARIANE_SUPABASE_URL, window.ARIANE_SUPABASE_ANON_KEY);
+        resolve(supabaseClient);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+      script.onload = function(){
+        try {
+          supabaseClient = window.supabase.createClient(window.ARIANE_SUPABASE_URL, window.ARIANE_SUPABASE_ANON_KEY);
+          resolve(supabaseClient);
+        } catch(e){ supabaseLoadPromise = null; reject(e); }
+      };
+      script.onerror = function(){ supabaseLoadPromise = null; reject(new Error("Impossible de charger le module de compte (vérifie ta connexion internet).")); };
+      document.head.appendChild(script);
+    });
+    return supabaseLoadPromise;
   }
 
   function accountStatus(msg, kind){
@@ -24893,79 +24972,93 @@ showPage();
   }
 
   function renderAccountUI(){
-    const acc = loadAccount();
     const loggedOut = document.getElementById('account-logged-out');
     const loggedIn = document.getElementById('account-logged-in');
     if(!loggedOut || !loggedIn) return;
-    if(acc.token && acc.email){
+    const user = currentSession && currentSession.user;
+    if(user){
       loggedOut.style.display = 'none';
       loggedIn.style.display = 'block';
       const emailEl = document.getElementById('account-current-email');
-      if(emailEl) emailEl.textContent = acc.email;
+      if(emailEl) emailEl.textContent = user.email || '';
       const syncEl = document.getElementById('account-sync-status');
-      if(syncEl) syncEl.textContent = acc.lastSync ? ('Dernière sauvegarde en ligne : ' + new Date(acc.lastSync).toLocaleString('fr-FR')) : 'Pas encore synchronisé.';
+      if(syncEl){
+        const last = localStorage.getItem(LAST_SYNC_KEY);
+        syncEl.textContent = last ? ('Dernière sauvegarde en ligne : ' + new Date(last).toLocaleString('fr-FR')) : 'Pas encore synchronisé.';
+      }
       const verifyRow = document.getElementById('account-verify-row');
-      if(verifyRow) verifyRow.style.display = acc.emailVerified ? 'none' : 'flex';
+      if(verifyRow) verifyRow.style.display = user.email_confirmed_at ? 'none' : 'flex';
     } else {
       loggedOut.style.display = 'block';
       loggedIn.style.display = 'none';
     }
   }
 
-  // Relie le vendeur (Stripe/PayPal) de cet appareil au compte qui vient de
-  // se connecter. Si ce compte a déjà un vendeur rattaché ailleurs (ex:
-  // connecté depuis un autre appareil avant), c'est CE vendeur-là qui fait
-  // désormais autorité — Ariane adopte son sellerId/secret pour que le
-  // compte ne pointe jamais que sur une seule identité vendeur. Si ce
-  // navigateur n'a pas encore de vendeur local (nouvel appareil), on
-  // récupère directement celui du compte. Silencieux : ne bloque jamais la
-  // connexion si ça échoue (ex: backend d'une version plus ancienne).
   async function resendVerificationEmail(){
-    const acc = loadAccount();
-    if(!acc.token) return;
+    const email = currentSession && currentSession.user && currentSession.user.email;
+    if(!email){ accountStatus('Pas connecté.', 'err'); return; }
     accountStatus('Envoi...', null);
     try {
-      const res = await fetch(accountBackendUrl() + '/api/auth/resend-verification', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + acc.token }
-      });
-      const json = await res.json().catch(function(){ return {}; });
-      if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
-      accountStatus(json.message || 'Email renvoyé.', 'ok');
+      const sb = await loadSupabase();
+      const { error } = await sb.auth.resend({ type: 'signup', email });
+      if(error) throw error;
+      accountStatus('Email renvoyé.', 'ok');
     } catch(e){
       accountStatus('Erreur : ' + e.message, 'err');
     }
   }
   window.resendVerificationEmail = resendVerificationEmail;
 
-  async function claimSellerIfAny(token){
+  function paymentsBackendUrl(){
+    try {
+      const p = data?.paymentsV5?.backendUrl;
+      if(p) return p;
+    } catch(e){}
+    return window.ARIANE_BACKEND_URL_DEFAULT || 'http://localhost:4242';
+  }
+
+  // Relie le vendeur (Stripe/PayPal) de cet appareil au compte connecté.
+  // Si le compte a déjà un vendeur (connecté depuis un autre appareil),
+  // c'est CELUI-LÀ qui fait autorité : Ariane adopte son sellerId/secret,
+  // pour qu'un compte ne pointe jamais que sur une seule identité vendeur.
+  // Silencieux : ne bloque jamais la connexion si le backend est injoignable.
+  const claimedForUser = {};
+  async function claimSellerIfAny(session){
+    if(!session || !session.user || !session.access_token) return;
+    if(claimedForUser[session.user.id]) return;
+    claimedForUser[session.user.id] = true;
+    const headers = { Authorization: 'Bearer ' + session.access_token };
     try {
       const p = data?.paymentsV5;
       let json = null;
       if(p && p.sellerId && p.sellerSecret){
-        const res = await fetch(accountBackendUrl() + '/api/sellers/claim', {
+        const res = await fetch(paymentsBackendUrl() + '/api/sellers/claim', {
           method: 'POST',
-          headers: {'Content-Type':'application/json', Authorization: 'Bearer ' + token},
+          headers: Object.assign({'Content-Type':'application/json'}, headers),
           body: JSON.stringify({ sellerId: p.sellerId, sellerSecret: p.sellerSecret })
         });
         json = await res.json().catch(function(){ return null; });
       }
-      // Pas de vendeur local, ou secret local invalide côté serveur (ex:
-      // nouvel appareil dont l'identifiant local n'a jamais servi) : on
-      // récupère quand même le vendeur déjà rattaché à ce compte, s'il
-      // existe (ou on lui en crée un).
       if(!json || !json.ok){
-        const res = await fetch(accountBackendUrl() + '/api/seller/mine', {
-          headers: { Authorization: 'Bearer ' + token }
-        });
+        const res = await fetch(paymentsBackendUrl() + '/api/seller/mine', { headers });
         json = await res.json().catch(function(){ return null; });
       }
       if(json && json.ok && json.sellerId && json.sellerSecret && data?.paymentsV5){
-        data.paymentsV5.sellerId = json.sellerId;
-        data.paymentsV5.sellerSecret = json.sellerSecret;
-        saveData();
+        if(data.paymentsV5.sellerId !== json.sellerId || data.paymentsV5.sellerSecret !== json.sellerSecret){
+          data.paymentsV5.sellerId = json.sellerId;
+          data.paymentsV5.sellerSecret = json.sellerSecret;
+          if(typeof saveData === 'function') saveData();
+        }
+      } else {
+        claimedForUser[session.user.id] = false; // on retentera à la prochaine session
       }
-    } catch(e){ /* pas bloquant */ }
+    } catch(e){ claimedForUser[session.user.id] = false; }
+  }
+
+  async function fetchRemoteData(sb, userId){
+    const { data: row, error } = await sb.from('ariane_data').select('data').eq('user_id', userId).maybeSingle();
+    if(error) throw error;
+    return row ? row.data : null;
   }
 
   async function accountSignup(){
@@ -24978,18 +25071,20 @@ showPage();
     }
     accountStatus('Création du compte...', null);
     try {
-      const res = await fetch(accountBackendUrl() + '/api/auth/signup', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ email, password, businessName, initialData: data })
+      const sb = await loadSupabase();
+      const { data: signUpData, error } = await sb.auth.signUp({
+        email, password,
+        options: { data: { businessName } }
       });
-      const json = await res.json().catch(function(){ return {}; });
-      if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
-      const acc = { token: json.token, email: json.user.email, businessName: json.user.businessName, emailVerified: Boolean(json.user.emailVerified), lastSync: new Date().toISOString() };
-      saveAccount(acc);
-      await claimSellerIfAny(json.token);
+      if(error) throw error;
+      currentSession = signUpData.session;
+      if(currentSession && currentSession.user){
+        const { error: upsertErr } = await sb.from('ariane_data').upsert({ user_id: currentSession.user.id, data: data, updated_at: new Date().toISOString() });
+        if(upsertErr) throw upsertErr;
+        localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
+      }
       renderAccountUI();
-      accountStatus('Compte créé et données sauvegardées en ligne', 'ok');
+      accountStatus(currentSession ? 'Compte créé et données sauvegardées en ligne' : 'Compte créé — vérifie ta boîte mail pour confirmer ton adresse.', 'ok');
     } catch(e){
       accountStatus('Erreur : ' + e.message, 'err');
     }
@@ -25004,23 +25099,12 @@ showPage();
     }
     accountStatus('Connexion...', null);
     try {
-      const res = await fetch(accountBackendUrl() + '/api/auth/login', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ email, password })
-      });
-      const json = await res.json().catch(function(){ return {}; });
-      if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
+      const sb = await loadSupabase();
+      const { data: loginData, error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      currentSession = loginData.session;
 
-      const acc = { token: json.token, email: json.user.email, businessName: json.user.businessName, emailVerified: Boolean(json.user.emailVerified) };
-      saveAccount(acc);
-
-      // Récupère les données déjà en ligne pour ce compte, s'il y en a.
-      const dataRes = await fetch(accountBackendUrl() + '/api/data', {
-        headers: { Authorization: 'Bearer ' + json.token }
-      });
-      const dataJson = await dataRes.json().catch(function(){ return {}; });
-      const remoteData = dataJson?.data;
+      const remoteData = await fetchRemoteData(sb, currentSession.user.id);
       const hasRemoteData = remoteData && typeof remoteData === 'object' && Object.keys(remoteData).length > 0;
 
       if(hasRemoteData){
@@ -25029,7 +25113,7 @@ showPage();
           // IMPORTANT : "data" est déclaré avec `let` en haut du fichier, donc
           // window.data = ... ne le touche PAS (ça crée une propriété globale
           // séparée). Il faut réassigner la vraie variable partagée.
-          data = (remoteData && typeof remoteData === 'object') ? remoteData : {};
+          data = remoteData;
           if (!data.ventes) data.ventes = [];
           if (!data.marches) data.marches = [];
           if (!data.transactions) data.transactions = [];
@@ -25049,9 +25133,6 @@ showPage();
         }
       }
 
-      acc.lastSync = new Date().toISOString();
-      saveAccount(acc);
-      await claimSellerIfAny(json.token);
       await accountPush(true);
       renderAccountUI();
       accountStatus('Connecté', 'ok');
@@ -25081,14 +25162,13 @@ showPage();
     }
     if(statusEl){ statusEl.textContent = 'Envoi...'; statusEl.style.color = 'var(--text3)'; }
     try {
-      const res = await fetch(accountBackendUrl() + '/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ email })
+      const sb = await loadSupabase();
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
       });
-      const json = await res.json().catch(function(){ return {}; });
+      if(error) throw error;
       if(statusEl){
-        statusEl.textContent = json.message || 'Si un compte existe avec cet email, un lien vient d\'être envoyé.';
+        statusEl.textContent = 'Si un compte existe avec cet email, un lien vient d\'être envoyé.';
         statusEl.style.color = 'var(--accent)';
       }
     } catch(e){
@@ -25096,30 +25176,26 @@ showPage();
     }
   }
 
-  // Appelé au chargement si l'URL contient #reinitialiser-mot-de-passe&token=xxx
-  // (lien cliqué depuis l'email reçu). Affiche un petit formulaire pour choisir
-  // le nouveau mot de passe, sans avoir besoin d'être connecté.
-  function showResetPasswordPromptV5(token){
+  // Ancien flux (backend maison, lien #reinitialiser-mot-de-passe&token=xxx) :
+  // conservé en simple garde-fou pour ne jamais planter si un vieux lien
+  // traîne encore quelque part. Le vrai flux Supabase passe par
+  // handlePasswordRecovery() ci-dessous, déclenché par l'événement
+  // PASSWORD_RECOVERY du SDK.
+  function showResetPasswordPromptV5(){
+    alert("Ce lien de réinitialisation n'est plus valide. Redemande un nouveau lien depuis Paramètres > Mot de passe oublié.");
+  }
+
+  // Déclenché quand Supabase détecte, à l'ouverture de la page, une session
+  // de récupération de mot de passe (lien cliqué depuis l'email reçu).
+  async function handlePasswordRecovery(){
     const pwd1 = prompt('Choisis ton nouveau mot de passe (8 caractères minimum) :');
     if(pwd1 === null) return;
     if(pwd1.length < 8){ alert('Le mot de passe doit faire au moins 8 caractères.'); return; }
-    completePasswordReset(token, pwd1);
-  }
-
-  async function completePasswordReset(token, password){
     try {
-      const res = await fetch(accountBackendUrl() + '/api/auth/reset-password', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ token, password })
-      });
-      const json = await res.json().catch(function(){ return {}; });
-      if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
-      alert('Mot de passe changé Tu peux te connecter avec ton nouveau mot de passe.');
-      if(typeof location !== 'undefined'){
-        location.hash = '';
-        goPage('parametres');
-      }
+      const sb = await loadSupabase();
+      const { error } = await sb.auth.updateUser({ password: pwd1 });
+      if(error) throw error;
+      alert('Mot de passe changé. Tu es maintenant connecté avec ton nouveau mot de passe.');
     } catch(e){
       alert('Erreur : ' + e.message);
     }
@@ -25127,35 +25203,57 @@ showPage();
 
   function accountLogout(){
     if(!confirm('Se déconnecter ? Tes données restent dans ce navigateur, seule la synchronisation en ligne s\'arrête.')) return;
-    saveAccount({});
+    loadSupabase().then(function(sb){ sb.auth.signOut(); }).catch(function(){});
+    currentSession = null;
     renderAccountUI();
     accountStatus('Déconnecté.', null);
   }
 
-  async function accountPush(silent){
-    const acc = loadAccount();
-    if(!acc.token) return;
+  // Suppression définitive du compte (droit à l'effacement RGPD). Supprimer
+  // un compte Supabase exige la clé "service_role", qui ne doit jamais être
+  // dans le navigateur : c'est donc le backend qui s'en charge, après avoir
+  // revérifié le mot de passe. La sauvegarde en ligne part avec le compte.
+  async function accountDeleteConfirm(){
+    if(!currentSession || !currentSession.user){ accountStatus('Pas connecté.', 'err'); return; }
+    const pwdEl = document.getElementById('account-delete-password');
+    const password = pwdEl ? pwdEl.value : '';
+    if(!password){ accountStatus('Entre ton mot de passe pour confirmer.', 'err'); return; }
+    if(!confirm('Supprimer définitivement ton compte et ta sauvegarde en ligne ? Cette action est irréversible.')) return;
+
+    accountStatus('Suppression...', null);
     try {
-      const res = await fetch(accountBackendUrl() + '/api/data', {
-        method: 'PUT',
-        headers: {'Content-Type':'application/json', Authorization: 'Bearer ' + acc.token},
-        body: JSON.stringify({ data })
+      const res = await fetch(paymentsBackendUrl() + '/api/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + currentSession.access_token },
+        body: JSON.stringify({ password })
       });
-      if(!res.ok){
-        if(res.status === 401){
-          // Jeton expiré : on déconnecte proprement plutôt que d'échouer en boucle.
-          saveAccount({});
-          renderAccountUI();
-          if(!silent) accountStatus('Session expirée, reconnecte-toi.', 'err');
-        }
-        return;
-      }
-      acc.lastSync = new Date().toISOString();
-      saveAccount(acc);
+      const json = await res.json().catch(function(){ return {}; });
+      if(!res.ok) throw new Error(json.error || ('Erreur ' + res.status));
+
+      try { const sb = await loadSupabase(); await sb.auth.signOut({ scope: 'local' }); } catch(e){}
+      currentSession = null;
+      try { localStorage.removeItem(LAST_SYNC_KEY); } catch(e){}
+      const box = document.getElementById('account-delete-box');
+      if(box) box.style.display = 'none';
+      if(pwdEl) pwdEl.value = '';
+      renderAccountUI();
+      accountStatus('Compte supprimé. Tes données locales dans ce navigateur restent intactes.', 'ok');
+    } catch(e){
+      accountStatus('Erreur : ' + e.message, 'err');
+    }
+  }
+
+  async function accountPush(silent){
+    if(!currentSession || !currentSession.user) return;
+    try {
+      const sb = await loadSupabase();
+      const { error } = await sb.from('ariane_data').upsert({ user_id: currentSession.user.id, data: data, updated_at: new Date().toISOString() });
+      if(error) throw error;
+      localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
       renderAccountUI();
       if(!silent) accountStatus('Sauvegardé en ligne', 'ok');
     } catch(e){
-      if(!silent) accountStatus('Backend injoignable, réessaie plus tard.', 'err');
+      if(!silent) accountStatus('Synchronisation impossible, réessaie plus tard.', 'err');
     }
   }
 
@@ -25165,8 +25263,7 @@ showPage();
   // serveur à chaque frappe (regroupe les sauvegardes rapprochées en une seule).
   let syncTimer = null;
   function scheduleAutoSync(){
-    const acc = loadAccount();
-    if(!acc.token) return;
+    if(!currentSession || !currentSession.user) return;
     clearTimeout(syncTimer);
     syncTimer = setTimeout(function(){ accountPush(true); }, 3000);
   }
@@ -25185,14 +25282,28 @@ showPage();
   window.accountSignup = accountSignup;
   window.accountLogin = accountLogin;
   window.accountLogout = accountLogout;
+  window.accountDeleteConfirm = accountDeleteConfirm;
   window.accountSyncNow = accountSyncNow;
   window.toggleForgotPassword = toggleForgotPassword;
   window.requestPasswordReset = requestPasswordReset;
   window.showResetPasswordPromptV5 = showResetPasswordPromptV5;
-  window.completePasswordReset = completePasswordReset;
 
   window.addEventListener('load', function(){
-    setTimeout(renderAccountUI, 300);
+    loadSupabase().then(function(sb){
+      sb.auth.onAuthStateChange(function(event, session){
+        currentSession = session;
+        if(event === 'PASSWORD_RECOVERY') handlePasswordRecovery();
+        if(session) claimSellerIfAny(session);
+        renderAccountUI();
+      });
+      sb.auth.getSession().then(function(res){
+        currentSession = res.data.session;
+        renderAccountUI();
+      });
+    }).catch(function(){
+      // Supabase pas configuré : le compte/la sauvegarde en ligne restent
+      // désactivés, mais Ariane continue de fonctionner en local comme avant.
+    });
   });
 })();
 </script>
