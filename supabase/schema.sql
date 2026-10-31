@@ -32,3 +32,9 @@ create policy "Un vendeur met à jour ses propres données"
 create policy "Un vendeur supprime ses propres données"
   on public.ariane_data for delete
   using (auth.uid() = user_id);
+
+-- Accès explicite via l'API (le projet n'expose pas automatiquement les
+-- nouvelles tables). Seuls les utilisateurs connectés y ont droit, et les
+-- règles RLS ci-dessus limitent chacun à sa propre ligne.
+grant select, insert, update, delete on public.ariane_data to authenticated;
+revoke all on public.ariane_data from anon;
