@@ -1,4 +1,4 @@
-const ARIANE_CACHE_V501 = 'ariane-v5-07-pwa-cache';
+const ARIANE_CACHE_V501 = 'berthier-v8-cache';
 const ARIANE_ASSETS_V501 = [
   './',
   './index.html?v=507',
@@ -6,7 +6,17 @@ const ARIANE_ASSETS_V501 = [
   './icons/icon-192.png?v=507',
   './icons/icon-512.png?v=507',
   './icons/icon-maskable-512.png?v=507',
-  './icons/apple-touch-icon.png?v=507'
+  './icons/apple-touch-icon.png?v=507',
+  // Tout ce qu'il faut pour que l'app soit complète sans réseau dès la première visite (stand de marché)
+  './fonts/fonts.css',
+  './fonts/geist-latin-wght-normal.woff2',
+  './fonts/geist-mono-latin-wght-normal.woff2',
+  './icons/berthier-logo.png',
+  './icons/berthier-anime.svg',
+  './icons/berthier-parle.svg',
+  './icons/berthier-tete.svg',
+  './icons/berthier-tete-fixe.svg',
+  './vendor/supabase-2.45.4.js'
 ];
 
 self.addEventListener('install', event => {
@@ -21,7 +31,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys
-        .filter(key => !key.includes('ariane-v5-07'))
+        .filter(key => key !== ARIANE_CACHE_V501)
         .map(key => caches.delete(key))
     )).then(() => self.clients.claim())
   );

@@ -6046,25 +6046,27 @@ body {
           <div class="param-title">Régime fiscal</div>
           <div class="form-row">
             <label class="form-label">Statut</label>
-            <select class="form-select" id="param-regime" onchange="saveParams()">
-              <option value="micro-bnc">Micro-BNC (artisanat / services)</option>
-              <option value="micro-bic">Micro-BIC (vente)</option>
+            <select class="form-select" id="param-regime" onchange="applyRegimeRatesV8(this.value)">
+              <option value="micro-bic">Micro-BIC — vente de créations ou d'objets (12,3 %)</option>
+              <option value="micro-bic-services">Micro-BIC — prestations de services (21,2 %)</option>
+              <option value="micro-bnc">Micro-BNC — profession libérale (25,6 %)</option>
               <option value="autre">Autre / personnalisé</option>
             </select>
+            <div class="regime-hint-v8">Taux officiels 2026 (service-public.fr). Choisir ton statut remplit les taux tout seul. Vérifie toujours sur autoentrepreneur.urssaf.fr.</div>
           </div>
         </div>
         <div class="param-card">
           <div class="param-title">Cotisations sociales</div>
           <div class="form-row">
-            <label class="form-label">Taux : <span class="range-display" id="disp-cotis">22</span>%</label>
-            <input type="range" min="0" max="50" step="1" id="param-cotis" value="22" oninput="document.getElementById('disp-cotis').textContent=this.value;saveParams();renderDashboard()">
+            <label class="form-label">Taux : <span class="range-display" id="disp-cotis">12,3</span>%</label>
+            <input type="range" min="0" max="50" step="0.1" id="param-cotis" value="12.3" oninput="document.getElementById('disp-cotis').textContent=this.value;saveParams();renderDashboard()">
           </div>
         </div>
         <div class="param-card">
-          <div class="param-title">Impôt sur le revenu estimé</div>
+          <div class="param-title">Impôt sur le revenu (versement libératoire)</div>
           <div class="form-row">
-            <label class="form-label">Taux : <span class="range-display" id="disp-impot">7</span>%</label>
-            <input type="range" min="0" max="45" step="1" id="param-impot" value="7" oninput="document.getElementById('disp-impot').textContent=this.value;saveParams();renderDashboard()">
+            <label class="form-label">Taux : <span class="range-display" id="disp-impot">1</span>%</label>
+            <input type="range" min="0" max="45" step="0.1" id="param-impot" value="1" oninput="document.getElementById('disp-impot').textContent=this.value;saveParams();renderDashboard()">
           </div>
         </div>
         <div class="param-card">
@@ -6554,7 +6556,7 @@ function migrateVenteCanaux() {
 // ─── DATA ────────────────────────────────────────────────────
 let data = {
   ventes: [], marches: [], transactions: [], factures: [], stocks: [], products: [], taches: [], calTypes: [], calTypesInitialized: false, calHidden: [], siteBuilder: null,
-  params: { regime: 'micro-bnc', cotis: 22, impot: 7, marge: 5 }
+  params: { regime: 'micro-bic', cotis: 12.3, impot: 1, marge: 5 }
 };
 
 function loadData() {
@@ -6580,7 +6582,7 @@ function loadData() {
   if (!data.taches) data.taches = [];
   if (!data.calTypes) data.calTypes = [];
   if (!data.siteBuilder) data.siteBuilder = null;
-  if (!data.params) data.params = { regime: 'micro-bnc', cotis: 22, impot: 7, marge: 5 };
+  if (!data.params) data.params = { regime: 'micro-bic', cotis: 12.3, impot: 1, marge: 5 };
   // Empêche les données de démo de réapparaître et d'écraser de vraies
   // données : dès qu'une donnée réelle quelconque est présente (même sans
   // vente), on marque "démo déjà traitée" — qu'importe la valeur actuelle
@@ -6700,7 +6702,7 @@ function restoreAutoSnapshot(ts) {
     if (!data.products) data.products = [];
     if (!data.taches) data.taches = [];
     if (!data.calTypes) data.calTypes = [];
-    if (!data.params) data.params = { regime: 'micro-bnc', cotis: 22, impot: 7, marge: 5 };
+    if (!data.params) data.params = { regime: 'micro-bic', cotis: 12.3, impot: 1, marge: 5 };
     migrateVenteCanaux();
     ensureProductsData();
     ensureStockData();
@@ -6715,7 +6717,7 @@ function restoreAutoSnapshot(ts) {
 }
 function clearAll() {
   localStorage.removeItem('lorangerie-clean-v1');
-  data = { ventes: [], marches: [], transactions: [], factures: [], stocks: [], products: [], taches: [], calTypes: [], calTypesInitialized: false, calHidden: [], siteBuilder: null, params: { regime: 'micro-bnc', cotis: 22, impot: 7, marge: 5 } };
+  data = { ventes: [], marches: [], transactions: [], factures: [], stocks: [], products: [], taches: [], calTypes: [], calTypesInitialized: false, calHidden: [], siteBuilder: null, params: { regime: 'micro-bic', cotis: 12.3, impot: 1, marge: 5 } };
   ensureProductsData();
   ensureStockData();
   render(); alert('Données effacées.');
@@ -7138,7 +7140,7 @@ function renderDashboard() {
     return `<tr>
       <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.78rem">${v.date}</td>
       <td style="color:var(--text);font-size:0.81rem">${prods}</td>
-      <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span></td>
+      <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span>${v.paiement?' <span class="tag tag-pay-'+v.paiement+'">'+(v.paiement==='carte'?'Carte':'Liquide')+'</span>':''}</td>
       <td style="font-family:'Geist',sans-serif;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
       <td class="amount-pos">${fmt(total)}</td>
     </tr>`;
@@ -7200,7 +7202,7 @@ function renderVentes() {
         ${dateLabel} <span style="color:var(--text3);font-weight:400">· ${ventesJour.length} vente(s) · ${nbJour} article(s)</span>
       </td>
       <td colspan="3" style="padding:8px 14px;text-align:right">
-        <span style="font-family:'Geist',sans-serif;font-size:0.85rem;color:var(--gold);font-weight:600">Recette du jour : ${fmt(recetteJour)}</span>
+        <span style="font-family:'Geist',sans-serif;font-size:0.85rem;color:var(--gold);font-weight:600">Recette du jour : ${fmt(recetteJour)}</span>${typeof payBreakdownV8 === 'function' ? payBreakdownV8(ventesJour) : ''}
       </td>
     </tr>`);
 
@@ -7213,7 +7215,7 @@ function renderVentes() {
       rows.push(`<tr>
         <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.75rem;padding-left:20px">↳</td>
         <td style="color:var(--text);font-size:0.81rem;max-width:200px">${v.items.map(i=>`${escapeHtml(prodCategory(i.produit))} — ${escapeHtml(prodLabel(i.produit))} ×${i.qte}`).join(', ')}${v.note?`<div style="color:var(--text3);font-size:0.72rem;margin-top:2px">${escapeHtml(v.note)}</div>`:''}</td>
-        <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span></td>
+        <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span>${v.paiement?' <span class="tag tag-pay-'+v.paiement+'">'+(v.paiement==='carte'?'Carte':'Liquide')+'</span>':''}</td>
         <td style="font-family:'Geist',sans-serif;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
         <td style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--text3)">${fmt(prixMoyen)}</td>
         <td class="amount-pos">${fmt(total)}</td>
@@ -7886,8 +7888,8 @@ function renderParams() {
 }
 function saveParams() {
   data.params.regime = document.getElementById('param-regime').value;
-  data.params.cotis = parseInt(document.getElementById('param-cotis').value);
-  data.params.impot = parseInt(document.getElementById('param-impot').value);
+  data.params.cotis = parseFloat(document.getElementById('param-cotis').value);
+  data.params.impot = parseFloat(document.getElementById('param-impot').value);
   data.params.marge = parseInt(document.getElementById('param-marge').value);
   saveData();
 }
@@ -9037,7 +9039,7 @@ function restoreJSON(event) {
       if (!data.products) data.products = [];
       if (!data.taches) data.taches = [];
       if (!data.calTypes) data.calTypes = [];
-      if (!data.params) data.params = { regime: 'micro-bnc', cotis: 22, impot: 7, marge: 5 };
+      if (!data.params) data.params = { regime: 'micro-bic', cotis: 12.3, impot: 1, marge: 5 };
       migrateVenteCanaux();
       ensureProductsData();
       ensureStockData();
@@ -23306,8 +23308,9 @@ function respondHelp(entry, originalText) {
       const card = table.closest('.section-card');
       if(!card) return;
 
-      const existing = card.querySelector(':scope > .mobile-table-cards-v435');
-      if(existing) existing.remove();
+      // Les cartes sont insérées juste après le tableau (dans .table-scroll) : on retire TOUTES les anciennes,
+      // sinon elles s'empilent à chaque mise à jour.
+      card.querySelectorAll('.mobile-table-cards-v435').forEach(el => el.remove());
 
       const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim()).filter(Boolean);
       const rows = Array.from(table.querySelectorAll('tbody tr'));
@@ -23320,12 +23323,21 @@ function respondHelp(entry, originalText) {
 
       rows.slice(0, 30).forEach(tr => {
         const tds = Array.from(tr.children);
+        // Ligne d'en-tête de groupe (ex. « Samedi 8 novembre · Recette du jour ») : un titre, pas une carte
+        if (tds.some(td => Number(td.getAttribute('colspan')) > 1)) {
+          if (!tr.innerText.trim()) return;
+          const head = document.createElement('div');
+          head.className = 'mobile-table-group-v435';
+          head.innerHTML = tds.map(td => '<div>' + td.innerHTML + '</div>').join('');
+          wrap.appendChild(head);
+          return;
+        }
         const mobileCard = document.createElement('div');
         mobileCard.className = 'mobile-table-card-v435';
 
         tds.forEach((td, i) => {
           const value = td.innerHTML.trim();
-          if(!value) return;
+          if(!value || td.textContent.trim() === '↳') return; // la flèche de groupe n'a pas de sens en carte
 
           const row = document.createElement('div');
           row.className = 'mobile-table-row-v435';
@@ -23510,7 +23522,7 @@ function respondHelp(entry, originalText) {
     updateOnlineStatusV437();
 
     if('serviceWorker' in navigator && isSecureForPwaV437()){
-      navigator.serviceWorker.register('./service-worker.js?v=520')
+      navigator.serviceWorker.register('./service-worker.js?v=800')
         .then(function(reg){
           if(reg && reg.update) reg.update();
         })
@@ -25135,7 +25147,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
           if (!data.taches) data.taches = [];
           if (!data.calTypes) data.calTypes = [];
           if (!data.siteBuilder) data.siteBuilder = null;
-          if (!data.params) data.params = { regime: 'micro-bnc', cotis: 22, impot: 7, marge: 5 };
+          if (!data.params) data.params = { regime: 'micro-bic', cotis: 12.3, impot: 1, marge: 5 };
           try { if(typeof migrateVenteCanaux === 'function') migrateVenteCanaux(); } catch(e){}
           try { if(typeof ensureProductsData === 'function') ensureProductsData(); } catch(e){}
           try { if(typeof ensureStockData === 'function') ensureStockData(); } catch(e){}
@@ -25439,6 +25451,8 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     bug:['bug','bugs','probleme','marche pas','plante','bloque','bloquee','erreur'],
     prix:['prix','gratuit','payant','abonnement','tarif','coute','payer'],
     donnees:['donnees','confidentialite','rgpd','prive','securite','vie'],
+    liquide:['liquide','liquides','espece','especes','cash','monnaie','billet','billets','caisse'],
+    carte:['carte','cartes','cb','sumup','tpe','bancaire','sans contact'],
     semaine:['semaine','semaines','semene','smaine'], mois:['mois','mensuel','moi'], annee:['annee','an','annuel','anee','anne','annees','anne'], jour:['jour','aujourd','aujourdhui','auj','ajd','journee'], hier:['hier']
   };
   var WORD2KEY = {};
@@ -25490,8 +25504,42 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
   function label(id){ return (typeof prodLabel === 'function') ? prodLabel(id) : id; }
   function chargesRate(){ var p = D().params || {}; return ((Number(p.cotis) || 0) + (Number(p.impot) || 0)) / 100; }
 
+  // ── Stock d'un produit précis (« il me reste combien de savon lavande ? ») ──
+  function productMatches(text){
+    var words = norm(text).split(' ').filter(function(w){ return w.length >= 3; }).map(function(w){ return w.replace(/s$/, ''); });
+    var out = [];
+    (D().products || []).forEach(function(p){
+      var toks = norm(p.label).split(' ').filter(function(w){ return w.length >= 3; }).map(function(w){ return w.replace(/s$/, ''); });
+      if (!toks.length) return;
+      var hit = toks.filter(function(t){ return words.some(function(w){ return w === t || (t.length >= 5 && lev(w, t) <= 1); }); }).length;
+      if (hit) out.push({ p: p, hit: hit, full: hit === toks.length });
+    });
+    var best = Math.max.apply(null, out.map(function(o){ return o.hit; }).concat([0]));
+    var top = out.filter(function(o){ return o.hit === best; });
+    var full = top.filter(function(o){ return o.full; });
+    return full.length ? full : top;
+  }
+  function stockAnswer(list){
+    var lines = list.map(function(o){
+      var st = (typeof stockEntry === 'function') ? stockEntry(o.p.id) : null;
+      if (!st || !st.suivi) return o.p.label + ' : stock non suivi (active le suivi dans Stock).';
+      var n = Number(st.stock) || 0;
+      return o.p.label + ' : ' + (n <= 0 ? 'épuisé' : n + ' en stock') + (n > 0 && n <= Number(st.seuil) ? ' (bientôt épuisé)' : '') + '.';
+    });
+    return { text: lines.join('\n'), actions: [{ label: 'Voir le stock', page: 'stock' }] };
+  }
+
   // ── Questions sur les chiffres ──
   var INTENTS = [
+    { test: function(c){ return (c.liquide || c.carte) && !c.ajouter; }, run: function(c){
+        var p = periodFrom(c), tot = { especes: 0, carte: 0, autre: 0 };
+        ventesIn(p).forEach(function(v){ var k = v.paiement === 'carte' ? 'carte' : (v.paiement === 'especes' ? 'especes' : 'autre');
+          (v.items || []).forEach(function(i){ tot[k] += (Number(i.qte) || 0) * (Number(i.prix) || 0); }); });
+        var t = p.label.charAt(0).toUpperCase() + p.label.slice(1) + ' : ' + money(tot.especes) + ' en liquide, ' + money(tot.carte) + ' par carte.';
+        if (tot.autre > 0) t += '\n' + money(tot.autre) + ' de ventes sans moyen de paiement noté (saisies avec le formulaire détaillé).';
+        if (c.liquide && !c.carte) t += '\nC\'est ce que tu devrais avoir en caisse en plus de ton fond de caisse.';
+        return { text: t, actions: [{ label: 'Voir mes ventes', page: 'ventes' }] };
+    } },
     { test: function(c){ return c.marche && (c.meilleur || c.benefice || c.pire); }, run: function(c){
         var ms = (D().marches || []).map(function(m){
           var st = (typeof computeStatsMarche === 'function') ? computeStatsMarche(m.id) : { totalCA: 0, ventes: [] };
@@ -25533,7 +25581,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     { test: function(c){ return c.urssaf && (c.combien || !c.ajouter); }, run: function(c){
         var p = periodFrom(c), ca = caOf(ventesIn(p)), r = chargesRate();
         if (!r) return { text: "Tes taux de cotisations et d'impôt ne sont pas réglés. Indique-les dans Paramètres (régime fiscal) et je calculerai ce qu'il faut mettre de côté.", actions: [{ label: 'Régler mes taux', page: 'parametres' }] };
-        return { text: 'Sur ' + money(ca) + ' de ventes ' + p.label + ', mets de côté environ ' + money(ca * r) + ' pour l\'URSSAF et l\'impôt (taux réglé : ' + Math.round(r * 100) + ' %). C\'est une estimation : vérifie toujours sur autoentrepreneur.urssaf.fr.', actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }, { label: 'Mes taux', page: 'parametres' }] };
+        return { text: 'Sur ' + money(ca) + ' de ventes ' + p.label + ', mets de côté environ ' + money(ca * r) + ' pour l\'URSSAF et l\'impôt (taux réglé : ' + String(Math.round(r * 1000) / 10).replace('.', ',') + ' %). C\'est une estimation : vérifie toujours sur autoentrepreneur.urssaf.fr.', actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }, { label: 'Mes taux', page: 'parametres' }] };
     } },
     { test: function(c){ return c.benefice && !c.ajouter; }, run: function(c){
         var p = periodFrom(c), ca = caOf(ventesIn(p)), dep = sumDep(depensesIn(p)), ch = ca * chargesRate();
@@ -25573,7 +25621,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     { k:['prix'], q:'Berthier est payant ?', a:"Non, Berthier est gratuit pendant la bêta, sans carte bancaire." },
     { k:['donnees'], q:'Mes données sont-elles privées ?', a:"Oui. Sans compte, rien ne quitte ton appareil. Avec un compte, la sauvegarde est stockée dans l'Union européenne. Pas de pub, pas de revente. Tout est expliqué dans la politique de confidentialité." },
     { k:['bug'], q:'Ça ne marche pas', a:"Désolé ! Clique sur « Signaler un bug » en haut de cette fenêtre et décris ce qui s'est passé : on corrige vite." },
-    { k:['aide'], q:'Que sais-tu faire ?', a:"Je réponds sur l'app et je fais tes comptes. Essaie :\n« combien j'ai vendu ce mois ? »\n« quel marché rapporte le plus ? »\n« qu'est-ce qui est en rupture ? »\n« mon bénéfice cette année »\n« combien mettre de côté pour l'URSSAF ? »\n« vendu 3 savons à 6 € »" }
+    { k:['aide'], q:'Que sais-tu faire ?', a:"Je réponds sur l'app et je fais tes comptes. Essaie :\n« combien j'ai vendu ce mois ? »\n« quel marché rapporte le plus ? »\n« qu'est-ce qui est en rupture ? »\n« combien en liquide aujourd'hui ? »\n« il me reste combien de bracelets ? »\n« mon bénéfice cette année »\n« combien mettre de côté pour l'URSSAF ? »\n« vendu 3 savons à 6 € »" }
   ];
   function findKb(c){
     var best = null, score = 0;
@@ -25631,6 +25679,10 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     var exact = KB.filter(function(e){ return norm(e.q) === norm(text); })[0];
     if (exact) return { text: exact.a, actions: exact.act, q: exact.q };
     var c = concepts(text);
+    if ((c.stock || /\breste\b|\bcombien\b/.test(norm(text))) && !c.ajouter && !c.vente && !c.liquide && !c.carte){
+      var pm = productMatches(text);
+      if (pm.length && pm.length <= 6) return stockAnswer(pm);
+    }
     if (c.bug){ var b = KB.filter(function(e){ return e.k[0] === 'bug'; })[0]; return { text: b.a, actions: b.act, q: b.q }; }
     for (var i = 0; i < INTENTS.length; i++){
       if (INTENTS[i].test(c)){ var r = INTENTS[i].run(c); if (r) return r; }
@@ -25657,7 +25709,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
       }
     }, 380);
   }
-  var QUICK = ["Combien j'ai vendu ce mois ?", "Quel marché rapporte le plus ?", "Qu'est-ce qui est en rupture ?", "Mon bénéfice ce mois-ci", "Combien mettre de côté pour l'URSSAF ?", "Que sais-tu faire ?"];
+  var QUICK = ["Combien j'ai vendu aujourd'hui ?", "Combien en liquide aujourd'hui ?", "Quel marché rapporte le plus ?", "Qu'est-ce qui est en rupture ?", "Mon bénéfice ce mois-ci", "Combien mettre de côté pour l'URSSAF ?", "Que sais-tu faire ?"];
   try { HELP_QUICK_QUESTIONS.splice(0, HELP_QUICK_QUESTIONS.length); QUICK.forEach(function(q){ HELP_QUICK_QUESTIONS.push(q); }); } catch (e) {}
 
   window.askHelpQuestion = function(text){
@@ -25955,6 +26007,88 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
 })();
 </script>
 
+<script>
+// ─── Parcours v8 : corrections du 2e test utilisateur ───
+(function(){
+  // Taux officiels 2026 (service-public.fr, vérifié le 1er janvier 2026) : cotisations + versement libératoire
+  var RATES = { 'micro-bic': [12.3, 1], 'micro-bic-services': [21.2, 1.7], 'micro-bnc': [25.6, 2.2] };
+  function fr(n){ return String(n).replace('.', ','); }
+  function showRates(){
+    var p = data.params || {};
+    var dc = document.getElementById('disp-cotis'), di = document.getElementById('disp-impot');
+    if (dc) dc.textContent = fr(p.cotis); if (di) di.textContent = fr(p.impot);
+  }
+  window.applyRegimeRatesV8 = function(regime){
+    data.params.regime = regime;
+    var r = RATES[regime];
+    if (r){
+      data.params.cotis = r[0]; data.params.impot = r[1];
+      var c = document.getElementById('param-cotis'), i = document.getElementById('param-impot');
+      if (c) c.value = r[0]; if (i) i.value = r[1];
+    }
+    saveData(); showRates();
+    try { renderDashboard(); } catch (e) {}
+  };
+  // Anciens réglages par défaut jamais modifiés (micro-BNC 22 % + 7 %) → bon défaut pour un vendeur d'objets
+  var p = data.params || {};
+  if (p.regime === 'micro-bnc' && Number(p.cotis) === 22 && Number(p.impot) === 7){
+    p.regime = 'micro-bic'; p.cotis = 12.3; p.impot = 1; saveData();
+  }
+  if (typeof renderParams === 'function' && !renderParams.__v8){
+    var oldRP = renderParams;
+    var rp = function(){ oldRP.apply(this, arguments); showRates(); };
+    rp.__v8 = true; window.renderParams = rp; try { renderParams = rp; } catch (e) {}
+  }
+  document.addEventListener('input', function(e){ if (e.target && (e.target.id === 'param-cotis' || e.target.id === 'param-impot')) setTimeout(showRates, 0); });
+
+  // Détail liquide / carte sous la « Recette du jour »
+  window.payBreakdownV8 = function(ventes){
+    var t = { especes: 0, carte: 0 }, any = false;
+    (ventes || []).forEach(function(v){ if (v.paiement === 'especes' || v.paiement === 'carte'){ any = true;
+      (v.items || []).forEach(function(i){ t[v.paiement] += (Number(i.qte) || 0) * (Number(i.prix) || 0); }); } });
+    if (!any) return '';
+    return '<span class="pay-breakdown-v8">liquide ' + fmt(t.especes) + ' · carte ' + fmt(t.carte) + '</span>';
+  };
+
+  // Formulaire marché : l'essentiel d'abord, le reste sous « Plus de détails »
+  function setupMarketForm(){
+    var modal = document.getElementById('modal-marche'); if (!modal || modal.__v8) return; modal.__v8 = true;
+    var adv = ['marche-fin', 'marche-type', 'marche-lieu', 'marche-jours', 'marche-notes'];
+    adv.forEach(function(id){ var el = document.getElementById(id); var row = el && el.closest('.form-row'); if (row) row.classList.add('marche-adv-v8'); });
+    var stand = document.getElementById('marche-frais-location');
+    var standLabel = stand && stand.previousElementSibling; if (standLabel) standLabel.textContent = 'Emplacement (€)';
+    var last = document.getElementById('marche-frais-total');
+    var anchor = last && last.closest('.form-row');
+    if (anchor){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'marche-more-v8';
+      b.textContent = 'Plus de détails (date de fin, lieu, nombre de jours, notes…)';
+      b.onclick = function(){ modal.classList.add('marche-open-v8'); b.style.display = 'none'; };
+      anchor.parentNode.insertBefore(b, anchor.nextSibling);
+    }
+  }
+  setupMarketForm();
+  // À l'ouverture : replié pour un nouveau marché, déplié si on modifie un marché qui a des détails
+  var baseOpen = window.__openModalBaseV7 || openModal;
+  var openV8 = function(id){
+    var r = (id === 'modal-vente' && window.openExpressV7) ? openExpressV7() : baseOpen.apply(this, arguments);
+    if (id === 'modal-marche') foldMarket(false);
+    return r;
+  };
+  function foldMarket(expandIfDetails){
+    var modal = document.getElementById('modal-marche'); if (!modal) return;
+    var has = expandIfDetails && ['marche-lieu', 'marche-notes'].some(function(id){ var e = document.getElementById(id); return e && e.value; });
+    modal.classList.toggle('marche-open-v8', !!has);
+    var b = modal.querySelector('.marche-more-v8'); if (b) b.style.display = has ? 'none' : '';
+  }
+  window.openModal = openV8; try { openModal = openV8; } catch (e) {}
+  if (typeof editMarche === 'function' && !editMarche.__v8){
+    var oldEM = editMarche;
+    var em = function(){ var r = oldEM.apply(this, arguments); foldMarket(true); return r; };
+    em.__v8 = true; window.editMarche = em; try { editMarche = em; } catch (e) {}
+  }
+  try { renderVentes(); renderDashboard(); } catch (e) {}
+})();
+</script>
 <style id="ariane-design-v6">
 /* ─── Design v6 « sombre épuré » ──────────────────────────────────────────
    Noir chaud, bordures fines, un seul accent (le bleu Berthier).
@@ -26260,7 +26394,8 @@ html body .help-msg-bot::before{content:'';position:absolute;left:-32px;top:0;wi
 .express-pay .btn:disabled{opacity:.4;cursor:not-allowed;}
 .express-detail{display:block;width:100%;margin-top:12px;background:none;border:0;color:var(--text3);font:inherit;font-size:.8rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
 .express-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:30000;display:flex;gap:14px;align-items:center;
-  background:var(--surface3);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;box-shadow:0 12px 32px rgba(0,0,0,.5);transition:opacity .2s,transform .2s;font-size:.9rem;max-width:calc(100vw - 32px);}
+  background:#1e1f23 !important;border:1px solid var(--border2);border-radius:8px;padding:12px 16px;box-shadow:0 12px 32px rgba(0,0,0,.6);transition:opacity .2s,transform .2s;font-size:.9rem;max-width:calc(100vw - 32px);}
+.express-toast.show{opacity:1 !important;}
 .express-toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
 .express-toast button{background:none;border:0;color:var(--accent2);font:inherit;font-weight:600;cursor:pointer;}
 
@@ -26303,6 +26438,25 @@ html body #mobile-bottom-nav-v432{display:none !important;}
   #page-marches .section-header{flex-wrap:wrap;gap:10px;}
   /* Vente express plein écran sur téléphone */
   .express-modal{max-height:100dvh;overflow-y:auto;}
+}
+
+/* Parcours v8 */
+.regime-hint-v8{font-size:.75rem;color:var(--text3);margin-top:8px;line-height:1.5;}
+.tag-pay-carte{color:var(--accent2) !important;}
+.tag-pay-especes{color:var(--green) !important;}
+.pay-breakdown-v8{display:block;font-size:.72rem;font-weight:400;color:var(--text3);margin-top:2px;}
+#modal-marche .marche-adv-v8{display:none;}
+#modal-marche.marche-open-v8 .marche-adv-v8{display:block;}
+#modal-marche .form-row-grid > .marche-adv-v8{display:none;}
+#modal-marche.marche-open-v8 .form-row-grid > .marche-adv-v8{display:block;}
+.marche-more-v8{display:block;width:100%;margin:4px 0 14px;padding:8px 0;background:none;border:0;border-top:1px solid var(--border);color:var(--text2);font:inherit;font-size:.82rem;text-align:left;cursor:pointer;}
+.marche-more-v8:hover{color:var(--text);}
+
+.mobile-table-group-v435{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;padding:16px 0 8px;font-size:.82rem;color:var(--text2);border-bottom:1px solid var(--border2);}
+
+@media (max-width:900px){
+  .express-toast{bottom:calc(168px + env(safe-area-inset-bottom));width:calc(100vw - 32px);justify-content:space-between;z-index:40000;}
+  html body .mobile-scroll-hint-v432{display:none !important;}
 }
 
 ::selection{background:rgba(79,140,255,.3);}
