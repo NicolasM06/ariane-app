@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ariane — Compta & Ventes</title>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="fonts/fonts.css" rel="stylesheet">
 <style>
   :root {
     --bg: #0e0f13; --surface: #16171d; --surface2: #1e2028; --border: #2a2c36; --border2: #353845;
@@ -5947,7 +5947,7 @@ body {
               <a href="#" onclick="toggleForgotPassword();return false" style="font-size:0.8rem;color:var(--text3);margin-left:4px">Mot de passe oublié ?</a>
             </div>
             <div style="margin-top:12px;color:var(--text3);font-size:.74rem;line-height:1.5">
-              Ariane est en bêta gratuite : le service est fourni sans garantie, peut évoluer ou être interrompu, et tes données peuvent être réinitialisées à l'occasion. Exporte régulièrement une sauvegarde (Exports &gt; Sauvegarde complète) pour ne rien perdre. En créant un compte, tu acceptes ces conditions.
+              Ariane est en bêta gratuite : le service est fourni sans garantie, peut évoluer ou être interrompu, et tes données peuvent être réinitialisées à l'occasion. Exporte régulièrement une sauvegarde (Exports &gt; Sauvegarde complète) pour ne rien perdre. En créant un compte, tu acceptes les <a href="site/cgu.html" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="site/confidentialite.html" target="_blank" rel="noopener">politique de confidentialité</a>.
               Un souci, une idée ? <a href="#" onclick="reportArianeBug();return false">Écris-nous</a>.
             </div>
             <div id="forgot-password-box" style="display:none;margin-top:14px;padding:14px;background:var(--surface2);border-radius:var(--radius-sm)">
@@ -5994,7 +5994,7 @@ body {
 
           <div id="account-status" style="margin-top:12px;font-size:.82rem"></div>
           <div style="margin-top:14px;color:var(--text3);font-size:.72rem;line-height:1.5">
-            Confidentialité : avec un compte, tes données Ariane (ventes, clients, factures) sont copiées sur notre base de données en ligne (Supabase, hébergée dans l'UE) pour la sauvegarde en ligne, en plus de ton navigateur. Sans compte, rien ne quitte cet appareil. Tu peux à tout moment exporter (Exports &gt; Sauvegarde JSON) ou supprimer tes données en ligne ci-dessus. Question ou demande RGPD (accès, rectification, suppression) : <a href="#" onclick="reportArianeBug();return false">écris-nous</a>.
+            Confidentialité : avec un compte, tes données Ariane (ventes, clients, factures) sont copiées sur notre base de données en ligne (Supabase, hébergée dans l'UE) pour la sauvegarde en ligne, en plus de ton navigateur. Sans compte, rien ne quitte cet appareil. Tu peux à tout moment exporter (Exports &gt; Sauvegarde JSON) ou supprimer tes données en ligne ci-dessus. Question ou demande RGPD (accès, rectification, suppression) : <a href="mailto:arianeapp.support@gmail.com">arianeapp.support@gmail.com</a>. <a href="site/confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a> · <a href="site/cgu.html" target="_blank" rel="noopener">Conditions d'utilisation</a> · <a href="site/mentions-legales.html" target="_blank" rel="noopener">Mentions légales</a>.
           </div>
         </div>
 
@@ -24951,7 +24951,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
         return;
       }
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+      script.src = 'vendor/supabase-2.45.4.js'; // hébergé sur le site (plus de CDN tiers)
       script.onload = function(){
         try {
           supabaseClient = window.supabase.createClient(window.ARIANE_SUPABASE_URL, window.ARIANE_SUPABASE_ANON_KEY);

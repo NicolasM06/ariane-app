@@ -7,9 +7,7 @@
 <meta name="description" content="Ariane aide les créateurs qui vendent sur les marchés à noter leurs ventes, suivre leur stock, savoir quels marchés sont rentables et estimer leurs cotisations — depuis leur téléphone.">
 <meta name="theme-color" content="#08090a">
 <link rel="icon" href="../icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../fonts/fonts.css" rel="stylesheet">
 <style>
   /* ─── Design v6 « sombre épuré » — mêmes tokens que l'app ─── */
   :root {
@@ -151,6 +149,8 @@
   .form-row input::placeholder, .form-row textarea::placeholder { color: var(--text3); }
   .form-row input:focus, .form-row textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
   .form-row textarea { resize: vertical; min-height: 120px; }
+  .form-legal { font-size: .8rem; color: var(--text3); margin: -4px 0 18px; }
+  .form-legal a { color: var(--text2); text-decoration: underline; text-underline-offset: 3px; }
   .form-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .form-status { font-size: .82rem; color: var(--text2); opacity: 0; transition: opacity .3s; }
   .form-status.show { opacity: 1; }
@@ -352,7 +352,7 @@
           <small>ou écris à arianeapp.support@gmail.com</small>
         </div>
       </div>
-      <p class="beta-note reveal">Ariane est en bêta gratuite : le service évolue en continu. Exporte régulièrement une sauvegarde pour garder tes données en sécurité.</p>
+      <p class="beta-note reveal">Ariane est en bêta gratuite : le service évolue en continu. Exporte régulièrement une sauvegarde pour garder tes données en sécurité. Voir les <a href="cgu.html" style="color:inherit">conditions d'utilisation</a>.</p>
     </div>
   </section>
 
@@ -383,6 +383,7 @@
           <label for="cf-message">Message</label>
           <textarea id="cf-message" name="message" placeholder="Dis-nous tout..." required></textarea>
         </div>
+        <p class="form-legal">Ton nom, ton e-mail et ton message servent uniquement à te répondre. <a href="confidentialite.html">En savoir plus</a>.</p>
         <div class="form-foot">
           <button type="submit" class="btn btn-primary">Envoyer le message</button>
           <span class="form-status" id="form-status">Ta messagerie n'a pas suivi ? Copie le message ci-dessous.</span>
@@ -413,6 +414,9 @@
       <a href="#avis">Devenir testeur</a>
       <a href="#contact">Contact</a>
       <a href="../index.html">Ouvrir l'app</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+      <a href="cgu.html">Conditions d'utilisation</a>
+      <a href="confidentialite.html">Confidentialité</a>
     </div>
   </div>
 </footer>
