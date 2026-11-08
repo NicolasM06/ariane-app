@@ -25663,6 +25663,18 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     reply(text);
   };
   try { sendHelpMessage = window.sendHelpMessage; } catch (e) {}
+  // Suggestions en bas de la fenêtre : l'ancienne version cassait le clic (guillemets dans onclick).
+  window.renderHelpQuickChips = function(list){
+    var box = document.getElementById('help-chat-quick'); if (!box) return;
+    box.innerHTML = '';
+    (list || []).forEach(function(q){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'help-chip'; b.textContent = q;
+      b.addEventListener('click', function(){ window.askHelpQuestion(q); });
+      box.appendChild(b);
+    });
+  };
+  try { renderHelpQuickChips = window.renderHelpQuickChips; } catch (e) {}
   window.berthierAnswer = answer; // pour les tests
 })();
 </script>
