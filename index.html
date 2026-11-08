@@ -25537,6 +25537,76 @@ html body .commercial-actions .btn-primary{background:transparent !important;col
   html body #page-parametres .params-grid{grid-template-columns:1fr !important;}
 }
 
+/* ─── v6 · sans cadres ───
+   Le contenu est posé directement sur le fond. Les blocs sont séparés par des filets fins,
+   plus par des boîtes arrondies. Arrondis restants : 6px (boutons, champs), 4px (étiquettes). */
+html body .section-card, html body .marche-card, html body .export-card, html body .param-card,
+html body .kpi-card, html body .hero-full, html body .hero-panel, html body .dashboard-hero,
+html body .hero-side-item, html body .hero-mini-card, html body .welcome-stat, html body .vente-item,
+html body .calendar-item, html body .commercial-card, html body .pay-v5-card, html body .pay-v5-panel,
+html body .mobile-table-card-v435, html body .drop-zone{
+  background:transparent !important;background-image:none !important;border:0 !important;
+  border-radius:0 !important;box-shadow:none !important;backdrop-filter:none !important;}
+
+/* Sections : un filet au-dessus, de l'air autour */
+html body .section-card{border-top:1px solid var(--border) !important;margin:0 0 40px !important;overflow:visible !important;}
+html body .section-header{padding:18px 0 !important;}
+html body .section-card > .table-scroll, html body .section-card table{margin:0 !important;}
+html body table th:first-child, html body table td:first-child{padding-left:0 !important;}
+html body .filter-bar{margin:0 0 8px !important;}
+
+/* Rangée de chiffres : une bande avec des séparateurs verticaux */
+html body .kpi-grid, html body .export-grid{gap:0 !important;border-top:1px solid var(--border) !important;
+  border-bottom:1px solid var(--border) !important;clip-path:inset(0 1px 0 0);margin-bottom:40px !important;}
+html body .kpi-card, html body .export-card{border-right:1px solid var(--border) !important;
+  border-bottom:1px solid var(--border) !important;margin-bottom:-1px !important;padding:22px 24px !important;}
+html body .kpi-grid > .kpi-card:first-child, html body .export-grid > .export-card:first-child{padding-left:0 !important;}
+html body .kpi-card:hover, html body .export-card:hover, html body .marche-card:hover{background:rgba(255,255,255,.015) !important;}
+
+/* Tableau de bord : le haut devient une simple introduction + une liste */
+html body .hero-full{padding:8px 0 36px !important;margin-bottom:0 !important;border-bottom:1px solid var(--border) !important;}
+html body .hero-side-item{border-top:1px solid var(--border) !important;padding:14px 0 !important;}
+html body .hero-full-right{gap:0 !important;}
+html body .hero-full-right > .hero-side-item:first-child{border-top:0 !important;padding-top:4px !important;}
+
+/* Listes : un filet entre chaque élément */
+html body .vente-item, html body .calendar-item, html body .mobile-table-card-v435, html body .marche-card{
+  border-bottom:1px solid var(--border) !important;padding-left:0 !important;padding-right:0 !important;}
+html body .marche-card{margin:0 !important;}
+
+/* Écran d'accueil : chiffres séparés par des filets, pas des boîtes */
+html body .welcome-stat{border-left:1px solid var(--border) !important;}
+html body .welcome-stat:first-child{border-left:0 !important;}
+
+/* Alertes : texte coloré discret, sans boîte */
+html body .alert{background:transparent !important;border:0 !important;border-left:0 !important;padding:4px 0 !important;border-radius:0 !important;}
+
+/* Arrondis restants, plus discrets */
+html body .btn, html body .topbar-actions .btn, html body .action-btn, html body button.btn,
+html body input, html body select, html body textarea, html body .form-input, html body .form-select,
+html body .form-textarea, html body .nav-item, html body #pwa-install-btn-v437, html body #help-fab,
+html body .mobile-fab-v435, html body .custom-dd-btn, html body .snap-toggle-btn-v430{border-radius:6px !important;}
+html body .tag, html body .badge, html body .mode-badge, html body .help-chip, html body .cal-type,
+html body [style*="border-radius: 999px"], html body [style*="border-radius:999px"]{border-radius:4px !important;}
+html body .modal, html body .welcome-card{border-radius:10px !important;}
+
+/* Barre du bas sur téléphone : collée au bord, droite, sans bulle */
+html body .mobile-bottom-nav-v432, html body .mobile-shell-v435{left:0 !important;right:0 !important;bottom:0 !important;
+  border-radius:0 !important;border:0 !important;border-top:1px solid var(--border) !important;
+  padding-bottom:env(safe-area-inset-bottom) !important;}
+html body .mobile-bottom-nav-v432 button, html body .mobile-shell-v435 button{border-radius:6px !important;}
+@media (max-width:900px){ html body .modal{border-radius:10px 10px 0 0 !important;} }
+
+/* v6 · sans cadres (suite) : barre de recherche, cartes du tableau de bord, graphiques */
+html body .filter-bar{background:transparent !important;border:0 !important;border-radius:0 !important;padding:0 !important;}
+html body .hero-full .hero-side-item, html body #dashboard-hero .hero-side-item{background:transparent !important;
+  border:0 !important;border-top:1px solid var(--border) !important;border-radius:0 !important;padding:14px 0 !important;}
+html body .hero-full .hero-full-right > .hero-side-item:first-child{border-top:0 !important;padding-top:4px !important;}
+html body .stats-2col{gap:0 40px !important;}
+html body .section-header{background:transparent !important;}
+html body .stats-2col > .section-card{background:transparent !important;}
+html body .stats-2col > .section-card > div[style*="padding:16px"]{padding:16px 0 !important;}
+
 ::selection{background:rgba(79,140,255,.3);}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
 </style>
