@@ -5180,11 +5180,11 @@ body {
   <div class="welcome-card">
     <div class="welcome-kicker">Ariane</div>
     <div class="welcome-title">Bienvenue sur Ariane</div>
-    <div class="welcome-sub">Ton outil pour gérer ventes, stock, factures et dépenses au même endroit — sans tableur, sans prise de tête.</div>
+    <div class="welcome-sub">Ton stand de marché dans ta poche : ventes, stock, marchés et dépenses au même endroit — sans tableur, sans prise de tête.</div>
     <div class="welcome-grid">
       <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-ventes"/></svg></div><div class="welcome-stat-label">Ventes aujourd'hui</div><div class="welcome-stat-value" id="welcome-stat-ventes">0 €</div></div>
       <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-stock"/></svg></div><div class="welcome-stat-label">Stock faible</div><div class="welcome-stat-value" id="welcome-stat-stock">0</div></div>
-      <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-factures"/></svg></div><div class="welcome-stat-label">Factures à faire</div><div class="welcome-stat-value" id="welcome-stat-factures">0</div></div>
+      <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-marches"/></svg></div><div class="welcome-stat-label">Marchés à venir</div><div class="welcome-stat-value" id="welcome-stat-factures">0</div></div>
       <div class="welcome-stat"><div class="welcome-stat-icon"><svg class="icon"><use href="#icon-depenses"/></svg></div><div class="welcome-stat-label">Dépenses du mois</div><div class="welcome-stat-value" id="welcome-stat-depenses">0 €</div></div>
     </div>
     <div class="welcome-actions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
@@ -5314,9 +5314,9 @@ body {
     <div class="nav-item" data-page="ventes" onclick="goPage('ventes')"><span class="nav-icon"><svg class="icon"><use href="#icon-ventes"/></svg></span> Ventes <span id="badge-ventes" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="commandes" onclick="goPage('commandes')"><span class="nav-icon"><svg class="icon"><use href="#icon-commandes"/></svg></span> Commandes <span id="badge-commandes" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="stock" onclick="goPage('stock')"><span class="nav-icon"><svg class="icon"><use href="#icon-stock"/></svg></span> Stock <span id="badge-stock" class="badge" style="display:none"></span></div>
-    <div class="nav-item" data-page="marches" onclick="goPage('marches')"><span class="nav-icon"><svg class="icon"><use href="#icon-marches"/></svg></span> Marchés & Événements</div>
+    <div class="nav-item" data-page="marches" onclick="goPage('marches')"><span class="nav-icon"><svg class="icon"><use href="#icon-marches"/></svg></span> Mes marchés</div>
     <div class="nav-item" data-page="produits-stats" onclick="goPage('produits-stats')"><span class="nav-icon"><svg class="icon"><use href="#icon-stats"/></svg></span> Stats produits</div>
-    <div class="nav-item" data-page="transactions" onclick="goPage('transactions')"><span class="nav-icon"><svg class="icon"><use href="#icon-depenses"/></svg></span> Dépenses & Compta <span id="badge-classer" class="badge" style="display:none"></span></div>
+    <div class="nav-item" data-page="transactions" onclick="goPage('transactions')"><span class="nav-icon"><svg class="icon"><use href="#icon-depenses"/></svg></span> Dépenses <span id="badge-classer" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="factures" onclick="goPage('factures')"><span class="nav-icon"><svg class="icon"><use href="#icon-factures"/></svg></span> Factures <span id="badge-factures" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="clients" onclick="goPage('clients')"><span class="nav-icon"><svg class="icon"><use href="#icon-clients"/></svg></span> Clients</div>
     <div class="nav-item" data-page="calendrier" onclick="goPage('calendrier')"><span class="nav-icon"><svg class="icon"><use href="#icon-calendrier"/></svg></span> Calendrier <span id="badge-calendrier" class="badge" style="display:none"></span></div>
@@ -9642,7 +9642,7 @@ checkDueReminders();
         .reduce((s,v) => s + v.items.reduce((a,i)=>a+i.qte*i.prix,0), 0);
       const stockSummary = (typeof computeStockSummary === 'function') ? computeStockSummary() : {low:[],rupture:[]};
       const stockFaible = (stockSummary.low?.length||0) + (stockSummary.rupture?.length||0);
-      const facturesAFaire = (data.factures||[]).filter(f => f.statut==='impayee' || f.statut==='retard').length;
+      const facturesAFaire = (data.marches||[]).filter(m => (m.fin||m.debut||'') >= todayStr()).length; // affiché comme « Marchés à venir »
       const depensesMois = (data.transactions||[]).filter(t => t.type==='depense' && (t.date||'').slice(0,7)===monthStr())
         .reduce((s,t)=>s+Math.abs(t.montant||0),0);
       document.getElementById('welcome-stat-ventes').textContent = fmt(ventesAuj);
@@ -18396,8 +18396,8 @@ showPage();
 
   // ── UI page bilan + panneaux commerciaux ────────────────────────
   function injectMonthlyPage18(){
-    if(!document.querySelector('[data-page="bilan-mensuel"]')){
-      const after = document.querySelector('[data-page="dashboard"]');
+    if(!document.querySelector('.nav-item[data-page="bilan-mensuel"]')){
+      const after = document.querySelector('.nav-item[data-page="dashboard"]');
       if(after){
         after.insertAdjacentHTML('afterend', `<div class="nav-item" data-page="bilan-mensuel" onclick="goPage('bilan-mensuel')"><span class="nav-icon"><svg class="icon"><use href="#icon-bilan"/></svg></span> Bilan mensuel</div>`);
       }
@@ -22395,8 +22395,8 @@ showPage();
       <button type="button" data-page="dashboard" onclick="goPage('dashboard')"><span><svg class="icon"><use href="#icon-dashboard"/></svg></span>Accueil</button>
       <button type="button" data-page="ventes" onclick="goPage('ventes')"><span><svg class="icon"><use href="#icon-ventes"/></svg></span>Ventes</button>
       <button type="button" data-page="stock" onclick="goPage('stock')"><span><svg class="icon"><use href="#icon-stock"/></svg></span>Stock</button>
-      <button type="button" data-page="factures" onclick="goPage('factures')"><span><svg class="icon"><use href="#icon-factures"/></svg></span>Factures</button>
-      <button type="button" data-page="site-builder" onclick="goPage('site-builder')"><span><svg class="icon"><use href="#icon-site"/></svg></span>Site</button>
+      <button type="button" data-page="marches" onclick="goPage('marches')"><span><svg class="icon"><use href="#icon-marches"/></svg></span>Marchés</button>
+      <button type="button" data-page="bilan-mensuel" onclick="goPage('bilan-mensuel')"><span><svg class="icon"><use href="#icon-bilan"/></svg></span>Bilan</button>
     `;
     document.body.appendChild(nav);
     updateMobileNav432();
@@ -23191,8 +23191,8 @@ function respondHelp(entry, originalText) {
       ['dashboard', svg('dashboard'), 'Accueil'],
       ['ventes', svg('ventes'), 'Ventes'],
       ['stock', svg('stock'), 'Stock'],
-      ['factures', svg('factures'), 'Factures'],
-      [hasAssistant ? 'assistant' : 'site-builder', svg(hasAssistant ? 'help' : 'site'), hasAssistant ? 'Aide' : 'Site']
+      ['marches', svg('marches'), 'Marchés'],
+      ['bilan-mensuel', svg('bilan'), 'Bilan']
     ];
   }
 
@@ -25305,6 +25305,45 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
       // désactivés, mais Ariane continue de fonctionner en local comme avant.
     });
   });
+})();
+</script>
+
+<script>
+// ─── Recentrage « créateurs sur les marchés » ─────────────────────────────
+// Ces pages sont retirées du menu, mais leur code reste en place pour
+// pouvoir les réactiver : il suffit de les enlever de cette liste.
+(function(){
+  var REDIRECT = {
+    'calendrier': 'marches',
+    'produits-stats': 'bilan-mensuel',
+    'commandes': 'ventes',
+    'clients': 'ventes',
+    'factures': 'dashboard',
+    'paiements-v5': 'dashboard',
+    'site-builder': 'dashboard'
+  };
+  var css = Object.keys(REDIRECT).map(function(p){
+    return '.nav-item[data-page="'+p+'"], #mobile-bottom-nav-v432 [data-page="'+p+'"], #mobile-shell-v435 [data-page="'+p+'"]';
+  }).join(', ') + '{display:none !important;}';
+  var st = document.createElement('style');
+  st.id = 'ariane-recentrage-style';
+  st.textContent = css;
+  document.head.appendChild(st);
+
+  function wrap(){
+    var current = window.goPage || (typeof goPage !== 'undefined' ? goPage : null);
+    if(!current || current.__recentrage) return;
+    var wrapped = function(page){
+      var target = REDIRECT[page] || page;
+      return current.call(this, target);
+    };
+    wrapped.__recentrage = true;
+    window.goPage = wrapped;
+    try { goPage = wrapped; } catch(e) {}
+  }
+  wrap();
+  // D'autres scripts peuvent re-patcher goPage au chargement : on repasse après eux.
+  window.addEventListener('load', function(){ wrap(); setTimeout(wrap, 500); });
 })();
 </script>
 
