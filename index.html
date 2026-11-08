@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ariane — Compta & Ventes</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0e0f13; --surface: #16171d; --surface2: #1e2028; --border: #2a2c36; --border2: #353845;
@@ -19,7 +19,7 @@
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { font-size: 15px; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+  body { font-family: 'Geist', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
   /* Sidebar */
   #sidebar { width: 230px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
   .sidebar-logo {
@@ -29,20 +29,20 @@
   padding-top: 6px;
   padding-bottom: 6px;
 }
-  .logo-mark { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--accent); letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
-  .logo-sub { font-size: 0.68rem; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 3px; }
+  .logo-mark { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--accent); letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+  .logo-sub { font-size: 0.68rem; color: var(--text3); font-family: 'Geist', sans-serif; margin-top: 3px; }
   .sidebar-nav { padding: 12px 10px; flex: 1; }
   .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; color: var(--text2); font-size: 0.87rem; font-weight: 400; transition: all 0.15s; margin-bottom: 2px; user-select: none; }
   .nav-item .nav-icon { font-size: 1rem; min-width: 20px; text-align: center; }
   .nav-item:hover { background: var(--surface2); color: var(--text); }
   .nav-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
-  .sidebar-footer { padding: 14px 10px; border-top: 1px solid var(--border); font-size: 0.7rem; color: var(--text3); font-family: 'DM Mono', monospace; text-align: center; line-height: 1.8; }
+  .sidebar-footer { padding: 14px 10px; border-top: 1px solid var(--border); font-size: 0.7rem; color: var(--text3); font-family: 'Geist', sans-serif; text-align: center; line-height: 1.8; }
   /* Main */
   #main { margin-left: 230px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
   .topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); position: sticky; top: 0; z-index: 50; }
-  .topbar-title { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; }
+  .topbar-title { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; }
   .topbar-actions { display: flex; gap: 8px; align-items: center; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-family: 'Geist', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
   .btn-primary { background: var(--accent); color: #1a0a2e; }
   .btn-primary:hover { background: var(--accent2); }
   .btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
@@ -60,8 +60,8 @@
   .kpi-card.green::before { background: linear-gradient(90deg, var(--green), transparent); }
   .kpi-card.red::before { background: linear-gradient(90deg, var(--danger), transparent); }
   .kpi-card.blue::before { background: linear-gradient(90deg, var(--blue), transparent); }
-  .kpi-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; margin-bottom: 10px; }
-  .kpi-value { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.6rem; letter-spacing: -0.02em; line-height: 1; }
+  .kpi-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Geist', sans-serif; margin-bottom: 10px; }
+  .kpi-value { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 1.6rem; letter-spacing: -0.02em; line-height: 1; }
   .kpi-value.purple { color: var(--accent); } .kpi-value.gold { color: var(--gold); }
   .kpi-value.green { color: var(--green); } .kpi-value.red { color: var(--danger); } .kpi-value.blue { color: var(--blue); }
   .kpi-sub { font-size: 0.73rem; color: var(--text3); margin-top: 6px; }
@@ -74,14 +74,14 @@
   /* Cards */
   .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
   .section-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .section-title { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.93rem; }
+  .section-title { font-family: 'Geist', sans-serif; font-weight: 600; font-size: 0.93rem; }
   /* Tables */
   table { width: 100%; border-collapse: collapse; }
-  th { padding: 9px 14px; text-align: left; font-size: 0.7rem; font-family: 'DM Mono', monospace; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  th { padding: 9px 14px; text-align: left; font-size: 0.7rem; font-family: 'Geist', sans-serif; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); background: var(--surface2); }
   td { padding: 10px 14px; font-size: 0.83rem; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(255,255,255,0.015); }
-  .tag { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; font-family: 'Geist', sans-serif; }
   .tag-recette { background: var(--green-dim); color: var(--green); }
   .tag-depense { background: var(--danger-dim); color: var(--danger); }
   .tag-perso { background: rgba(255,255,255,0.06); color: var(--text3); }
@@ -89,17 +89,17 @@
   .tag-payee { background: var(--green-dim); color: var(--green); }
   .tag-impayee { background: var(--gold-dim); color: var(--gold); }
   .tag-retard { background: var(--danger-dim); color: var(--danger); }
-  .amount-pos { color: var(--green); font-family: 'DM Mono', monospace; font-weight: 500; }
-  .amount-neg { color: var(--danger); font-family: 'DM Mono', monospace; font-weight: 500; }
-  .amount-neutral { color: var(--text2); font-family: 'DM Mono', monospace; }
+  .amount-pos { color: var(--green); font-family: 'Geist', sans-serif; font-weight: 500; }
+  .amount-neg { color: var(--danger); font-family: 'Geist', sans-serif; font-weight: 500; }
+  .amount-neutral { color: var(--text2); font-family: 'Geist', sans-serif; }
   /* Modal */
   .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); padding: 26px; width: 520px; max-width: 95vw; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
-  .modal-title { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 20px; }
+  .modal-title { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 20px; }
   .form-row { margin-bottom: 13px; }
-  .form-label { display: block; font-size: 0.75rem; color: var(--text3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
-  .form-input, .form-select, .form-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 9px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.87rem; outline: none; transition: border-color 0.15s; }
+  .form-label { display: block; font-size: 0.75rem; color: var(--text3); font-family: 'Geist', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+  .form-input, .form-select, .form-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 9px 12px; font-family: 'Geist', sans-serif; font-size: 0.87rem; outline: none; transition: border-color 0.15s; }
   .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
   .form-select option { background: var(--surface2); }
   .form-row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -110,12 +110,12 @@
   .empty-state { padding: 40px; text-align: center; color: var(--text3); font-size: 0.87rem; }
   .empty-icon { font-size: 2rem; margin-bottom: 10px; opacity: 0.4; }
   input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: 4px; }
-  .range-display { font-family: 'DM Mono', monospace; font-size: 1.05rem; color: var(--accent); font-weight: 500; }
+  .range-display { font-family: 'Geist', sans-serif; font-size: 1.05rem; color: var(--accent); font-weight: 500; }
   .export-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
   .export-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; text-align: center; cursor: pointer; transition: all 0.2s; }
   .export-card:hover { border-color: var(--accent); background: var(--accent-dim); }
   .export-icon { font-size: 2rem; margin-bottom: 10px; }
-  .export-title { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.92rem; margin-bottom: 5px; }
+  .export-title { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 0.92rem; margin-bottom: 5px; }
   .export-desc { font-size: 0.78rem; color: var(--text3); line-height: 1.5; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -128,7 +128,7 @@
   .page { display: none; } .page.active { display: block; }
   .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
   .filter-bar .form-input, .filter-bar .form-select { width: auto; font-size: 0.81rem; padding: 7px 10px; }
-  .badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: var(--danger); color: white; border-radius: 50%; font-size: 0.63rem; font-weight: 500; font-family: 'DM Mono', monospace; margin-left: 5px; }
+  .badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: var(--danger); color: white; border-radius: 50%; font-size: 0.63rem; font-weight: 500; font-family: 'Geist', sans-serif; margin-left: 5px; }
   /* Progress bar */
   .prog-bar-bg { background: var(--surface2); border-radius: 4px; height: 8px; overflow: hidden; }
   .prog-bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s; }
@@ -137,7 +137,7 @@
   .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
   .stat-row:last-child { border-bottom: none; }
   .stat-label { font-size: 0.83rem; color: var(--text2); }
-  .stat-val { font-family: 'DM Mono', monospace; font-size: 0.83rem; color: var(--accent); font-weight: 500; }
+  .stat-val { font-family: 'Geist', sans-serif; font-size: 0.83rem; color: var(--accent); font-weight: 500; }
   /* Channel tag */
   .tag-evenement { background: rgba(79,140,255,0.15); color: var(--accent); }
   .tag-marche { background: rgba(79,140,255,0.15); color: var(--accent); }
@@ -149,14 +149,14 @@
   .marche-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.15s; }
   .marche-card:hover { border-color: var(--accent); }
   .marche-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .marche-name { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.95rem; }
-  .marche-meta { font-size: 0.75rem; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .marche-name { font-family: 'Geist', sans-serif; font-weight: 600; font-size: 0.95rem; }
+  .marche-meta { font-size: 0.75rem; color: var(--text3); font-family: 'Geist', sans-serif; }
   .drop-zone { border: 2px dashed var(--border2); border-radius: var(--radius); padding: 32px; text-align: center; color: var(--text3); cursor: pointer; transition: all 0.2s; }
   .drop-zone:hover { border-color: var(--accent); color: var(--accent); }
   .params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .param-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
-  .param-title { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.88rem; margin-bottom: 13px; }
-  .divider { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.78rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .param-title { font-family: 'Geist', sans-serif; font-weight: 600; font-size: 0.88rem; margin-bottom: 13px; }
+  .divider { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 0.78rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
   /* Vente item in modal */
   .vente-item { display: grid; grid-template-columns: 1fr 1fr 72px 90px 28px; gap: 8px; align-items: center; margin-bottom: 8px; }
   /* Ligne issue d'un scan OCR dont le produit n'a pas été reconnu : reste
@@ -388,7 +388,7 @@ body {
 
 .hero-kicker {
   color: #93c5fd;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   text-transform: uppercase;
   letter-spacing: .12em;
   font-size: .72rem;
@@ -396,7 +396,7 @@ body {
 }
 
 .hero-title {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Geist', sans-serif;
   font-size: clamp(1.45rem, 2vw, 2.2rem);
   line-height: 1.15;
   font-weight: 700;
@@ -434,7 +434,7 @@ body {
 }
 
 .hero-mini-label {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   text-transform: uppercase;
   letter-spacing: .08em;
   color: var(--text3);
@@ -443,7 +443,7 @@ body {
 }
 
 .hero-mini-value {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Geist', sans-serif;
   font-weight: 700;
   font-size: 1.15rem;
 }
@@ -502,7 +502,7 @@ body {
 }
 
 .kpi-label {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   color: var(--text3);
   letter-spacing: .1em;
   font-size: .72rem;
@@ -795,7 +795,7 @@ body.sidebar-open #sidebar-overlay {
 }
 
 .hero-title {
-  font-family: 'DM Sans', sans-serif !important;
+  font-family: 'Geist', sans-serif !important;
   font-weight: 700 !important;
   font-size: 2.15rem !important;
   line-height: 1.22 !important;
@@ -835,7 +835,7 @@ body.sidebar-open #sidebar-overlay {
 .kpi-value.green,
 .kpi-value.red,
 .kpi-value.blue {
-  font-family: 'DM Mono', monospace !important;
+  font-family: 'Geist', sans-serif !important;
   font-size: 1.82rem !important;
   line-height: 1.08 !important;
   font-weight: 500 !important;
@@ -849,7 +849,7 @@ body.sidebar-open #sidebar-overlay {
 
 /* Les petits chiffres du hero aussi restent réguliers */
 .hero-mini-value {
-  font-family: 'DM Mono', monospace !important;
+  font-family: 'Geist', sans-serif !important;
   font-size: 1.16rem !important;
   line-height: 1.1 !important;
   font-weight: 500 !important;
@@ -991,7 +991,7 @@ body.sidebar-open #sidebar-overlay {
   display: block !important;
   max-width: 820px !important;
   width: 100% !important;
-  font-family: 'DM Sans', sans-serif !important;
+  font-family: 'Geist', sans-serif !important;
   font-size: 2.15rem !important;
   line-height: 1.22 !important;
   font-weight: 700 !important;
@@ -1041,7 +1041,7 @@ body.sidebar-open #sidebar-overlay {
 }
 
 .hero-full .hero-mini-value {
-  font-family: 'DM Mono', monospace !important;
+  font-family: 'Geist', sans-serif !important;
   font-size: 1.3rem !important;
   line-height: 1.1 !important;
   font-weight: 500 !important;
@@ -1109,7 +1109,7 @@ body.sidebar-open #sidebar-overlay {
 }
 
 .calendar-date {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .78rem;
   color: var(--accent);
 }
@@ -1137,7 +1137,7 @@ body.sidebar-open #sidebar-overlay {
   width: fit-content;
   padding: 3px 9px;
   border-radius: 999px;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .68rem;
   margin-bottom: 5px;
   background: rgba(79,140,255,.15);
@@ -1206,7 +1206,7 @@ body.sidebar-open #sidebar-overlay {
   width: fit-content;
   padding: 5px 10px;
   border-radius: 999px;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .7rem;
   margin-bottom: 10px;
   border: 1px solid rgba(255,255,255,.1);
@@ -1230,7 +1230,7 @@ body.sidebar-open #sidebar-overlay {
   display: inline-block;
   margin-top: 4px;
   margin-bottom: 6px;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .72rem;
   color: var(--accent);
 }
@@ -1396,7 +1396,7 @@ body.sidebar-open #sidebar-overlay {
 /* =========================================================
    SITE BUILDER — CONSTRUCTEUR DE SITE LOCAL
    ========================================================= */
-.builder-layout{display:grid;grid-template-columns:260px minmax(0,1fr)310px;gap:18px;align-items:start}.builder-toolbar,.builder-properties{position:sticky;top:96px}.builder-tool-grid{padding:16px;display:grid;gap:10px}.builder-tool-grid .btn{justify-content:flex-start}.builder-divider{font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;padding:14px 18px 6px;border-top:1px solid var(--border)}
+.builder-layout{display:grid;grid-template-columns:260px minmax(0,1fr)310px;gap:18px;align-items:start}.builder-toolbar,.builder-properties{position:sticky;top:96px}.builder-tool-grid{padding:16px;display:grid;gap:10px}.builder-tool-grid .btn{justify-content:flex-start}.builder-divider{font-family:'Geist',sans-serif;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;padding:14px 18px 6px;border-top:1px solid var(--border)}
 .builder-details summary{list-style:none}.builder-details summary::-webkit-details-marker{display:none}.builder-details summary::before{content:'▸ ';font-size:.7rem}.builder-details[open] summary::before{content:'▾ '}.builder-toolbar .form-row,.builder-toolbar .form-row-grid{padding-left:16px;padding-right:16px}.builder-canvas-wrap{min-width:0;background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.22)}.builder-canvas-top{height:48px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);color:var(--text3);font-size:.82rem}.site-builder-canvas{position:relative;width:100%;min-height:720px;overflow:hidden;background:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px),#10131d;background-size:28px 28px}.builder-element{position:absolute;cursor:move;user-select:none;border:1px solid transparent;min-width:40px;min-height:30px;display:flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .12s ease,border-color .12s ease;box-sizing:border-box;overflow:hidden}.builder-element:hover{border-color:rgba(79,140,255,.45);box-shadow:0 0 0 3px rgba(79,140,255,.1)}.builder-element.selected{border-color:#4f8cff!important;box-shadow:0 0 0 4px rgba(79,140,255,.16)}.builder-element-title{font-weight:700;line-height:1.05}.builder-element-text{justify-content:flex-start;text-align:left;line-height:1.45}.builder-element-button{font-weight:700}.builder-element-image img{width:100%;height:100%;object-fit:cover;border-radius:inherit;pointer-events:none}.builder-element-dropdown select{width:100%;height:100%;border:0;border-radius:inherit;padding:0 12px;background:transparent;color:inherit;font:inherit;pointer-events:none}.builder-element-card,.builder-element-section{align-items:flex-start;justify-content:flex-start;text-align:left;padding:16px;line-height:1.45}.builder-resize-handle{position:absolute;right:-5px;bottom:-5px;width:13px;height:13px;border-radius:99px;background:#4f8cff;cursor:nwse-resize;display:none}.builder-element.selected .builder-resize-handle{display:block}@media(max-width:1280px){.builder-layout{grid-template-columns:240px minmax(0,1fr)}.builder-properties{grid-column:1/-1;position:static}}@media(max-width:900px){.builder-layout{grid-template-columns:1fr}.builder-toolbar{position:static}.site-builder-canvas{min-height:620px}}
 
 
@@ -1433,7 +1433,7 @@ body.sidebar-open #sidebar-overlay {
 
 .builder-page-link {
   margin-top: 4px;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .7rem;
   color: var(--accent);
   word-break: break-all;
@@ -1456,7 +1456,7 @@ body.sidebar-open #sidebar-overlay {
 }
 
 .builder-page-edit-title {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -1545,7 +1545,7 @@ body.sidebar-open #sidebar-overlay {
   left: 6px;
   top: 6px;
   pointer-events: none;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: 10px;
   color: rgba(255,255,255,.65);
   background: rgba(0,0,0,.28);
@@ -1630,7 +1630,7 @@ body.sidebar-open #sidebar-overlay {
   position: absolute;
   top: -26px;
   right: 0;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: 10px;
   color: #fff;
   background: rgba(37,99,235,.92);
@@ -1651,7 +1651,7 @@ body.sidebar-open #sidebar-overlay {
 .builder-dropdown-visual-editor{display:grid;gap:10px;margin-top:10px}
 .builder-dropdown-option{display:grid;grid-template-columns:28px 1fr 1fr 34px;gap:8px;align-items:center;padding:9px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045)}
 .builder-dropdown-option.dragging{opacity:.55;border-color:rgba(79,140,255,.7)}
-.builder-dropdown-drag{height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.07);color:var(--text3);cursor:grab;user-select:none;font-family:'DM Mono',monospace}
+.builder-dropdown-drag{height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.07);color:var(--text3);cursor:grab;user-select:none;font-family:'Geist',sans-serif}
 .builder-dropdown-drag:active{cursor:grabbing}
 .builder-dropdown-option input{width:100%;min-width:0}
 .builder-dropdown-delete{height:34px;width:34px;border-radius:10px;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.12);color:#fecaca;cursor:pointer}
@@ -1700,7 +1700,7 @@ body.sidebar-open #sidebar-overlay {
   margin-top: 6px;
   color: var(--text3);
   font-size: .78rem;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
 }
 
 .builder-format-buttons {
@@ -1888,7 +1888,7 @@ body.sidebar-open #sidebar-overlay {
 }
 
 .builder-dimensions-title {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -2091,7 +2091,7 @@ label[for="builder-canvas-zoom"] {
   right: 18px;
   bottom: 18px;
   z-index: 2147483645;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: 11px;
   color: rgba(255,255,255,.72);
   background: rgba(0,0,0,.35);
@@ -2292,7 +2292,7 @@ label[for="builder-canvas-zoom"] {
 }
 
 .builder-dropdown-style-title {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .72rem;
   color: var(--text3);
   text-transform: uppercase;
@@ -2431,7 +2431,7 @@ label[for="builder-canvas-zoom"] {
 
 .builder-history-hint {
   color: var(--text3);
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .68rem;
   margin-left: 4px;
 }
@@ -2494,7 +2494,7 @@ label[for="builder-canvas-zoom"] {
 }
 
 .builder-pro-pack-title {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: .1em;
@@ -2526,7 +2526,7 @@ label[for="builder-canvas-zoom"] {
 }
 
 .builder-seo-title {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .72rem;
   color: var(--text3);
   text-transform: uppercase;
@@ -2568,7 +2568,7 @@ label[for="builder-canvas-zoom"] {
   background: rgba(15,23,42,.94);
   border: 1px solid rgba(79,140,255,.35);
   color: #bfdbfe;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .72rem;
   pointer-events: none;
   opacity: 0;
@@ -2593,14 +2593,14 @@ label[for="builder-canvas-zoom"] {
   border-radius: 20px; padding: 48px 44px; box-shadow: 0 30px 100px rgba(0,0,0,0.55);
   text-align: center;
 }
-.welcome-kicker { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
-.welcome-title { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 2.1rem; letter-spacing: -0.02em; margin-bottom: 12px; }
+.welcome-kicker { font-family: 'Geist', sans-serif; font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.welcome-title { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 2.1rem; letter-spacing: -0.02em; margin-bottom: 12px; }
 .welcome-sub { color: var(--text2); font-size: 0.95rem; max-width: 480px; margin: 0 auto 34px; line-height: 1.6; }
 .welcome-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px; }
 .welcome-stat { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 12px; }
 .welcome-stat-icon { font-size: 1.3rem; margin-bottom: 8px; }
-.welcome-stat-label { font-size: 0.7rem; color: var(--text3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-.welcome-stat-value { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--accent); }
+.welcome-stat-label { font-size: 0.7rem; color: var(--text3); font-family: 'Geist', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.welcome-stat-value { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--accent); }
 .welcome-actions { display: flex; gap: 12px; justify-content: center; }
 .welcome-skip { background: none; border: none; color: var(--text3); font-size: 0.8rem; cursor: pointer; margin-top: 18px; text-decoration: underline; }
 @media (max-width: 640px) { .welcome-grid { grid-template-columns: repeat(2, 1fr); } .welcome-card { padding: 32px 22px; } .welcome-title { font-size: 1.5rem; } }
@@ -2610,7 +2610,7 @@ label[for="builder-canvas-zoom"] {
 .setup-steps { display: flex; gap: 6px; margin-bottom: 22px; }
 .setup-step-dot { flex: 1; height: 4px; border-radius: 3px; background: var(--border); transition: background 0.2s; }
 .setup-step-dot.done, .setup-step-dot.active { background: var(--accent); }
-.setup-step-title { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+.setup-step-title { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
 .setup-step-sub { font-size: 0.8rem; color: var(--text3); margin-bottom: 20px; }
 .setup-panel { display: none; }
 .setup-panel.active { display: block; }
@@ -2663,7 +2663,7 @@ label[for="builder-canvas-zoom"] {
 }
 
 .commercial-card-title {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Geist', sans-serif;
   font-weight: 700;
   letter-spacing: -.025em;
   margin-bottom: 7px;
@@ -2697,7 +2697,7 @@ label[for="builder-canvas-zoom"] {
   border: 1px solid rgba(79,140,255,.28);
   background: rgba(79,140,255,.13);
   color: #bfdbfe;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .72rem;
   margin-left: 8px;
 }
@@ -2908,7 +2908,7 @@ label[for="builder-canvas-zoom"] {
 }
 
 .builder-align-pro-title {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: .09em;
@@ -2978,7 +2978,7 @@ label[for="builder-canvas-zoom"] {
   background: rgba(15,23,42,.96);
   border: 1px solid rgba(79,140,255,.35);
   color: #bfdbfe;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .72rem;
   opacity: 0;
   transform: translateY(8px);
@@ -3033,7 +3033,7 @@ label[for="builder-canvas-zoom"] {
   background: rgba(15,23,42,.96);
   color: #bfdbfe;
   border: 1px solid rgba(79,140,255,.35);
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: 10px;
   transform: translate(8px, -26px);
 }
@@ -3083,7 +3083,7 @@ label[for="builder-canvas-zoom"] {
 .v426-active-hint {
   margin-top: 10px;
   color: var(--text3);
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .72rem;
 }
 
@@ -3156,7 +3156,7 @@ label[for="builder-canvas-zoom"] {
   background: rgba(15,23,42,.96);
   color: #bfdbfe;
   border: 1px solid rgba(79,140,255,.35);
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: 10px;
   transform: translate(8px, -26px);
   white-space: nowrap;
@@ -3209,7 +3209,7 @@ label[for="builder-canvas-zoom"] {
   background: rgba(15,23,42,.97);
   color: #bfdbfe;
   border: 1px solid rgba(79,140,255,.38);
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: 10px;
   transform: translate(8px, -26px);
   white-space: nowrap;
@@ -3516,7 +3516,7 @@ label[for="builder-canvas-zoom"] {
     color: var(--text3);
     font-size: .72rem;
     padding: 0 14px 10px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Geist', sans-serif;
   }
 
   .modal-overlay {
@@ -4254,7 +4254,7 @@ label[for="builder-canvas-zoom"] {
 
   .mobile-table-label-v435 {
     color: var(--text3) !important;
-    font-family: 'DM Mono', monospace !important;
+    font-family: 'Geist', sans-serif !important;
     text-transform: uppercase !important;
     letter-spacing: .06em !important;
     font-size: .62rem !important;
@@ -4515,7 +4515,7 @@ label[for="builder-canvas-zoom"] {
   border-radius: 999px;
   background: linear-gradient(135deg, #93c5fd, #4f8cff, #818cf8);
   color: #12091e;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Geist', sans-serif;
   font-weight: 700;
   font-size: .86rem;
   cursor: pointer;
@@ -4538,7 +4538,7 @@ label[for="builder-canvas-zoom"] {
   background: rgba(251,191,36,.16);
   border: 1px solid rgba(251,191,36,.30);
   color: #fde68a;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Geist', sans-serif;
   font-size: .72rem;
   box-shadow: 0 18px 60px rgba(0,0,0,.40);
   backdrop-filter: blur(16px);
@@ -4699,7 +4699,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
     linear-gradient(135deg, rgba(24,26,42,.96), rgba(10,12,21,.96));
 }
 .pay-v5-kicker {
-  font-family:'DM Mono',monospace;
+  font-family:'Geist',sans-serif;
   font-size:.72rem;
   letter-spacing:.13em;
   text-transform:uppercase;
@@ -4707,7 +4707,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
   margin-bottom:10px;
 }
 .pay-v5-title {
-  font-family:'DM Sans', sans-serif;
+  font-family:'Geist', sans-serif;
   font-size:clamp(1.5rem,2.4vw,2.35rem);
   line-height:1.15;
   letter-spacing:-.02em;
@@ -4789,7 +4789,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
   border:1px solid rgba(255,255,255,.08);
 }
 .pay-v5-mini-label {
-  font-family:'DM Mono',monospace;
+  font-family:'Geist',sans-serif;
   text-transform:uppercase;
   letter-spacing:.08em;
   color:var(--text3);
@@ -4797,7 +4797,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
   margin-bottom:8px;
 }
 .pay-v5-mini-value {
-  font-family:'DM Sans', sans-serif;
+  font-family:'Geist', sans-serif;
   font-size:1.25rem;
   font-weight:700;
   letter-spacing:-.035em;
@@ -4811,7 +4811,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
   border:1px solid rgba(255,255,255,.10);
   background:rgba(0,0,0,.26);
   color:#e5e7eb;
-  font-family:'DM Mono',ui-monospace,monospace;
+  font-family:'Geist',ui-monospace,monospace;
   font-size:.76rem;
   line-height:1.55;
 }
@@ -4834,7 +4834,7 @@ body.pwa-offline-v437 #pwa-offline-badge-v437 {
   margin-bottom:14px;
 }
 .builder-pay-v5-title {
-  font-family:'DM Sans', sans-serif;
+  font-family:'Geist', sans-serif;
   font-size:1.15rem;
   font-weight:700;
   letter-spacing:-.035em;
@@ -7002,7 +7002,7 @@ function renderDashboard() {
     return `<div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;margin-bottom:4px">
         <span style="font-size:0.82rem;color:var(--text)">${escapeHtml(id)}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--accent)">${pct}% — ${fmt(s.ca)}</span>
+        <span style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--accent)">${pct}% — ${fmt(s.ca)}</span>
       </div>
       <div class="prog-bar-bg"><div class="prog-bar" style="width:${pct}%"></div></div>
       <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">${s.qte} unité(s) vendue(s)</div>
@@ -7017,7 +7017,7 @@ function renderDashboard() {
     return `<div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;margin-bottom:4px">
         <span style="font-size:0.82rem;color:var(--text)">${CANAUX[canal]||canal}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--accent)">${pct}% — ${fmt(s.ca)}</span>
+        <span style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--accent)">${pct}% — ${fmt(s.ca)}</span>
       </div>
       <div class="prog-bar-bg"><div class="prog-bar" style="width:${pct}%"></div></div>
       <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">${s.nb} vente(s)</div>
@@ -7086,32 +7086,32 @@ function renderDashboard() {
         <div style="margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px">
             <span style="font-size:0.78rem;color:var(--text3)">CA ventes</span>
-            <span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--green)">+${fmt(d.ca)}</span>
+            <span style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--green)">+${fmt(d.ca)}</span>
           </div>
           <div class="prog-bar-bg"><div style="height:6px;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--accent));width:${pct}%;transition:width .4s"></div></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px">
           <div style="background:var(--surface);border-radius:var(--radius-sm);padding:9px 12px">
-            <div style="font-size:0.68rem;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:3px">Panier moyen</div>
-            <div style="font-family:'DM Mono',monospace;font-size:0.88rem;color:var(--accent)">${fmt(panier)}</div>
+            <div style="font-size:0.68rem;color:var(--text3);font-family:'Geist',sans-serif;text-transform:uppercase;margin-bottom:3px">Panier moyen</div>
+            <div style="font-family:'Geist',sans-serif;font-size:0.88rem;color:var(--accent)">${fmt(panier)}</div>
           </div>
           <div style="background:var(--surface);border-radius:var(--radius-sm);padding:9px 12px">
-            <div style="font-size:0.68rem;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:3px">Dépenses hors charges</div>
-            <div style="font-family:'DM Mono',monospace;font-size:0.88rem;color:var(--danger)">${depenses>0?'-'+fmt(depenses):'—'}</div>
+            <div style="font-size:0.68rem;color:var(--text3);font-family:'Geist',sans-serif;text-transform:uppercase;margin-bottom:3px">Dépenses hors charges</div>
+            <div style="font-family:'Geist',sans-serif;font-size:0.88rem;color:var(--danger)">${depenses>0?'-'+fmt(depenses):'—'}</div>
             <div style="font-size:0.68rem;color:var(--text3);margin-top:4px">Frais ${fmt(depensesBase)} · Coût produits ${fmt(coutProduits)}</div>
           </div>
           <div style="background:var(--surface);border-radius:var(--radius-sm);padding:9px 12px">
-            <div style="font-size:0.68rem;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:3px">Net après charges</div>
-            <div style="font-family:'DM Mono',monospace;font-size:0.88rem;color:${netApresCharges>=0?'var(--green)':'var(--danger)'}">${fmt(netApresCharges)}</div>
+            <div style="font-size:0.68rem;color:var(--text3);font-family:'Geist',sans-serif;text-transform:uppercase;margin-bottom:3px">Net après charges</div>
+            <div style="font-family:'Geist',sans-serif;font-size:0.88rem;color:${netApresCharges>=0?'var(--green)':'var(--danger)'}">${fmt(netApresCharges)}</div>
             <div style="font-size:0.68rem;color:var(--text3);margin-top:4px">CA - charges / impôt</div>
           </div>
           <div style="background:var(--surface);border-radius:var(--radius-sm);padding:9px 12px">
-            <div style="font-size:0.68rem;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:3px">Bénéfice après coûts</div>
-            <div style="font-family:'DM Mono',monospace;font-size:0.88rem;color:${benefEstime>=0?'var(--green)':'var(--danger)'}">${fmt(benefEstime)}</div>
+            <div style="font-size:0.68rem;color:var(--text3);font-family:'Geist',sans-serif;text-transform:uppercase;margin-bottom:3px">Bénéfice après coûts</div>
+            <div style="font-family:'Geist',sans-serif;font-size:0.88rem;color:${benefEstime>=0?'var(--green)':'var(--danger)'}">${fmt(benefEstime)}</div>
             <div style="font-size:0.68rem;color:var(--text3);margin-top:4px">Net - frais - coût produits</div>
           </div>
           <div style="background:var(--surface);border-radius:var(--radius-sm);padding:9px 12px">
-            <div style="font-size:0.68rem;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:3px">Top produit</div>
+            <div style="font-size:0.68rem;color:var(--text3);font-family:'Geist',sans-serif;text-transform:uppercase;margin-bottom:3px">Top produit</div>
             <div style="font-size:0.78rem;color:var(--text2)">${topProd ? escapeHtml(prodLabel(topProd[0])) : '—'}</div>
           </div>
         </div>
@@ -7127,10 +7127,10 @@ function renderDashboard() {
     const canal = normalizeCanal(v.canal);
     const marche = v.marcheId && canal === 'evenement' ? data.marches.find(m=>m.id===v.marcheId) : null;
     return `<tr>
-      <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${v.date}</td>
+      <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.78rem">${v.date}</td>
       <td style="color:var(--text);font-size:0.81rem">${prods}</td>
       <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span></td>
-      <td style="font-family:'DM Mono',monospace;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
+      <td style="font-family:'Geist',sans-serif;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
       <td class="amount-pos">${fmt(total)}</td>
     </tr>`;
   }).join('') : `<tr><td colspan="5" class="empty-state">Aucune vente</td></tr>`;
@@ -7187,11 +7187,11 @@ function renderVentes() {
 
     // En-tête du jour
     rows.push(`<tr style="background:rgba(79,140,255,0.06)">
-      <td colspan="4" style="padding:8px 14px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text2);font-weight:600;text-transform:capitalize">
+      <td colspan="4" style="padding:8px 14px;font-family:'Geist',sans-serif;font-size:0.75rem;color:var(--text2);font-weight:600;text-transform:capitalize">
         ${dateLabel} <span style="color:var(--text3);font-weight:400">· ${ventesJour.length} vente(s) · ${nbJour} article(s)</span>
       </td>
       <td colspan="3" style="padding:8px 14px;text-align:right">
-        <span style="font-family:'DM Mono',monospace;font-size:0.85rem;color:var(--gold);font-weight:600">Recette du jour : ${fmt(recetteJour)}</span>
+        <span style="font-family:'Geist',sans-serif;font-size:0.85rem;color:var(--gold);font-weight:600">Recette du jour : ${fmt(recetteJour)}</span>
       </td>
     </tr>`);
 
@@ -7202,11 +7202,11 @@ function renderVentes() {
       const marche = v.marcheId && canal === 'evenement' ? data.marches.find(m=>m.id===v.marcheId) : null;
       const prixMoyen = v.items.length>0?(total/v.items.reduce((s,i)=>s+i.qte,0)):0;
       rows.push(`<tr>
-        <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.75rem;padding-left:20px">↳</td>
+        <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.75rem;padding-left:20px">↳</td>
         <td style="color:var(--text);font-size:0.81rem;max-width:200px">${v.items.map(i=>`${escapeHtml(prodCategory(i.produit))} — ${escapeHtml(prodLabel(i.produit))} ×${i.qte}`).join(', ')}${v.note?`<div style="color:var(--text3);font-size:0.72rem;margin-top:2px">${escapeHtml(v.note)}</div>`:''}</td>
         <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span></td>
-        <td style="font-family:'DM Mono',monospace;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text3)">${fmt(prixMoyen)}</td>
+        <td style="font-family:'Geist',sans-serif;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
+        <td style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--text3)">${fmt(prixMoyen)}</td>
         <td class="amount-pos">${fmt(total)}</td>
         <td>
           <button class="action-btn" data-action="edit-vente" data-id="${escapeHtml(v.id)}" title="Modifier"><svg class="icon icon-sm"><use href="#icon-edit"/></svg></button>
@@ -7314,17 +7314,17 @@ function showMarcheDetail(id) {
     const rows = ventesJour.map(v => {
       const total = v.items.reduce((s,i)=>s+i.qte*i.prix,0);
       return `<tr>
-        <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.75rem;padding-left:20px">${v.items.map(i=>`${escapeHtml(prodLabel(i.produit))} ×${i.qte}`).join(', ')}</td>
+        <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.75rem;padding-left:20px">${v.items.map(i=>`${escapeHtml(prodLabel(i.produit))} ×${i.qte}`).join(', ')}</td>
         <td class="amount-pos" style="font-size:0.82rem">${fmt(total)}</td>
       </tr>`;
     }).join('');
     const separator = idx > 0 ? `<tr><td colspan="2" style="padding:0"><div style="height:2px;background:linear-gradient(90deg,var(--accent),transparent);margin:4px 0"></div></td></tr>` : '';
     return `${separator}
       <tr style="background:var(--surface2)">
-        <td style="font-size:0.78rem;font-family:'DM Mono',monospace;color:var(--text2);font-weight:600;padding:8px 14px">
+        <td style="font-size:0.78rem;font-family:'Geist',sans-serif;color:var(--text2);font-weight:600;padding:8px 14px">
           ${new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}
         </td>
-        <td style="font-family:'DM Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--gold)">Recette du jour : ${fmt(recetteJour)}</td>
+        <td style="font-family:'Geist',sans-serif;font-size:0.82rem;font-weight:600;color:var(--gold)">Recette du jour : ${fmt(recetteJour)}</td>
       </tr>
       ${rows}`;
   }).join('') : `<tr><td colspan="2" style="color:var(--text3);text-align:center;padding:16px">Aucune vente liée à cet événement</td></tr>`;
@@ -7339,7 +7339,7 @@ function showMarcheDetail(id) {
       <div class="kpi-card gold" style="padding:14px"><div class="kpi-label">Panier moyen</div><div class="kpi-value gold" style="font-size:1.2rem">${fmt(panierMoyen)}</div></div>
     </div>
     ${fraisBreakdown.length ? `<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px">
-      <div style="font-size:0.72rem;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Détail des frais</div>
+      <div style="font-size:0.72rem;color:var(--text3);font-family:'Geist',sans-serif;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Détail des frais</div>
       ${fraisBreakdown.join('')}
       <div style="display:flex;justify-content:space-between;padding:6px 0 0"><span style="font-size:0.8rem;font-weight:600;color:var(--text)">Total frais</span><span class="amount-neg" style="font-weight:600">${fmt(frais)}</span></div>
     </div>` : ''}
@@ -7349,9 +7349,9 @@ function showMarcheDetail(id) {
       const products = Object.entries(s.products||{}).sort((a,b)=>b[1].qte-a[1].qte || b[1].ca-a[1].ca).map(([pid,ps],idx)=>{
         const pctP = s.qte>0 ? (ps.qte/s.qte*100) : 0;
         return `<div style="display:grid;grid-template-columns:28px 1fr 70px 70px;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);align-items:center">
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text3)">#${idx+1}</span>
+          <span style="font-family:'Geist',sans-serif;font-size:0.7rem;color:var(--text3)">#${idx+1}</span>
           <span style="font-size:0.8rem;color:var(--text)">${escapeHtml(prodLabel(pid))}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent)">${pctP.toFixed(1)}%</span>
+          <span style="font-family:'Geist',sans-serif;font-size:0.75rem;color:var(--accent)">${pctP.toFixed(1)}%</span>
           <span class="amount-neutral">×${ps.qte}</span>
         </div>`;
       }).join('');
@@ -7359,7 +7359,7 @@ function showMarcheDetail(id) {
         <summary style="cursor:pointer;list-style:none">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px">
             <span style="font-size:0.83rem;color:var(--text)">${cat} <span style="font-size:0.72rem;color:var(--text3)">ouvrir ▾</span></span>
-            <span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--accent)">${pct}% — ${fmt(s.ca)} (×${s.qte})</span>
+            <span style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--accent)">${pct}% — ${fmt(s.ca)} (×${s.qte})</span>
           </div>
           <div class="prog-bar-bg"><div class="prog-bar" style="width:${pct}%"></div></div>
         </summary>
@@ -7390,16 +7390,16 @@ function renderStatsPage() {
       <div class="section-card">
         <div class="section-header"><div class="section-title">Classement des catégories</div></div>
         <div style="padding:20px">
-          ${sorted.length ? `<div style="font-size:0.78rem;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:14px">Sur ${fmt(totalCA)} de CA total. Clique sur une catégorie pour voir les produits vendus.</div>` + sorted.map(([cat,s],i)=>{
+          ${sorted.length ? `<div style="font-size:0.78rem;color:var(--text3);font-family:'Geist',sans-serif;margin-bottom:14px">Sur ${fmt(totalCA)} de CA total. Clique sur une catégorie pour voir les produits vendus.</div>` + sorted.map(([cat,s],i)=>{
             const pct = totalCA>0?(s.ca/totalCA*100):0;
             const colors = ['var(--accent)','var(--gold)','var(--green)','var(--blue)','var(--accent2)'];
             const col = colors[i] || 'var(--text2)';
             const productRows = Object.entries(s.products||{}).sort((a,b)=>b[1].qte-a[1].qte || b[1].ca-a[1].ca).map(([pid,ps],idx)=>{
               const pctP = s.qte>0 ? (ps.qte/s.qte*100) : 0;
               return `<div style="display:grid;grid-template-columns:28px 1fr 75px 90px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
-                <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text3)">#${idx+1}</span>
+                <span style="font-family:'Geist',sans-serif;font-size:0.7rem;color:var(--text3)">#${idx+1}</span>
                 <span style="font-size:0.8rem;color:var(--text)">${escapeHtml(prodLabel(pid))}</span>
-                <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent)">${pctP.toFixed(1)}%</span>
+                <span style="font-family:'Geist',sans-serif;font-size:0.75rem;color:var(--accent)">${pctP.toFixed(1)}%</span>
                 <span class="amount-neutral">${ps.qte} vendu(s)</span>
               </div>`;
             }).join('');
@@ -7407,12 +7407,12 @@ function renderStatsPage() {
               <summary style="cursor:pointer;list-style:none">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
                   <div style="display:flex;align-items:center;gap:8px">
-                    <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:${col};font-weight:500;min-width:20px">#${i+1}</span>
+                    <span style="font-family:'Geist',sans-serif;font-size:0.7rem;color:${col};font-weight:500;min-width:20px">#${i+1}</span>
                     <span style="font-size:0.84rem;color:var(--text)">${escapeHtml(cat)}</span>
                     <span style="font-size:0.72rem;color:var(--text3)">ouvrir ▾</span>
                   </div>
                   <div style="text-align:right">
-                    <span style="font-family:'DM Mono',monospace;font-size:0.84rem;color:${col};font-weight:600">${pct.toFixed(1)}%</span>
+                    <span style="font-family:'Geist',sans-serif;font-size:0.84rem;color:${col};font-weight:600">${pct.toFixed(1)}%</span>
                     <span style="color:var(--text3);font-size:0.75rem;margin-left:6px">${fmt(s.ca)}</span>
                   </div>
                 </div>
@@ -7420,7 +7420,7 @@ function renderStatsPage() {
                 <div style="font-size:0.72rem;color:var(--text3);margin-top:3px">${s.qte} unité(s) · prix moyen ${fmt(s.ca/s.qte)}</div>
               </summary>
               <div style="margin-top:10px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm)">
-                <div style="font-size:0.72rem;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px;text-transform:uppercase">Top des produits dans ${escapeHtml(cat)}</div>
+                <div style="font-size:0.72rem;color:var(--text3);font-family:'Geist',sans-serif;margin-bottom:6px;text-transform:uppercase">Top des produits dans ${escapeHtml(cat)}</div>
                 ${productRows || '<div style="font-size:0.8rem;color:var(--text3)">Aucun produit vendu</div>'}
               </div>
             </details>`;
@@ -7435,7 +7435,7 @@ function renderStatsPage() {
             return `<div style="margin-bottom:14px">
               <div style="display:flex;justify-content:space-between;margin-bottom:4px">
                 <span style="font-size:0.84rem;color:var(--text)">${CANAUX[canal]||canal}</span>
-                <span style="font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--accent)">${pct.toFixed(1)}% — ${fmt(s.ca)}</span>
+                <span style="font-family:'Geist',sans-serif;font-size:0.8rem;color:var(--accent)">${pct.toFixed(1)}% — ${fmt(s.ca)}</span>
               </div>
               <div class="prog-bar-bg"><div class="prog-bar" style="width:${pct}%"></div></div>
               <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">${s.nb} vente(s) · panier moyen ${fmt(s.ca/s.nb)}</div>
@@ -7457,11 +7457,11 @@ function renderStatsPage() {
             const topProduct = topCat ? Object.entries(topCat[1].products||{}).sort((a,b)=>b[1].qte-a[1].qte || b[1].ca-a[1].ca)[0] : null;
             return `<tr>
               <td style="color:var(--text);font-weight:500">${escapeHtml(m.nom)}</td>
-              <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${escapeHtml(m.debut)}</td>
+              <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.78rem">${escapeHtml(m.debut)}</td>
               <td class="amount-pos">${fmt(totalCA)}</td>
               <td class="amount-neg">${frais>0?'-'+fmt(frais):'-'}</td>
               <td class="${net>=0?'amount-pos':'amount-neg'}">${fmt(net)}</td>
-              <td style="font-family:'DM Mono',monospace;font-size:0.8rem">${ventes.length}</td>
+              <td style="font-family:'Geist',sans-serif;font-size:0.8rem">${ventes.length}</td>
               <td style="font-size:0.8rem;color:var(--text2)">${topCat?topCat[0]:'-'}</td>
               <td style="font-size:0.8rem;color:var(--text2)">${topProduct?escapeHtml(prodLabel(topProduct[0])):'-'}</td>
             </tr>`;
@@ -7535,11 +7535,11 @@ function renderStock() {
     else if (s.suivi) { tag = '<span class="tag tag-stock-ok">OK</span>'; }
 
     return `<tr class="${rowClass}">
-      <td style="color:var(--text3);font-size:0.78rem;font-family:'DM Mono',monospace">${escapeHtml(prodCategory(s.produit))}</td>
+      <td style="color:var(--text3);font-size:0.78rem;font-family:'Geist',sans-serif">${escapeHtml(prodCategory(s.produit))}</td>
       <td style="color:var(--text);font-size:0.82rem">${escapeHtml(prodLabel(s.produit))}</td>
       <td>${tag}</td>
       <td class="amount-neutral">${s.suivi ? stock : '—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text3)">${s.suivi ? seuil : '—'}</td>
+      <td style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--text3)">${s.suivi ? seuil : '—'}</td>
       <td class="amount-neutral">${s.suivi ? fmt(cout) : '—'}</td>
       <td class="amount-neutral">${fmt(prix)}</td>
       <td class="${marge >= 0 ? 'amount-pos' : 'amount-neg'}">${s.suivi ? fmt(marge) : '—'}</td>
@@ -7563,7 +7563,7 @@ function renderTransactions() {
   document.getElementById('tx-count').textContent = `(${txs.length} / ${data.transactions.length})`;
   document.getElementById('tx-tbody').innerHTML = txs.length ? txs.map(t=>`
     <tr>
-      <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${t.date}</td>
+      <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.78rem">${t.date}</td>
       <td style="color:var(--text)">${escapeHtml(t.libelle)}</td>
       <td style="font-size:0.78rem;color:var(--text3)">${catLabel(t.categorie)}</td>
       <td>${typeTag(t.type)}</td>
@@ -7583,10 +7583,10 @@ function renderFactures() {
   const facs = [...data.factures].sort((a,b)=>b.date.localeCompare(a.date));
   document.getElementById('fac-tbody').innerHTML = facs.length ? facs.map(f=>`
     <tr>
-      <td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:0.78rem">${f.locked ? '' : ''}${escapeHtml(f.num)}${f.type==='avoir' ? ' <span style="color:var(--danger)">(avoir)</span>' : ''}</td>
+      <td style="font-family:'Geist',sans-serif;color:var(--text3);font-size:0.78rem">${f.locked ? '' : ''}${escapeHtml(f.num)}${f.type==='avoir' ? ' <span style="color:var(--danger)">(avoir)</span>' : ''}</td>
       <td style="color:var(--text)">${escapeHtml(f.client)}</td>
       <td class="amount-neutral">${fmt(f.montant)}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text3)">${escapeHtml(f.echeance||'-')}</td>
+      <td style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--text3)">${escapeHtml(f.echeance||'-')}</td>
       <td>${statutTag(f.statut)}</td>
       <td>
         <button class="action-btn" data-action="edit-fac" data-id="${escapeHtml(f.id)}" title="${f.locked ? 'Voir / changer le statut' : 'Modifier'}"><svg class="icon icon-sm"><use href="#icon-edit"/></svg></button>
@@ -7657,7 +7657,7 @@ function renderClients() {
       <td style="color:var(--text3);font-size:0.82rem">${escapeHtml(contact)}</td>
       <td class="amount-neutral">${stats.factures.length}</td>
       <td class="amount-neutral">${fmt(stats.total)}</td>
-      <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${stats.derniere ? escapeHtml(stats.derniere) : '—'}</td>
+      <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.78rem">${stats.derniere ? escapeHtml(stats.derniere) : '—'}</td>
       <td onclick="event.stopPropagation()">
         <button class="action-btn" onclick="openClientModal('${escapeHtml(c.id)}')" title="Modifier"><svg class="icon icon-sm"><use href="#icon-edit"/></svg></button>
         <button class="action-btn" onclick="deleteClient('${escapeHtml(c.id)}')" title="Supprimer" style="color:var(--danger)"><svg class="icon icon-sm"><use href="#icon-delete"/></svg></button>
@@ -7746,7 +7746,7 @@ function showClientDetail(id) {
     ${stats.factures.length ? `<div class="table-scroll"><table>
       <thead><tr><th>N°</th><th>Date</th><th>Montant</th><th>Statut</th></tr></thead>
       <tbody>${stats.factures.map(f => `<tr>
-        <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${escapeHtml(f.num)}</td>
+        <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.78rem">${escapeHtml(f.num)}</td>
         <td style="color:var(--text3);font-size:0.82rem">${escapeHtml(f.date||'-')}</td>
         <td class="amount-neutral">${fmt(f.montant)}</td>
         <td>${statutTag(f.statut)}</td>
@@ -7785,7 +7785,7 @@ function renderCommandes() {
   tbody.innerHTML = commandes.map(c => {
     const livraison = [c.modeLivraison ? (LIVRAISON_LABELS[c.modeLivraison]||c.modeLivraison) : '', c.numeroSuivi].filter(Boolean).join(' · ') || '—';
     return `<tr>
-      <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.78rem">${escapeHtml(c.date||'-')}</td>
+      <td style="color:var(--text3);font-family:'Geist',sans-serif;font-size:0.78rem">${escapeHtml(c.date||'-')}</td>
       <td style="color:var(--text)">${escapeHtml(c.client||'—')}</td>
       <td style="color:var(--text2);font-size:0.82rem">${escapeHtml(c.produit||'—')}${c.qte>1?' ×'+c.qte:''}</td>
       <td class="amount-neutral">${fmt(c.total||0)}</td>
@@ -25346,6 +25346,143 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
   window.addEventListener('load', function(){ wrap(); setTimeout(wrap, 500); });
 })();
 </script>
+
+<style id="ariane-design-v6">
+/* ─── Design v6 « sombre épuré » ──────────────────────────────────────────
+   Noir chaud, bordures fines, un seul accent (le bleu Ariane).
+   Ce bloc est chargé en dernier : il gagne sur les anciens styles.
+   Pour revenir à l'ancien look, supprime simplement ce bloc <style>. */
+:root{
+  --bg:#08090a; --surface:#111214; --surface2:#17181b; --surface3:#1e1f23;
+  --border:rgba(255,255,255,.07); --border2:rgba(255,255,255,.12);
+  --text:#f7f8f8; --text2:#a1a5ae; --text3:#6b7079;
+  --accent:#4f8cff; --accent-dim:rgba(79,140,255,.12);
+  --accent2:#8fb2ff; --accent2-dim:rgba(143,178,255,.10);
+  --blue:#4f8cff; --blue-dim:rgba(79,140,255,.12);
+  --green:#3ecf8e; --green-dim:rgba(62,207,142,.12);
+  --gold:#e6b450; --gold-dim:rgba(230,180,80,.12);
+  --danger:#f06a6a; --danger-dim:rgba(240,106,106,.12);
+  --radius:12px; --radius-sm:8px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+html,body{background:var(--bg) !important;background-image:none !important;color:var(--text);
+  font-family:'Geist',system-ui,sans-serif !important;-webkit-font-smoothing:antialiased;}
+body::before,body::after{display:none !important;}
+h1,h2,h3,.hero-title,.topbar-title,.modal-title,.section-title{letter-spacing:-.02em;text-wrap:pretty;}
+p{text-wrap:pretty;}
+
+/* Barre latérale */
+#sidebar{background:#0b0c0e !important;border-right:1px solid var(--border) !important;box-shadow:none !important;backdrop-filter:none !important;}
+.nav-item{border-radius:6px !important;color:var(--text2) !important;
+  transition:background .15s var(--ease),color .15s var(--ease) !important;box-shadow:none !important;border:0 !important;}
+.nav-item:hover{background:rgba(255,255,255,.04) !important;color:var(--text) !important;}
+.nav-item.active{background:rgba(255,255,255,.07) !important;color:var(--text) !important;font-weight:550 !important;}
+.nav-item.active .nav-icon,.nav-item.active .icon{color:var(--accent) !important;}
+.nav-item::before,.nav-item::after{display:none !important;}
+
+/* Barre du haut */
+.topbar{background:rgba(8,9,10,.82) !important;backdrop-filter:saturate(1.2) blur(10px) !important;
+  border-bottom:1px solid var(--border) !important;box-shadow:none !important;}
+
+/* Cartes et panneaux : surface unie, bordure fine, pas de lueur */
+.section-card,.kpi-card,.param-card,.export-card,.marche-card,.hero-panel,.hero-mini-card,.dashboard-hero,.hero-full,
+.welcome-card,.welcome-stat,.vente-item,.calendar-item,.alert,.drop-zone{
+  background:var(--surface) !important;background-image:none !important;border:1px solid var(--border) !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.3) !important;backdrop-filter:none !important;border-radius:var(--radius) !important;}
+.hero-mini-card,.welcome-stat,.vente-item,.calendar-item{background:var(--surface2) !important;box-shadow:none !important;}
+.section-card:hover,.kpi-card:hover,.marche-card:hover,.export-card:hover{border-color:var(--border2) !important;transform:none !important;}
+.alert-info{border-color:rgba(79,140,255,.25) !important;}
+.alert-success{border-color:rgba(62,207,142,.25) !important;}
+.alert-warn{border-color:rgba(230,180,80,.25) !important;}
+.alert-danger{border-color:rgba(240,106,106,.25) !important;}
+
+/* Chiffres : alignés et lisibles */
+.kpi-value,.hero-mini-value,.stat-val,.welcome-stat-value,.amount-pos,.amount-neg,.amount-neutral,.range-display{
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+.kpi-value,.welcome-stat-value{text-shadow:none !important;background:none !important;-webkit-text-fill-color:currentColor !important;}
+.kpi-label,.hero-mini-label,.stat-label,.form-label,.hero-kicker,.welcome-stat-label{color:var(--text3) !important;letter-spacing:.06em;}
+
+/* Boutons */
+.btn,.action-btn{border-radius:8px !important;font-weight:500 !important;box-shadow:none !important;text-shadow:none !important;
+  transition:background .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease),transform .15s var(--ease) !important;}
+.btn:active,.action-btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--accent) !important;background-image:none !important;color:#fff !important;border:1px solid transparent !important;}
+.btn-primary:hover{background:#6a9dff !important;}
+.btn-secondary,.btn-ghost{background:transparent !important;background-image:none !important;color:var(--text) !important;border:1px solid var(--border2) !important;}
+.btn-secondary:hover,.btn-ghost:hover{background:rgba(255,255,255,.05) !important;}
+.btn-danger{background:transparent !important;color:var(--danger) !important;border:1px solid rgba(240,106,106,.35) !important;}
+.btn-danger:hover{background:var(--danger-dim) !important;}
+.btn:focus-visible,.nav-item:focus-visible,.action-btn:focus-visible{outline:2px solid var(--accent) !important;outline-offset:2px;}
+.action-btn{background:transparent !important;border:1px solid var(--border) !important;color:var(--text2) !important;}
+.action-btn:hover{color:var(--text) !important;border-color:var(--border2) !important;}
+
+/* Champs */
+.form-input,input[type="text"],input[type="number"],input[type="email"],input[type="password"],input[type="date"],input[type="search"],select,textarea{
+  background:#0d0e10 !important;border:1px solid var(--border2) !important;border-radius:8px !important;color:var(--text) !important;
+  box-shadow:none !important;transition:border-color .15s var(--ease),box-shadow .15s var(--ease) !important;}
+.form-input:focus,input:focus,select:focus,textarea:focus{border-color:var(--accent) !important;box-shadow:0 0 0 3px var(--accent-dim) !important;outline:none !important;}
+
+/* Tableaux */
+table th{color:var(--text3) !important;font-weight:500 !important;letter-spacing:.04em;border-bottom:1px solid var(--border) !important;background:transparent !important;}
+table td{border-bottom:1px solid var(--border) !important;}
+table tr:hover td{background:rgba(255,255,255,.02) !important;}
+
+/* Étiquettes et badges : sobres */
+.tag,.badge{border-radius:6px !important;box-shadow:none !important;font-weight:500 !important;}
+.badge{background:var(--accent) !important;color:#fff !important;}
+
+/* Fenêtres */
+.modal-overlay{background:rgba(0,0,0,.6) !important;backdrop-filter:blur(4px) !important;}
+.modal,.welcome-card{background:var(--surface) !important;border:1px solid var(--border2) !important;
+  box-shadow:0 24px 48px rgba(0,0,0,.5) !important;border-radius:16px !important;}
+
+/* Barres de navigation mobiles */
+#mobile-bottom-nav-v432,#mobile-shell-v435{background:rgba(11,12,14,.92) !important;backdrop-filter:blur(12px) !important;
+  border-top:1px solid var(--border) !important;box-shadow:none !important;}
+#mobile-bottom-nav-v432 button,#mobile-shell-v435 button{color:var(--text3) !important;background:transparent !important;box-shadow:none !important;}
+#mobile-bottom-nav-v432 button.active,#mobile-shell-v435 button.active{color:var(--text) !important;}
+#mobile-bottom-nav-v432 button.active svg,#mobile-shell-v435 button.active svg{color:var(--accent) !important;}
+
+/* Barres de progression */
+.prog-bar-bg{background:var(--surface3) !important;}
+.prog-bar{background:var(--accent) !important;background-image:none !important;box-shadow:none !important;}
+
+
+/* ─── v6 · corrections après critique ─── */
+body{font-variant-numeric:tabular-nums;}
+.tag,code,kbd{font-family:'Geist Mono',ui-monospace,monospace !important;font-size:.72rem !important;letter-spacing:0 !important;}
+.kpi-label,.hero-mini-label,.stat-label,.hero-kicker,.welcome-stat-label,table th{font-size:.7rem !important;text-transform:uppercase;}
+
+/* Hero du tableau de bord : contenu en haut, cartes à leur taille naturelle */
+.hero-full{align-items:start !important;grid-template-rows:auto !important;border-radius:var(--radius) !important;
+  border:1px solid var(--border) !important;background:var(--surface) !important;background-image:none !important;box-shadow:none !important;padding:32px !important;}
+.hero-full > *{align-self:start !important;min-height:0 !important;}
+.hero-side-item{background:var(--surface2) !important;border:1px solid var(--border) !important;border-radius:10px !important;
+  min-height:0 !important;height:auto !important;padding:14px 16px !important;}
+.hero-title{font-weight:650 !important;}
+
+/* Liste des ventes : en-têtes de jour neutres */
+tr[style*="rgba(79,140,255,0.06)"]{background:rgba(255,255,255,.025) !important;}
+div[style*="linear-gradient(90deg,var(--accent)"]{background:var(--border) !important;opacity:1 !important;height:1px !important;}
+
+/* Boutons flottants : sobres et sans chevauchement */
+#help-fab{background:var(--surface3) !important;border:1px solid var(--border2) !important;color:var(--text) !important;
+  box-shadow:0 8px 24px rgba(0,0,0,.4) !important;width:48px !important;height:48px !important;}
+#help-fab:hover{transform:none !important;background:#26272c !important;}
+#pwa-install-btn-v437{background:var(--surface) !important;background-image:none !important;color:var(--text) !important;
+  border:1px solid var(--border2) !important;box-shadow:0 8px 24px rgba(0,0,0,.4) !important;font-weight:500 !important;
+  right:80px !important;bottom:20px !important;min-height:44px !important;}
+@media (max-width:900px){#pwa-install-btn-v437{right:auto !important;left:76px !important;bottom:calc(86px + env(safe-area-inset-bottom)) !important;}}
+
+.hero-full-right{grid-template-rows:none !important;grid-auto-rows:auto !important;align-content:start !important;gap:10px !important;}
+.hero-full-right > .hero-side-item{display:block !important;}
+/* La carte « Prochain calendrier » renvoie vers une page masquée : on la cache */
+.hero-full-right > .hero-side-item:nth-child(4){display:none !important;}
+#pwa-install-btn-v437{min-height:38px !important;padding:8px 14px !important;font-size:.8rem !important;}
+
+::selection{background:rgba(79,140,255,.3);}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+</style>
 
 </body>
 </html>
