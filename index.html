@@ -25387,6 +25387,285 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
   }
 })();
 </script>
+<script>
+// ─── Assistant Berthier v2 : gratuit, hors ligne ──────────────────────────────
+// 1. Comprend les fautes de frappe, les accents oubliés et les synonymes.
+// 2. Répond avec les vrais chiffres du vendeur (ventes, marchés, stock, dépenses, cotisations).
+// 3. Propose des boutons pour ouvrir la bonne page, et des phrases cliquables « … ».
+// Le reste de l'assistant (remplissage d'une vente depuis une phrase) est conservé.
+(function(){
+  if (typeof addHelpMessage !== 'function') return;
+
+  // ── Normalisation du texte ──
+  function norm(s){
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[’']/g, ' ').replace(/[^a-z0-9€\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  var SYN = {
+    vente:['vente','ventes','vendu','vendus','vendue','vendre','vends','vend','ca','chiffre','recette','recettes','gagne','encaisse','encaisser','rapporte','rapport'],
+    stock:['stock','stocks','inventaire','quantite','quantites','reste','restant','rupture','epuise','reappro','reapprovisionner'],
+    marche:['marche','marches','evenement','evenements','salon','salons','brocante','stand','emplacement','noel','convention','expo'],
+    depense:['depense','depenses','achat','achats','frais','charge','charges','cout','couts','matiere','matieres','essence','facture'],
+    benefice:['benefice','benefices','marge','marges','gain','gains','profit','net','rentable','rentabilite'],
+    urssaf:['urssaf','cotisation','cotisations','impot','impots','declaration','declarer','taxe','taxes','fisc','fiscal','regime','micro','autoentrepreneur','auto'],
+    produit:['produit','produits','article','articles','creation','creations','objet','objets','bijou','bijoux'],
+    sauvegarde:['sauvegarde','sauvegarder','backup','json','perdre','perdu','perte','restaurer','restauration','recuperer'],
+    exporter:['export','exporter','exports','csv','pdf','telecharger','excel','tableur','comptable'],
+    compte:['compte','connexion','connecter','inscription','inscrire','mdp','password','email','mail'],
+    combien:['combien','total','montant','somme','chiffres','bilan','resume','point'],
+    meilleur:['meilleur','meilleure','meilleurs','top','plus','mieux','record','premier'],
+    pire:['pire','moins','nul','flop','dernier','perte'],
+    prochain:['prochain','prochaine','suivant','bientot','avenir','venir','agenda','quand'],
+    ajouter:['ajouter','ajoute','ajout','creer','cree','nouveau','nouvelle','noter','note','enregistrer','saisir','faire','fais','rentrer','entrer'],
+    supprimer:['supprimer','effacer','enlever','retirer','annuler','modifier','corriger','changer','erreur'],
+    mobile:['mobile','telephone','portable','iphone','android','installer','installation','appli','application','hors','ligne'],
+    exemple:['exemple','exemples','demo','test','essayer','fictif','fictives'],
+    zero:['zero','reel','vider','recommencer','reset','reinitialiser'],
+    scanner:['scanner','scan','photo','ticket','camera'],
+    aide:['aide','bonjour','salut','hello','coucou','merci','qui','quoi','sais','peux','capable','fonctionnalites'],
+    bug:['bug','bugs','probleme','marche pas','plante','bloque','bloquee','erreur'],
+    prix:['prix','gratuit','payant','abonnement','tarif','coute','payer'],
+    donnees:['donnees','confidentialite','rgpd','prive','securite','vie'],
+    semaine:['semaine','semaines','semene','smaine'], mois:['mois','mensuel','moi'], annee:['annee','an','annuel','anee','anne','annees','anne'], jour:['jour','aujourd','aujourdhui','auj','ajd','journee'], hier:['hier']
+  };
+  var WORD2KEY = {};
+  Object.keys(SYN).forEach(function(k){ SYN[k].forEach(function(w){ WORD2KEY[w] = WORD2KEY[w] || k; }); });
+
+  function lev(a, b){
+    if (Math.abs(a.length - b.length) > 2) return 9;
+    var m = a.length, n = b.length, d = [];
+    for (var i = 0; i <= m; i++){ d[i] = [i]; }
+    for (var j = 1; j <= n; j++){ d[0][j] = j; }
+    for (i = 1; i <= m; i++) for (j = 1; j <= n; j++)
+      d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    return d[m][n];
+  }
+  var ALL_WORDS = Object.keys(WORD2KEY);
+  // Transforme une phrase en ensemble de « concepts » (vente, stock, marche…), tolérant aux fautes.
+  function concepts(text){
+    var words = norm(text).split(' ').filter(Boolean), found = {};
+    words.forEach(function(w){
+      var k = WORD2KEY[w] || (w.length > 3 && WORD2KEY[w.replace(/s$/, '')]);
+      if (!k && w.length >= 5){
+        var best = null, bd = 9;
+        ALL_WORDS.forEach(function(c){ if (c.length >= 5){ var dd = lev(w, c); if (dd < bd){ bd = dd; best = c; } } });
+        if (best && (bd === 1 || (bd === 2 && w.length >= 7))) k = WORD2KEY[best];
+      }
+      if (k) found[k] = true;
+    });
+    if (/marche pas|ne marche|fonctionne pas/.test(norm(text))) found.bug = true;
+    return found;
+  }
+
+  // ── Outils sur les données ──
+  function D(){ return (typeof data !== 'undefined' && data) ? data : {}; }
+  function money(n){ return (typeof fmt === 'function') ? fmt(n || 0) : (Math.round((n || 0) * 100) / 100) + ' €'; }
+  function iso(d){ return d.toISOString().slice(0, 10); }
+  function periodFrom(c){
+    var now = new Date(), start, end = iso(now), label;
+    if (c.hier){ var y = new Date(now); y.setDate(y.getDate() - 1); start = end = iso(y); label = 'hier'; }
+    else if (c.jour){ start = end; label = "aujourd'hui"; }
+    else if (c.semaine){ var w = new Date(now); w.setDate(w.getDate() - ((w.getDay() + 6) % 7)); start = iso(w); label = 'cette semaine'; }
+    else if (c.annee){ start = now.getFullYear() + '-01-01'; label = 'cette année'; }
+    else { start = iso(now).slice(0, 7) + '-01'; label = 'ce mois-ci'; }
+    return { start: start, end: end, label: label };
+  }
+  function ventesIn(p){ return (D().ventes || []).filter(function(v){ return v.date >= p.start && v.date <= p.end; }); }
+  function caOf(ventes){ return ventes.reduce(function(s, v){ return s + (v.items || []).reduce(function(a, i){ return a + (Number(i.qte) || 0) * (Number(i.prix) || 0); }, 0); }, 0); }
+  function depensesIn(p){ return (D().transactions || []).filter(function(t){ return t.type === 'depense' && (t.date || '') >= p.start && (t.date || '') <= p.end; }); }
+  function sumDep(list){ return list.reduce(function(s, t){ return s + Math.abs(Number(t.montant) || 0); }, 0); }
+  function label(id){ return (typeof prodLabel === 'function') ? prodLabel(id) : id; }
+  function chargesRate(){ var p = D().params || {}; return ((Number(p.cotis) || 0) + (Number(p.impot) || 0)) / 100; }
+
+  // ── Questions sur les chiffres ──
+  var INTENTS = [
+    { test: function(c){ return c.marche && (c.meilleur || c.benefice || c.pire); }, run: function(c){
+        var ms = (D().marches || []).map(function(m){
+          var st = (typeof computeStatsMarche === 'function') ? computeStatsMarche(m.id) : { totalCA: 0, ventes: [] };
+          return { m: m, ca: st.totalCA || 0, n: (st.ventes || []).length, net: (st.totalCA || 0) - (parseFloat(m.frais) || 0) };
+        }).filter(function(x){ return x.n > 0; });
+        if (!ms.length) return { text: "Tu n'as pas encore de ventes rattachées à un marché. Quand tu notes une vente, choisis le marché : je pourrai te dire lesquels valent le déplacement.", actions: [{ label: 'Mes marchés', page: 'marches' }] };
+        ms.sort(function(a, b){ return b.net - a.net; });
+        var best = ms[0], worst = ms[ms.length - 1];
+        var t = (c.pire && !c.meilleur)
+          ? 'Le marché le moins rentable : ' + (worst.m.nom || 'sans nom') + ', avec ' + money(worst.net) + ' net (' + money(worst.ca) + ' de ventes, ' + money(worst.ca - worst.net) + ' de frais).'
+          : 'Ton marché le plus rentable : ' + (best.m.nom || 'sans nom') + ', avec ' + money(best.net) + ' net (' + money(best.ca) + ' de ventes, ' + money(best.ca - best.net) + ' de frais).';
+        if (ms.length > 1) t += '\nClassement : ' + ms.slice(0, 5).map(function(x, i){ return (i + 1) + '. ' + (x.m.nom || 'sans nom') + ' — ' + money(x.net); }).join(' · ');
+        return { text: t, actions: [{ label: 'Voir mes marchés', page: 'marches' }] };
+    } },
+    { test: function(c){ return c.marche && c.prochain; }, run: function(){
+        var today = iso(new Date());
+        var next = (D().marches || []).filter(function(m){ return (m.fin || m.debut || '') >= today; })
+          .sort(function(a, b){ return String(a.debut).localeCompare(String(b.debut)); })[0];
+        if (!next) return { text: "Aucun marché à venir n'est noté. Ajoute le prochain pour suivre tes frais et tes ventes du jour.", actions: [{ label: 'Ajouter un marché', modal: 'modal-marche', page: 'marches' }] };
+        return { text: 'Ton prochain marché : ' + (next.nom || 'sans nom') + ' le ' + next.debut + (next.lieu ? ', à ' + next.lieu : '') + (parseFloat(next.frais) ? '. Frais prévus : ' + money(parseFloat(next.frais)) : '') + '.', actions: [{ label: 'Mes marchés', page: 'marches' }] };
+    } },
+    { test: function(c){ return c.stock && !c.ajouter; }, run: function(){
+        if (typeof computeStockSummary !== 'function') return null;
+        var s = computeStockSummary();
+        if (!s.tracked.length) return { text: "Tu ne suis encore le stock d'aucun produit. Active le suivi dans Stock : je te préviendrai avant une rupture.", actions: [{ label: 'Ouvrir le stock', page: 'stock' }] };
+        if (!s.rupture.length && !s.low.length) return { text: 'Tout va bien : aucun produit en rupture ni sous son seuil d\'alerte (' + s.tracked.length + ' produits suivis).', actions: [{ label: 'Voir le stock', page: 'stock' }] };
+        var t = '';
+        if (s.rupture.length) t += 'En rupture : ' + s.rupture.map(function(x){ return label(x.produit); }).join(', ') + '.\n';
+        if (s.low.length) t += 'Bientôt épuisé : ' + s.low.map(function(x){ return label(x.produit) + ' (' + x.stock + ' restant' + (x.stock > 1 ? 's' : '') + ')'; }).join(', ') + '.';
+        return { text: t.trim(), actions: [{ label: 'Voir le stock', page: 'stock' }] };
+    } },
+    { test: function(c){ return (c.produit || c.vente) && c.meilleur; }, run: function(c){
+        var p = periodFrom(c), agg = {};
+        ventesIn(p).forEach(function(v){ (v.items || []).forEach(function(i){ var k = i.produit; agg[k] = agg[k] || { q: 0, ca: 0 }; agg[k].q += Number(i.qte) || 0; agg[k].ca += (Number(i.qte) || 0) * (Number(i.prix) || 0); }); });
+        var list = Object.keys(agg).map(function(k){ return { k: k, q: agg[k].q, ca: agg[k].ca }; }).sort(function(a, b){ return b.ca - a.ca; });
+        if (!list.length) return { text: 'Pas encore de ventes ' + p.label + '. Essaie « meilleur produit cette année ».' };
+        return { text: 'Ce qui se vend le mieux ' + p.label + ' : ' + list.slice(0, 3).map(function(x, i){ return (i + 1) + '. ' + label(x.k) + ' — ' + x.q + ' vendu' + (x.q > 1 ? 's' : '') + ', ' + money(x.ca); }).join(' · '), actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }] };
+    } },
+    { test: function(c){ return c.urssaf && (c.combien || !c.ajouter); }, run: function(c){
+        var p = periodFrom(c), ca = caOf(ventesIn(p)), r = chargesRate();
+        if (!r) return { text: "Tes taux de cotisations et d'impôt ne sont pas réglés. Indique-les dans Paramètres (régime fiscal) et je calculerai ce qu'il faut mettre de côté.", actions: [{ label: 'Régler mes taux', page: 'parametres' }] };
+        return { text: 'Sur ' + money(ca) + ' de ventes ' + p.label + ', mets de côté environ ' + money(ca * r) + ' pour l\'URSSAF et l\'impôt (taux réglé : ' + Math.round(r * 100) + ' %). C\'est une estimation : vérifie toujours sur autoentrepreneur.urssaf.fr.', actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }, { label: 'Mes taux', page: 'parametres' }] };
+    } },
+    { test: function(c){ return c.benefice && !c.ajouter; }, run: function(c){
+        var p = periodFrom(c), ca = caOf(ventesIn(p)), dep = sumDep(depensesIn(p)), ch = ca * chargesRate();
+        return { text: 'Bénéfice estimé ' + p.label + ' : ' + money(ca - dep - ch) + '\n' + money(ca) + ' de ventes − ' + money(dep) + ' de dépenses − ' + money(ch) + ' de cotisations et impôt estimés.', actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }] };
+    } },
+    { test: function(c){ return c.depense && (c.combien || c.mois || c.semaine || c.annee || c.jour) && !c.ajouter; }, run: function(c){
+        var p = periodFrom(c), list = depensesIn(p), total = sumDep(list), cats = {};
+        list.forEach(function(t){ var k = t.categorie || 'autre'; cats[k] = (cats[k] || 0) + Math.abs(Number(t.montant) || 0); });
+        var top = Object.keys(cats).sort(function(a, b){ return cats[b] - cats[a]; }).slice(0, 3);
+        return { text: 'Tes dépenses ' + p.label + ' : ' + money(total) + ' (' + list.length + ' dépense' + (list.length > 1 ? 's' : '') + ')' + (top.length ? '.\nLes plus grosses : ' + top.map(function(k){ return k + ' ' + money(cats[k]); }).join(' · ') : '.'), actions: [{ label: 'Voir mes dépenses', page: 'transactions' }] };
+    } },
+    { test: function(c){ return c.vente && (c.combien || c.mois || c.semaine || c.annee || c.jour || c.hier) && !c.ajouter; }, run: function(c){
+        var p = periodFrom(c), vs = ventesIn(p), ca = caOf(vs);
+        var nb = vs.reduce(function(s, v){ return s + (v.items || []).reduce(function(a, i){ return a + (Number(i.qte) || 0); }, 0); }, 0);
+        return { text: p.label.charAt(0).toUpperCase() + p.label.slice(1) + ', tu as vendu pour ' + money(ca) + ' : ' + nb + ' article' + (nb > 1 ? 's' : '') + ' en ' + vs.length + ' vente' + (vs.length > 1 ? 's' : '') + '.', actions: [{ label: 'Voir mes ventes', page: 'ventes' }] };
+    } }
+  ];
+
+  // ── Réponses toutes prêtes (adaptées aux créateurs sur les marchés) ──
+  var KB = [
+    { k:['ajouter','vente'], q:'Comment ajouter une vente ?', a:"Clique sur « + Vente » en haut, ou dis-le-moi directement, par exemple « vendu 2 bracelets à 15 € au marché de Noël ». Le stock et ton chiffre d'affaires se mettent à jour tout seuls.", act:[{label:'Ajouter une vente', modal:'modal-vente', page:'ventes'}] },
+    { k:['supprimer','vente'], q:'Comment corriger une vente ?', a:"Dans Ventes, clique sur le crayon pour modifier une vente, ou sur la corbeille pour la supprimer. Le stock est remis à jour automatiquement.", act:[{label:'Mes ventes', page:'ventes'}] },
+    { k:['ajouter','stock'], q:'Comment ajouter un produit ?', a:"Dans Stock, clique sur « + Stock » : indique le nom, le prix de vente, le coût de fabrication et la quantité. Active le suivi pour être prévenu avant une rupture.", act:[{label:'Ajouter un produit', modal:'modal-stock', page:'stock'}] },
+    { k:['stock'], q:'Comment gérer mon stock ?', a:"Chaque vente retire les articles du stock. Mets un seuil d'alerte par produit : je te dis ce qui est bientôt épuisé (demande-moi « qu'est-ce qui est en rupture ? »).", act:[{label:'Ouvrir le stock', page:'stock'}] },
+    { k:['ajouter','marche'], q:'Comment ajouter un marché ?', a:"Dans Mes marchés, clique sur « + Événement » : nom, date, lieu et frais (emplacement, trajet). Ensuite, rattache tes ventes à ce marché pour voir s'il est rentable.", act:[{label:'Ajouter un marché', modal:'modal-marche', page:'marches'}] },
+    { k:['marche'], q:'À quoi sert la page Mes marchés ?', a:"Elle compare tes marchés : ventes, frais et bénéfice net de chacun. Demande-moi « quel marché rapporte le plus ? » pour le classement.", act:[{label:'Mes marchés', page:'marches'}] },
+    { k:['ajouter','depense'], q:'Comment ajouter une dépense ?', a:"Dans Dépenses, clique sur « + Dépense » : montant, date et catégorie (matières, emplacement, essence…). Elles sont déduites de ton bénéfice.", act:[{label:'Ajouter une dépense', modal:'modal-transaction', page:'transactions'}] },
+    { k:['benefice'], q:"C'est quoi le bénéfice estimé ?", a:"Ventes − dépenses − cotisations et impôt estimés. Demande-moi « mon bénéfice ce mois-ci » pour le calcul avec tes chiffres." },
+    { k:['urssaf'], q:'Comment régler mon régime fiscal ?', a:"Dans Paramètres, choisis ton régime (micro-BIC pour la vente d'objets, micro-BNC pour les services) et tes taux. Je m'en sers pour estimer ce qu'il faut mettre de côté. Vérifie tes taux sur autoentrepreneur.urssaf.fr.", act:[{label:'Paramètres', page:'parametres'}] },
+    { k:['exporter'], q:'Comment exporter mes ventes ?', a:"Dans Exports : CSV pour un tableur ou ton comptable, PDF pour un rapport, JSON pour une sauvegarde complète.", act:[{label:'Exports', page:'exports'}] },
+    { k:['sauvegarde'], q:'Comment sauvegarder mes données ?', a:"Sans compte, tes données sont dans ce navigateur : exporte une sauvegarde JSON régulièrement (Exports). Avec un compte, elles sont aussi sauvegardées en ligne. Pour restaurer, utilise « Restaurer » dans Exports.", act:[{label:'Exports', page:'exports'}, {label:'Créer un compte', page:'parametres'}] },
+    { k:['compte'], q:'Faut-il un compte ?', a:"Non, Berthier marche sans compte. Le compte sert à sauvegarder en ligne et retrouver tes données sur un autre appareil. Ça se passe dans Paramètres.", act:[{label:'Paramètres', page:'parametres'}] },
+    { k:['mobile'], q:'Berthier marche sur téléphone ?', a:"Oui ! Ouvre le site sur ton téléphone puis « Ajouter à l'écran d'accueil » (ou le bouton « Installer Berthier »). Il fonctionne même sans réseau sur le stand." },
+    { k:['exemple'], q:'Comment essayer avec des exemples ?', a:"Dans Paramètres → Données → « Essayer avec des exemples » : choisis un métier, des ventes fictives se chargent. Repars de zéro quand tu es prêt.", act:[{label:'Paramètres', page:'parametres'}] },
+    { k:['zero'], q:'Comment repartir de zéro ?', a:"Dans Paramètres → Données → « Repartir de zéro ». Fais d'abord une sauvegarde JSON (Exports) au cas où.", act:[{label:'Paramètres', page:'parametres'}] },
+    { k:['scanner'], q:'Comment scanner un ticket ?', a:"Clique sur « Scanner » en haut : prends en photo un ticket ou une liste, Berthier essaie de reconnaître les articles et les montants. Vérifie avant de valider.", act:[{label:'Ouvrir le scanner', modal:'modal-ocr-scan'}] },
+    { k:['prix'], q:'Berthier est payant ?', a:"Non, Berthier est gratuit pendant la bêta, sans carte bancaire." },
+    { k:['donnees'], q:'Mes données sont-elles privées ?', a:"Oui. Sans compte, rien ne quitte ton appareil. Avec un compte, la sauvegarde est stockée dans l'Union européenne. Pas de pub, pas de revente. Tout est expliqué dans la politique de confidentialité." },
+    { k:['bug'], q:'Ça ne marche pas', a:"Désolé ! Clique sur « Signaler un bug » en haut de cette fenêtre et décris ce qui s'est passé : on corrige vite." },
+    { k:['aide'], q:'Que sais-tu faire ?', a:"Je réponds sur l'app et je fais tes comptes. Essaie :\n« combien j'ai vendu ce mois ? »\n« quel marché rapporte le plus ? »\n« qu'est-ce qui est en rupture ? »\n« mon bénéfice cette année »\n« combien mettre de côté pour l'URSSAF ? »\n« vendu 3 savons à 6 € »" }
+  ];
+  function findKb(c){
+    var best = null, score = 0;
+    KB.forEach(function(e){
+      var hits = e.k.filter(function(k){ return c[k]; }).length;
+      var s = hits === e.k.length ? hits * 2 + (e.k.length > 1 ? 1 : 0) : 0;
+      if (s > score){ score = s; best = e; }
+    });
+    return best;
+  }
+
+  // ── Affichage : boutons d'action et phrases cliquables ──
+  function go(a){
+    if (a.page && typeof goPage === 'function') goPage(a.page);
+    if (a.modal && typeof openModal === 'function') setTimeout(function(){ openModal(a.modal); }, 120);
+    if (window.innerWidth < 900 && typeof toggleHelpChat === 'function') toggleHelpChat(false);
+  }
+  function lastBotMsg(){ var l = document.querySelectorAll('#help-chat-messages .help-msg-bot:not(.help-msg-typing)'); return l[l.length - 1]; }
+  function addActions(actions){
+    var msg = lastBotMsg(); if (!msg || !actions || !actions.length) return;
+    var row = document.createElement('div'); row.className = 'help-actions';
+    actions.forEach(function(a){ var b = document.createElement('button'); b.type = 'button'; b.className = 'help-action'; b.textContent = a.label + ' →'; b.onclick = function(){ go(a); }; row.appendChild(b); });
+    msg.appendChild(row);
+    var box = document.getElementById('help-chat-messages'); if (box) box.scrollTop = box.scrollHeight;
+  }
+  function sayText(text){
+    var input = document.getElementById('help-chat-input');
+    if (!input) return;
+    input.value = text;
+    // Une phrase de vente (« vendu 2 bracelets à 15 € ») est seulement mise dans le champ,
+    // pour que le vendeur adapte les chiffres avant d'envoyer. Une question est envoyée tout de suite.
+    var isSale = (typeof tryParseSaleIntent === 'function') && tryParseSaleIntent(text);
+    if (isSale){ input.focus(); input.setSelectionRange(input.value.length, input.value.length); return; }
+    if (typeof sendHelpMessage === 'function') sendHelpMessage();
+  }
+  // Toute phrase entre « » dans un message de Berthier devient cliquable.
+  var prevAdd = addHelpMessage;
+  var withSay = function(role, text){
+    prevAdd(role, text);
+    if (role === 'user') return;
+    var msg = lastBotMsg(); if (!msg) return;
+    msg.innerHTML = msg.innerHTML.replace(/«(?:\s|&nbsp;)*([^«»<]{2,90}?)(?:\s|&nbsp;)*»/g, function(_, inner){
+      return '<button type="button" class="help-say" data-say="' + inner.replace(/"/g, '&quot;') + '">« ' + inner + ' »</button>';
+    });
+    msg.querySelectorAll('.help-say').forEach(function(b){
+      b.onclick = function(){ var t = document.createElement('textarea'); t.innerHTML = b.getAttribute('data-say'); sayText(t.value); };
+    });
+  };
+  withSay.__berthier = true;
+  window.addHelpMessage = withSay;
+  try { addHelpMessage = withSay; } catch (e) {}
+
+  // ── Cerveau : choisit la meilleure réponse ──
+  function answer(text){
+    var exact = KB.filter(function(e){ return norm(e.q) === norm(text); })[0];
+    if (exact) return { text: exact.a, actions: exact.act, q: exact.q };
+    var c = concepts(text);
+    if (c.bug){ var b = KB.filter(function(e){ return e.k[0] === 'bug'; })[0]; return { text: b.a, actions: b.act, q: b.q }; }
+    for (var i = 0; i < INTENTS.length; i++){
+      if (INTENTS[i].test(c)){ var r = INTENTS[i].run(c); if (r) return r; }
+    }
+    var e = findKb(c);
+    if (e) return { text: e.a, actions: e.act, q: e.q };
+    return null;
+  }
+  function reply(text){
+    var box = document.getElementById('help-chat-messages');
+    var typing = document.createElement('div');
+    typing.className = 'help-msg help-msg-bot help-msg-typing'; typing.textContent = '…';
+    box.appendChild(typing); box.scrollTop = box.scrollHeight;
+    setTimeout(function(){
+      typing.remove();
+      var r = answer(text);
+      if (r){
+        addHelpMessage('bot', r.text);
+        addActions(r.actions);
+        renderHelpQuickChips(QUICK.filter(function(q){ return q !== r.q && q !== text; }).slice(0, 4));
+      } else {
+        addHelpMessage('bot', "Je n'ai pas compris, désolé. Essaie par exemple « combien j'ai vendu ce mois ? », « quel marché rapporte le plus ? » ou « vendu 2 bracelets à 15 € ».");
+        renderHelpQuickChips(QUICK);
+      }
+    }, 380);
+  }
+  var QUICK = ["Combien j'ai vendu ce mois ?", "Quel marché rapporte le plus ?", "Qu'est-ce qui est en rupture ?", "Mon bénéfice ce mois-ci", "Combien mettre de côté pour l'URSSAF ?", "Que sais-tu faire ?"];
+  try { HELP_QUICK_QUESTIONS.splice(0, HELP_QUICK_QUESTIONS.length); QUICK.forEach(function(q){ HELP_QUICK_QUESTIONS.push(q); }); } catch (e) {}
+
+  window.askHelpQuestion = function(text){
+    document.getElementById('help-chat-input').value = '';
+    addHelpMessage('user', text);
+    reply(text);
+  };
+  try { askHelpQuestion = window.askHelpQuestion; } catch (e) {}
+  window.sendHelpMessage = function(){
+    var input = document.getElementById('help-chat-input');
+    var text = input.value.trim(); if (!text) return;
+    input.value = '';
+    addHelpMessage('user', text);
+    var sale = (typeof tryParseSaleIntent === 'function') ? tryParseSaleIntent(text) : null;
+    if (sale){ respondHelpSale(sale.items); return; }
+    reply(text);
+  };
+  try { sendHelpMessage = window.sendHelpMessage; } catch (e) {}
+  window.berthierAnswer = answer; // pour les tests
+})();
+</script>
 <style id="ariane-design-v6">
 /* ─── Design v6 « sombre épuré » ──────────────────────────────────────────
    Noir chaud, bordures fines, un seul accent (le bleu Berthier).
@@ -25657,6 +25936,13 @@ html body #help-fab{padding:0 !important;overflow:hidden;}
 html body .help-msg-bot{position:relative;margin-left:32px !important;}
 html body .help-msg-bot::before{content:'';position:absolute;left:-32px;top:0;width:24px;height:24px;
   background:url('icons/berthier-tete-fixe.svg') center/contain no-repeat;image-rendering:pixelated;image-rendering:crisp-edges;}
+
+/* Assistant v2 : boutons d'action et phrases cliquables */
+.help-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.help-action{font:500 .78rem/1 'Geist',sans-serif;color:var(--text);background:transparent;border:1px solid var(--border2);border-radius:6px;padding:7px 10px;cursor:pointer;transition:background .15s,border-color .15s;}
+.help-action:hover{background:rgba(255,255,255,.06);border-color:var(--text3);}
+.help-say{font:inherit;color:var(--accent2);background:rgba(79,140,255,.10);border:0;border-radius:4px;padding:1px 4px;margin:1px 0;cursor:pointer;text-align:left;}
+.help-say:hover{background:rgba(79,140,255,.2);color:var(--text);}
 
 ::selection{background:rgba(79,140,255,.3);}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
