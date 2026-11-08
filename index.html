@@ -25480,6 +25480,30 @@ div[style*="linear-gradient(90deg,var(--accent)"]{background:var(--border) !impo
 .hero-full-right > .hero-side-item:nth-child(4){display:none !important;}
 #pwa-install-btn-v437{min-height:38px !important;padding:8px 14px !important;font-size:.8rem !important;}
 
+/* ─── v6 · coins sobres partout ───
+   Échelle unique : 6px (étiquettes) · 8px (boutons, champs) · 12px (cartes) · 16px (fenêtres).
+   Plus aucune pilule ni bouton rond. « html body » passe devant les anciens styles mobiles. */
+html body .btn, html body .topbar-actions .btn, html body .action-btn, html body button.btn,
+html body .snap-toggle-btn-v430, html body .custom-dd-btn,
+html body input, html body select, html body textarea,
+html body .form-input, html body .form-select, html body .form-textarea,
+html body .help-chat-input-row input,
+html body #pwa-install-btn-v437, html body #help-fab, html body .mobile-fab-v435,
+html body .mobile-bottom-nav-v432 button, html body .mobile-shell-v435 button,
+html body .nav-item { border-radius:8px !important; }
+html body .tag, html body .badge, html body .mode-badge, html body .help-chip, html body .cal-type,
+html body .calendar-type-preview, html body #pwa-offline-badge-v437 { border-radius:6px !important; }
+html body .section-card, html body .kpi-card, html body .param-card, html body .export-card, html body .marche-card,
+html body .commercial-card, html body .pay-v5-card, html body .pay-v5-panel, html body .hero-panel, html body .hero-full,
+html body .mobile-bottom-nav-v432, html body .mobile-shell-v435, html body .mobile-fab-panel-v435 { border-radius:12px !important; }
+html body .modal, html body .welcome-card { border-radius:16px !important; }
+@media (max-width:900px){ html body .modal { border-radius:16px 16px 0 0 !important; } }
+/* Styles écrits directement dans le HTML/JS en forme de pilule */
+html body [style*="border-radius: 999px"], html body [style*="border-radius:999px"],
+html body [style*="border-radius:99px"] { border-radius:6px !important; }
+/* Bouton « + » mobile : carré arrondi, sans lueur */
+html body .mobile-fab-v435 { box-shadow:0 8px 24px rgba(0,0,0,.45) !important; background:var(--accent) !important; background-image:none !important; }
+
 ::selection{background:rgba(79,140,255,.3);}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
 </style>
