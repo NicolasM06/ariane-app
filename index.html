@@ -5178,6 +5178,7 @@ body {
 <!-- ÉCRAN DE BIENVENUE (premier lancement) -->
 <div id="welcome-screen" class="hidden">
   <div class="welcome-card">
+    <img class="welcome-mascot" src="icons/berthier-anime.svg" width="72" height="96" alt="Berthier">
     <div class="welcome-kicker">Berthier</div>
     <div class="welcome-title">Bienvenue sur Berthier</div>
     <div class="welcome-sub">Ton stand de marché dans ta poche : ventes, stock, marchés et dépenses au même endroit — sans tableur, sans prise de tête.</div>
@@ -22539,16 +22540,16 @@ showPage();
 </script>
 
 <!-- ASSISTANT D'AIDE (chatbot local) -->
-<button id="help-fab" onclick="toggleHelpChat()" aria-label="Besoin d'aide ?">
-  <span id="help-fab-icon"><svg class="icon"><use href="#icon-help"/></svg></span>
+<button id="help-fab" onclick="toggleHelpChat()" aria-label="Demander à Berthier">
+  <span id="help-fab-icon"><img class="help-fab-berthier" src="icons/berthier-tete.svg" alt=""></span>
 </button>
 <div id="help-chat-panel" class="help-chat-panel">
   <div class="help-chat-header">
     <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:1.2rem"></span>
+      <img id="help-berthier" class="help-berthier" src="icons/berthier-anime.svg" width="36" height="48" alt="Berthier">
       <div>
-        <div style="font-weight:700;font-size:0.95rem">Assistant Berthier</div>
-        <div style="font-size:0.72rem;color:var(--text2)">Réponses instantanées, hors ligne</div>
+        <div style="font-weight:700;font-size:0.95rem">Berthier</div>
+        <div style="font-size:0.72rem;color:var(--text2)">Ton collègue de la compta · réponses instantanées</div>
       </div>
     </div>
     <button class="help-chat-close" onclick="toggleHelpChat(false)"><svg class="icon icon-sm"><use href="#icon-close"/></svg></button>
@@ -22637,9 +22638,8 @@ const HELP_KB = [
 
 const HELP_QUICK_QUESTIONS = [
   "Comment ajouter une vente ?",
-  "Comment créer une facture ?",
   "Comment gérer mon stock ?",
-  "Comment exporter mon site ?",
+  "Comment ajouter un marché ou événement ?",
   "C'est quoi le bénéfice estimé ?",
   "Comment sauvegarder mes données ?"
 ];
@@ -22650,10 +22650,10 @@ function toggleHelpChat(forceState) {
   const panel = document.getElementById('help-chat-panel');
   const open = typeof forceState === 'boolean' ? forceState : !panel.classList.contains('open');
   panel.classList.toggle('open', open);
-  document.getElementById('help-fab-icon').innerHTML = open ? '<svg class="icon"><use href="#icon-close"/></svg>' : '<svg class="icon"><use href="#icon-help"/></svg>';
+  document.getElementById('help-fab-icon').innerHTML = open ? '<svg class="icon"><use href="#icon-close"/></svg>' : '<img class="help-fab-berthier" src="icons/berthier-tete.svg" alt="">';
   if (open && !helpChatOpened) {
     helpChatOpened = true;
-    addHelpMessage('bot', "Salut ! Je suis l'assistant de Berthier. Pose-moi une question sur les ventes, le stock, les factures, ton site ou tes sauvegardes — ou dis-moi directement une vente, ex : « vendu 2 sculptures à 45€ », et je te prépare le formulaire.");
+    addHelpMessage('bot', "Salut, moi c'est Berthier ! Pose-moi une question sur tes ventes, ton stock, tes marchés ou tes sauvegardes — ou dis-moi directement une vente, ex : « vendu 2 sculptures à 45€ », et je te prépare le formulaire.");
     renderHelpQuickChips(HELP_QUICK_QUESTIONS);
     setTimeout(() => document.getElementById('help-chat-input').focus(), 200);
   }
@@ -25361,6 +25361,32 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
 })();
 </script>
 
+<script>
+// ─── Berthier parle : quand l'assistant répond, son personnage « parle » le temps de la réponse ───
+(function(){
+  var IDLE = 'icons/berthier-anime.svg', TALK = 'icons/berthier-parle.svg';
+  new Image().src = TALK; // préchargement : pas de clignotement au premier message
+  var timer = null;
+  function talk(text){
+    var img = document.getElementById('help-berthier');
+    if (!img) return;
+    var ms = Math.min(2600, Math.max(900, String(text || '').length * 22));
+    img.src = TALK;
+    clearTimeout(timer);
+    timer = setTimeout(function(){ img.src = IDLE; }, ms);
+  }
+  if (typeof addHelpMessage === 'function' && !addHelpMessage.__berthier) {
+    var original = addHelpMessage;
+    var wrapped = function(role, text){
+      original(role, text);
+      if (role !== 'user') talk(text);
+    };
+    wrapped.__berthier = true;
+    window.addHelpMessage = wrapped;
+    try { addHelpMessage = wrapped; } catch (e) {}
+  }
+})();
+</script>
 <style id="ariane-design-v6">
 /* ─── Design v6 « sombre épuré » ──────────────────────────────────────────
    Noir chaud, bordures fines, un seul accent (le bleu Berthier).
@@ -25620,6 +25646,17 @@ html body .stats-2col{gap:0 40px !important;}
 html body .section-header{background:transparent !important;}
 html body .stats-2col > .section-card{background:transparent !important;}
 html body .stats-2col > .section-card > div[style*="padding:16px"]{padding:16px 0 !important;}
+
+/* Mascotte pixel art sur l'écran d'accueil */
+.welcome-mascot{display:block;width:72px;height:auto;margin:0 auto 12px;image-rendering:pixelated;image-rendering:crisp-edges;}
+
+/* Berthier, visage de l'assistant */
+html body #help-fab{padding:0 !important;overflow:hidden;}
+.help-fab-berthier{width:100%;height:100%;object-fit:cover;object-position:center top;image-rendering:pixelated;image-rendering:crisp-edges;display:block;}
+.help-berthier{width:36px;height:48px;image-rendering:pixelated;image-rendering:crisp-edges;flex-shrink:0;}
+html body .help-msg-bot{position:relative;margin-left:32px !important;}
+html body .help-msg-bot::before{content:'';position:absolute;left:-32px;top:0;width:24px;height:24px;
+  background:url('icons/berthier-tete-fixe.svg') center/contain no-repeat;image-rendering:pixelated;image-rendering:crisp-edges;}
 
 ::selection{background:rgba(79,140,255,.3);}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
