@@ -18,21 +18,27 @@ def px(x, y, c):
 rect(6, 1, 17, 11, 'S')                 # visage
 rect(7, 1, 16, 1, 'S')
 px(5, 6, 'S'); px(5, 7, 's'); px(18, 6, 'S'); px(18, 7, 's')   # oreilles
-rect(6, 2, 6, 6, 'H'); rect(17, 2, 17, 6, 'H'); px(7, 2, 'H'); px(7, 3, 'H'); px(16, 2, 'H'); px(16, 3, 'H')  # cheveux sur les côtés (crâne dégarni)
-rect(6, 1, 6, 1, '.'); rect(17, 1, 17, 1, '.')                  # arrondi du crâne
-px(11, 1, 'h'); px(12, 1, 'h')                                  # reflet sur le crâne
+# cheveux noirs, raie sur le côté, front qui se dégarnit, tempes grises (la cinquantaine)
+rect(7, 0, 16, 1, 'H'); rect(6, 1, 6, 1, '.'); rect(17, 1, 17, 1, '.')
+rect(6, 2, 9, 2, 'H'); rect(13, 2, 17, 2, 'H')                  # front dégarni au milieu
+rect(11, 0, 14, 0, 'h'); px(14, 1, 'h'); px(8, 1, 'h')           # reflets
+px(9, 0, 'r'); px(15, 2, 'r'); px(7, 2, 'r')                    # quelques cheveux gris
+rect(6, 3, 7, 3, 'H'); rect(16, 3, 17, 3, 'H'); px(8, 3, 'H')
+rect(6, 4, 6, 4, 'H'); rect(17, 4, 17, 4, 'H')
+rect(6, 5, 6, 6, 'r'); rect(17, 5, 17, 6, 'r')                  # tempes grises
+px(11, 2, 's')                                                   # ride sur le front
 # lunettes
 rect(7, 6, 10, 6, 'G'); rect(13, 6, 16, 6, 'G')                 # monture épaisse en haut (lunettes « browline »)
 rect(11, 6, 12, 6, 'G')                                         # pont
 rect(7, 7, 10, 7, 'g'); rect(13, 7, 16, 7, 'g')                 # verres clairs
 px(9, 7, 'E'); px(14, 7, 'E')                                   # yeux
-rect(7, 8, 10, 8, 'f'); rect(13, 8, 16, 8, 'f')                 # monture fine en bas
+rect(8, 8, 9, 8, 'n'); rect(14, 8, 15, 8, 'n')                  # cernes
 px(6, 6, 'G'); px(17, 6, 'G')                                   # branches
 # sourcils
 rect(8, 4, 9, 4, 'H'); rect(14, 4, 15, 4, 'H')
 # nez, moustache, bouche
 px(11, 8, 's'); px(12, 8, 's')
-rect(9, 9, 14, 9, 'M'); px(8, 10, 'M'); px(15, 10, 'M')
+rect(9, 9, 14, 9, 'M'); px(8, 10, 'M'); px(15, 10, 'M'); px(7, 9, 's'); px(16, 9, 's')  # moustache + rides des joues
 rect(10, 10, 13, 10, 'm')
 rect(7, 11, 16, 11, 's')                                        # ombre du menton
 # cou
@@ -79,9 +85,9 @@ for y in range(H):
 PALETTE = {
     'K': '#16171a',  # contour
     'S': '#f1c7a3', 's': '#d9a37f',          # peau
-    'H': '#6b5444', 'h': '#fbe0c8',          # cheveux, reflet du crâne
+    'H': '#2f2b2c', 'h': '#554f51', 'r': '#9a9da3',  # cheveux noirs, reflet, tempes grises
     'G': '#2a1d14', 'g': '#e6eefc', 'E': '#16171a', 'f': '#a9b0bb',  # lunettes, verres, yeux, monture fine
-    'M': '#6b5444', 'm': '#b9786a',          # moustache, bouche
+    'M': '#2b2829', 'm': '#b9786a', 'n': '#b88378',  # moustache, bouche, cernes
     'W': '#f2f3f5', 'w': '#c9ced8',          # chemise
     'T': '#4f8cff', 't': '#2f63c9',          # cravate (bleu de l'app)
     'V': '#c29a45', 'v': '#9a7632',          # gilet moutarde
