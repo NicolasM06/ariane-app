@@ -38,24 +38,30 @@ px(6, 6, 'G'); px(17, 6, 'G')                                   # branches
 rect(8, 4, 9, 4, 'H'); rect(14, 4, 15, 4, 'H')
 # nez, moustache, bouche
 px(11, 8, 's'); px(12, 8, 's')
-rect(9, 9, 14, 9, 'M'); px(8, 10, 'M'); px(15, 10, 'M'); px(7, 9, 's'); px(16, 9, 's')  # moustache + rides des joues
-rect(10, 10, 13, 10, 'm')
+px(7, 9, 's'); px(16, 9, 's')                                   # rides des joues (pas de moustache)
+rect(10, 10, 13, 10, 'm')                                       # bouche
 rect(7, 11, 16, 11, 's')                                        # ombre du menton
 # cou
 rect(10, 12, 13, 12, 's')
 
 # ── Corps ──
-rect(5, 13, 18, 24, 'V')                                        # gilet
+rect(5, 13, 18, 24, 'W')                                        # chemise blanche
 rect(5, 13, 5, 13, '.'); rect(18, 13, 18, 13, '.')
 for y, (a, b) in zip(range(13, 19), [(8, 15), (9, 14), (9, 14), (10, 13), (10, 13), (11, 12)]):
     rect(a, y, b, y, 'W')                                       # chemise (col en V)
-rect(8, 13, 8, 13, 'w'); rect(15, 13, 15, 13, 'w')              # col
+rect(8, 13, 10, 13, 'w'); rect(13, 13, 15, 13, 'w')             # col
 rect(11, 13, 12, 13, 't')                                       # nœud de cravate
 rect(11, 14, 12, 19, 'T'); px(11, 20, 'T'); px(12, 20, 't')     # cravate
-px(9, 20, 'v'); px(9, 22, 'v')                                  # boutons du gilet
-rect(5, 14, 5, 24, 'v'); rect(18, 14, 18, 24, 'v')              # ombre des côtés
+
+# surchemise noire ouverte par-dessus la chemise blanche
+rect(5, 13, 8, 24, 'O'); rect(15, 13, 18, 24, 'O')
+rect(5, 14, 5, 24, 'o'); rect(18, 14, 18, 24, 'o')              # ombre des côtés
+px(8, 13, 'q'); px(8, 14, 'q'); px(15, 13, 'q'); px(15, 14, 'q') # col de la surchemise
+rect(6, 16, 7, 16, 'q'); px(7, 15, 'T')                          # poche à rabat + stylo bleu
+rect(16, 16, 17, 16, 'q')
+px(8, 18, 'q'); px(8, 21, 'q')                                   # boutons
 # bras
-rect(3, 14, 4, 22, 'V'); rect(19, 14, 20, 19, 'V')
+rect(3, 14, 4, 21, 'O'); rect(19, 14, 20, 19, 'O'); rect(3, 22, 4, 22, 'W')  # manches noires, poignet blanc
 rect(3, 23, 4, 23, 'S')                                         # main gauche
 # calculatrice tenue contre le corps (main droite)
 rect(14, 18, 19, 24, 'C')
@@ -93,6 +99,7 @@ PALETTE = {
     'V': '#c29a45', 'v': '#9a7632',          # gilet moutarde
     'P': '#4a4e59', 'B': '#2b1e15',          # pantalon gris, chaussures marron
     'C': '#c9ccd3', 'c': '#6b7079', 'D': '#3ecf8e',  # calculatrice
+    'O': '#363941', 'o': '#2a2c32', 'q': '#565b66',  # surchemise noire, ombre, coutures/col
 }
 
 out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W*10}" height="{H*10}" shape-rendering="crispEdges">',
