@@ -5210,7 +5210,7 @@ body {
     <!-- ÉTAPE 0 : IDENTITÉ -->
     <div class="setup-panel active" data-setup-panel="0">
       <div class="setup-step-title">Ton entreprise</div>
-      <div class="setup-step-sub">Ces infos apparaîtront sur ton site, tes factures et ton tableau de bord.</div>
+      <div class="setup-step-sub">Pour personnaliser ton espace. Tu pourras tout changer plus tard.</div>
       <div class="form-row">
         <label class="form-label">Nom de l'entreprise</label>
         <input type="text" class="form-input" id="setup-nom" placeholder="Ex : L'Orangerie Créative">
@@ -5282,7 +5282,7 @@ body {
     <!-- ÉTAPE 2 : PRODUITS DE DÉPART -->
     <div class="setup-panel" data-setup-panel="2">
       <div class="setup-step-title">Tes premiers produits</div>
-      <div class="setup-step-sub">Nom, prix de vente et stock de départ. Tu pourras tout modifier ensuite.</div>
+      <div class="setup-step-sub">Ce que tu vends sur ton stand : nom, prix et quantité. Tu peux en ajouter d'autres plus tard.</div>
       <div id="setup-starter-list"></div>
       <button type="button" class="setup-add-row" onclick="addSetupStarterRow()"><svg class="icon icon-sm"><use href="#icon-plus"/></svg> Ajouter un produit</button>
     </div>
@@ -5311,7 +5311,7 @@ body {
     <div class="logo-sub">Compta & Suivi des ventes</div>
   </div>
   <div class="sidebar-nav">
-    <div class="nav-item active" data-page="dashboard" onclick="goPage('dashboard')"><span class="nav-icon"><svg class="icon"><use href="#icon-dashboard"/></svg></span> Dashboard</div>
+    <div class="nav-item active" data-page="dashboard" onclick="goPage('dashboard')"><span class="nav-icon"><svg class="icon"><use href="#icon-dashboard"/></svg></span> Accueil</div>
     <div class="nav-item" data-page="ventes" onclick="goPage('ventes')"><span class="nav-icon"><svg class="icon"><use href="#icon-ventes"/></svg></span> Ventes <span id="badge-ventes" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="commandes" onclick="goPage('commandes')"><span class="nav-icon"><svg class="icon"><use href="#icon-commandes"/></svg></span> Commandes <span id="badge-commandes" class="badge" style="display:none"></span></div>
     <div class="nav-item" data-page="stock" onclick="goPage('stock')"><span class="nav-icon"><svg class="icon"><use href="#icon-stock"/></svg></span> Stock <span id="badge-stock" class="badge" style="display:none"></span></div>
@@ -5334,7 +5334,7 @@ body {
   <div class="topbar">
     <div class="topbar-title-row-v51">
       <img id="topbar-brand-logo-v51" alt="Berthier">
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-title" id="topbar-title">Accueil</div>
     </div>
     <div class="topbar-actions" id="topbar-actions">
       <button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner</button>
@@ -6912,6 +6912,14 @@ function computeStatsCanaux() {
   });
   return stats;
 }
+function frDateV7(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T12:00:00');
+  if (isNaN(d)) return iso;
+  const opts = { day: 'numeric', month: 'short' };
+  if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
+  return d.toLocaleDateString('fr-FR', opts);
+}
 function computeStatsMarche(marcheId) {
   const ventes = data.ventes.filter(v => v.marcheId === marcheId);
   const prodStats = {};
@@ -6936,7 +6944,7 @@ function goPage(page) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.querySelector(`[data-page="${page}"]`).classList.add('active');
-  const titles = { dashboard:'Dashboard', ventes:'Ventes', commandes:'Commandes', stock:'Produits & stock', marches:'Marchés & Événements', 'produits-stats':'Stats par produit', transactions:'Dépenses & Compta', factures:'Factures', clients:'Clients', calendrier:'Calendrier', 'site-builder':'Site web', exports:'Exports', parametres:'Paramètres' };
+  const titles = { dashboard:'Accueil', ventes:'Ventes', commandes:'Commandes', stock:'Stock', marches:'Mes marchés', 'produits-stats':'Stats par produit', transactions:'Dépenses & Compta', factures:'Factures', clients:'Clients', calendrier:'Calendrier', 'site-builder':'Site web', exports:'Exports', parametres:'Paramètres' };
   document.getElementById('topbar-title').textContent = titles[page]||'';
   const actions = document.getElementById('topbar-actions');
   if (page==='ventes') actions.innerHTML = `<button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner</button><button class="btn btn-primary" onclick="openModal('modal-vente')"><svg class="icon"><use href="#icon-plus"/></svg> Vente</button>`;
@@ -7266,7 +7274,7 @@ function renderMarches() {
       <div class="marche-header">
         <div>
           <div class="marche-name">${escapeHtml(m.nom)}</div>
-          <div class="marche-meta">${escapeHtml(m.debut)}${m.fin&&m.fin!==m.debut?" → "+escapeHtml(m.fin):""}</div>
+          <div class="marche-meta">${escapeHtml(frDateV7(m.debut))}${m.fin&&m.fin!==m.debut?" → "+escapeHtml(frDateV7(m.fin)):""}</div>
         </div>
         <div style="text-align:right">
           <div class="amount-pos" style="font-size:1rem">${fmt(stats.totalCA)}</div>
@@ -8580,7 +8588,7 @@ async function analyzeOcrPhoto() {
 // toujours lui-même via le bouton "Enregistrer" habituel de modal-vente.
 function openPrefilledVenteFromOcr(items) {
   goPage('ventes');
-  openModal('modal-vente'); // réinitialise déjà le formulaire (date du jour, 1 ligne vide)
+  (window.__openModalBaseV7 || openModal)('modal-vente'); // formulaire détaillé (pas la vente express) ; réinitialise le formulaire
   document.getElementById('vente-items-list').innerHTML = '';
   items.forEach(i => {
     if (i.produit) addVenteItem(i.produit, i.qte, i.prix);
@@ -9443,7 +9451,9 @@ function exportSiteBuilderHTML(){const site=buildExportedSiteHTML();downloadBlob
 function render() { if (typeof ensureCalendarTypes === 'function') ensureCalendarTypes(); if (typeof ensureCalendarHidden === 'function') ensureCalendarHidden(); if (typeof ensureSiteBuilder === 'function') ensureSiteBuilder(); if (typeof ensureClientsData === 'function') ensureClientsData(); if (typeof ensureCommandesData === 'function') ensureCommandesData(); renderDashboard(); renderStock(); updateBadges(); if (typeof renderCalendrier === 'function') renderCalendrier(); if (typeof renderSiteBuilder === 'function') renderSiteBuilder(); }
 loadData();
 
-if (!data.params.demoInitialized) {
+// Ancien jeu d'exemple (sculptures). Il n'est plus chargé automatiquement : un nouveau vendeur
+// démarre avec une app vide et peut choisir « Voir un exemple » (mode exemple par métier).
+function seedDemoDataV1() {
   data.params.demoInitialized = true;
   const d=(offset)=>{const dt=new Date();dt.setDate(dt.getDate()-offset);return dt.toISOString().split('T')[0];};
   const m1id=uid(), m2id=uid(), m3id=uid();
@@ -9494,6 +9504,7 @@ if (!data.params.demoInitialized) {
   ];
   saveData();
 }
+if (!data.params.demoInitialized) { data.params.demoInitialized = true; saveData(); }
 render();
 
 // ─── RAPPELS (notification navigateur) ─────────────────────────
@@ -9701,8 +9712,8 @@ checkDueReminders();
   function resetStarterRows() {
     document.getElementById('setup-starter-list').innerHTML = '';
     starterRowId = 0;
-    addSetupStarterRow('Produit 1', 20, 5);
-    addSetupStarterRow('Produit 2', 15, 5);
+    addSetupStarterRow('', '', '');
+    addSetupStarterRow('', '', '');
   }
   window.addSetupStarterRow = function(nom='', prix='', stock='') {
     const id = 'starter-' + (starterRowId++);
@@ -9751,8 +9762,6 @@ checkDueReminders();
     document.getElementById('setup-summary').innerHTML = `
       <div class="setup-summary-row"><span style="color:var(--text3)">Entreprise</span><span>${escapeHtml(nom)}</span></div>
       <div class="setup-summary-row"><span style="color:var(--text3)">Activité</span><span>${escapeHtml(activite)}</span></div>
-      <div class="setup-summary-row"><span style="color:var(--text3)">Devise</span><span>${escapeHtml(devise)}</span></div>
-      <div class="setup-summary-row"><span style="color:var(--text3)">Instagram</span><span>${escapeHtml(insta||'—')}</span></div>
       <div class="setup-summary-row"><span style="color:var(--text3)">Produits de départ</span><span>${produits.length}</span></div>
     `;
   }
@@ -9760,6 +9769,7 @@ checkDueReminders();
   window.setupGoStep = function(dir) {
     if (dir>0 && setupStep===SETUP_STEP_COUNT-1) { finishQuickSetup(); return; }
     setupStep = Math.max(0, Math.min(SETUP_STEP_COUNT-1, setupStep+dir));
+    if (setupStep === 1) setupStep = Math.max(0, Math.min(SETUP_STEP_COUNT-1, setupStep+dir)); // étape « devise & réseaux » sautée
     renderSetupStep();
   };
 
@@ -9948,18 +9958,18 @@ function renderDesignHero() {
     '<div class="hero-full">' +
       '<div class="hero-full-left">' +
         '<div class="hero-kicker">Tableau de bord</div>' +
-        '<div class="hero-title">Une gestion plus claire, plus rapide et plus agréable.</div>' +
-        '<div class="hero-text">Revenus, charges, bénéfice et stock en un coup d’œil ci-dessous.</div>' +
+        '<div class="hero-title">' + (typeof heroTitleV7 === 'function' ? heroTitleV7() : 'Bonjour !') + '</div>' +
+        '<div class="hero-text">' + (typeof heroTextV7 === 'function' ? heroTextV7() : '') + '</div>' +
         '<div class="hero-actions">' +
           '<button class="btn btn-primary" onclick="openModal(&quot;modal-vente&quot;)"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter une vente</button>' +
           '<button class="btn btn-secondary" onclick="goPage(&quot;stock&quot;)">Voir le stock</button>' +
-          '<button class="btn btn-secondary" onclick="goPage(&quot;marches&quot;)">Voir les événements</button>' +
+          '<button class="btn btn-secondary" onclick="goPage(&quot;marches&quot;)">Mes marchés</button>' +
         '</div>' +
       '</div>' +
       '<div class="hero-full-right">' +
         '<div class="hero-side-item"><strong>À surveiller</strong><span>' + alertText + '</span></div>' +
         '<div class="hero-side-item"><strong>Meilleure catégorie</strong><span>' + (topCategory ? (topCategory[0] + ' — ' + fmt(topCategory[1].ca || 0)) : 'Pas encore assez de ventes pour classer.') + '</span></div>' +
-        '<div class="hero-side-item"><strong>Prochain événement</strong><span>' + (nextEvent ? (escapeHtml(nextEvent.nom || 'Événement') + (nextEvent.debut ? ' · ' + nextEvent.debut : '')) : 'Aucun événement à venir.') + '</span></div>' +
+        '<div class="hero-side-item"><strong>Prochain événement</strong><span>' + (nextEvent ? (escapeHtml(nextEvent.nom || 'Événement') + (nextEvent.debut ? ' · ' + (typeof frDateV7 === 'function' ? frDateV7(nextEvent.debut) : nextEvent.debut) : '')) : 'Aucun événement à venir.') + '</span></div>' +
         '<div class="hero-side-item"><strong>Prochain calendrier</strong>' +
           (nextCal
             ? ('<div class="hero-side-meta">' + escapeHtml(nextCal.date || '') + ' · ' + escapeHtml(typeof calTypeLabel === "function" ? calTypeLabel(nextCal.type) : (nextCal.type || '')) + '</div><span>' + escapeHtml(nextCal.title || 'Élément du calendrier') + '</span><div class="hero-side-cta"><button class="btn btn-secondary" onclick="goPage(&quot;calendrier&quot;)">Voir calendrier</button></div>')
@@ -23129,7 +23139,7 @@ function addHelpMessageWithUndo(text, ids) {
 function openPrefilledVenteFromChat(items) {
   toggleHelpChat(false);
   goPage('ventes');
-  openModal('modal-vente');
+  (window.__openModalBaseV7 || openModal)('modal-vente'); // formulaire détaillé pré-rempli
   const firstDate = items.find(i => i.date)?.date;
   if (firstDate) document.getElementById('vente-date').value = firstDate;
   const found = items.filter(i => i.produit);
@@ -23192,7 +23202,7 @@ function respondHelp(entry, originalText) {
       ['ventes', svg('ventes'), 'Ventes'],
       ['stock', svg('stock'), 'Stock'],
       ['marches', svg('marches'), 'Marchés'],
-      ['bilan-mensuel', svg('bilan'), 'Bilan']
+      ['plus', svg('menu'), 'Plus']
     ];
   }
 
@@ -23254,6 +23264,7 @@ function respondHelp(entry, originalText) {
     if(type === 'facture') { closeFab435(); return openModal('modal-facture'); }
     if(type === 'assistant') {
       closeFab435();
+      if(typeof toggleHelpChat === 'function') return toggleHelpChat(true);
       if(document.getElementById('page-assistant')) return safeGo435('assistant');
       if(document.getElementById('page-aide')) return safeGo435('aide');
       alert("Assistant indisponible.");
@@ -23273,8 +23284,7 @@ function respondHelp(entry, originalText) {
           <button type="button" class="btn btn-primary" onclick="mobileQuickActionV435('vente')"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter une vente</button>
           <button type="button" class="btn btn-secondary" onclick="mobileQuickActionV435('scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner un ticket</button>
           <button type="button" class="btn btn-secondary" onclick="mobileQuickActionV435('stock')"><svg class="icon"><use href="#icon-stock"/></svg> Ajouter un produit</button>
-          <button type="button" class="btn btn-secondary" onclick="mobileQuickActionV435('facture')"><svg class="icon"><use href="#icon-factures"/></svg> Créer une facture</button>
-          <button type="button" class="btn btn-ghost" onclick="mobileQuickActionV435('assistant')"><svg class="icon"><use href="#icon-help"/></svg> Ouvrir l’aide</button>
+          <button type="button" class="btn btn-ghost" onclick="mobileQuickActionV435('assistant')"><svg class="icon"><use href="#icon-help"/></svg> Demander à Berthier</button>
         </div>
       `;
       document.body.appendChild(menu);
@@ -23339,9 +23349,12 @@ function respondHelp(entry, originalText) {
 
     const active = currentPage435();
     const names = {
-      dashboard: 'Dashboard',
+      dashboard: 'Accueil',
       ventes: 'Ventes',
       stock: 'Stock',
+      marches: 'Mes marchés',
+      transactions: 'Dépenses',
+      'bilan-mensuel': 'Bilan du mois',
       factures: 'Factures',
       calendrier: 'Calendrier',
       exports: 'Exports',
@@ -25678,6 +25691,270 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
   window.berthierAnswer = answer; // pour les tests
 })();
 </script>
+<!-- ─── Parcours v7 : corrections issues du test utilisateur (4 profils, sur téléphone) ─── -->
+<div id="modal-express" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="express-title">
+  <div class="modal express-modal">
+    <div class="express-head">
+      <div class="modal-title" id="express-title">Vente express</div>
+      <button type="button" class="action-btn" aria-label="Fermer" onclick="closeExpressV7()"><svg class="icon icon-sm"><use href="#icon-close"/></svg></button>
+    </div>
+    <label class="express-label" for="express-marche">Où ?</label>
+    <select id="express-marche" class="form-select"></select>
+    <div class="express-label">Touche ce que tu vends <span class="express-hint">(re-touche pour en ajouter)</span></div>
+    <input id="express-search" class="form-input" type="search" placeholder="Chercher un produit…" oninput="renderExpressGridV7()" style="display:none">
+    <div id="express-grid" class="express-grid"></div>
+    <div id="express-cart" class="express-cart"></div>
+    <div class="express-total"><span>Total</span><strong id="express-total">0,00 €</strong></div>
+    <div class="express-pay">
+      <button type="button" class="btn btn-secondary" onclick="saveExpressV7('especes')">Liquide</button>
+      <button type="button" class="btn btn-primary" onclick="saveExpressV7('carte')">Carte</button>
+    </div>
+    <button type="button" class="express-detail" onclick="openDetailedSaleV7()">Formulaire détaillé (autre date, prix modifié, note…)</button>
+  </div>
+</div>
+
+<div id="plus-sheet" class="plus-sheet" onclick="if(event.target===this) closePlusSheetV7()">
+  <div class="plus-panel" role="menu" aria-label="Plus">
+    <div class="plus-grab"></div>
+    <button type="button" role="menuitem" onclick="plusGoV7('bilan-mensuel')"><svg class="icon"><use href="#icon-bilan"/></svg> Bilan du mois</button>
+    <button type="button" role="menuitem" onclick="plusGoV7('transactions')"><svg class="icon"><use href="#icon-depenses"/></svg> Dépenses</button>
+    <button type="button" role="menuitem" onclick="plusGoV7('exports')"><svg class="icon"><use href="#icon-exports"/></svg> Exports et sauvegarde</button>
+    <button type="button" role="menuitem" onclick="plusGoV7('parametres')"><svg class="icon"><use href="#icon-parametres"/></svg> Paramètres et compte</button>
+    <button type="button" role="menuitem" onclick="closePlusSheetV7(); toggleHelpChat(true)"><img src="icons/berthier-tete-fixe.svg" alt="" class="plus-berthier"> Demander à Berthier</button>
+    <button type="button" role="menuitem" id="plus-install" onclick="closePlusSheetV7(); if(window.installArianePwaV437) installArianePwaV437()"><svg class="icon"><use href="#icon-plus"/></svg> Installer l'app sur ce téléphone</button>
+  </div>
+</div>
+
+<div id="express-toast" class="express-toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  // ── Icône « menu » pour le bouton Plus ──
+  var sprite = document.querySelector('svg symbol[id^="icon-"]');
+  if (sprite && !document.getElementById('icon-menu')) {
+    var sym = document.createElementNS('http://www.w3.org/2000/svg', 'symbol');
+    sym.setAttribute('id', 'icon-menu'); sym.setAttribute('viewBox', '0 0 24 24');
+    sym.innerHTML = '<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/>';
+    sprite.parentNode.appendChild(sym);
+  }
+
+  function today(){ return new Date().toISOString().slice(0, 10); }
+  function money(n){ return (typeof fmt === 'function') ? fmt(n) : (Math.round(n * 100) / 100) + ' €'; }
+
+  // ── Démo : reconnaître l'ancien jeu d'exemple chargé automatiquement ──
+  window.isDemoDataV7 = function(){
+    if (data.params && data.params.demoMode) return true;
+    return (data.marches || []).some(function(m){ return m.nom === 'Convention MythoCon'; }) &&
+           (data.products || []).some(function(p){ return p.id === 'sculpture'; });
+  };
+
+  // ── Accueil du tableau de bord ──
+  window.heroTitleV7 = function(){
+    var ca = 0;
+    (data.ventes || []).filter(function(v){ return v.date === today(); })
+      .forEach(function(v){ (v.items || []).forEach(function(i){ ca += (Number(i.qte) || 0) * (Number(i.prix) || 0); }); });
+    if (!(data.products || []).length) return 'Bienvenue ! On commence par tes produits ?';
+    if (ca > 0) return "Aujourd'hui : " + money(ca) + ' vendus';
+    return 'Prêt pour ta prochaine vente ?';
+  };
+  window.heroTextV7 = function(){
+    if (!(data.products || []).length) return "Ajoute ce que tu vends sur ton stand (nom, prix, quantité). Ensuite, une vente se note en trois touches.";
+    var month = today().slice(0, 7), ca = 0, dep = 0;
+    (data.ventes || []).filter(function(v){ return (v.date || '').slice(0, 7) === month; })
+      .forEach(function(v){ (v.items || []).forEach(function(i){ ca += (Number(i.qte) || 0) * (Number(i.prix) || 0); }); });
+    (data.transactions || []).filter(function(t){ return t.type === 'depense' && (t.date || '').slice(0, 7) === month; })
+      .forEach(function(t){ dep += Math.abs(Number(t.montant) || 0); });
+    var p = data.params || {}, rate = ((Number(p.cotis) || 0) + (Number(p.impot) || 0)) / 100;
+    return 'Ce mois-ci : ' + money(ca) + ' de ventes, environ ' + money(ca - dep - ca * rate) + ' de bénéfice estimé.';
+  };
+
+  // Bandeau discret quand on regarde des données d'exemple
+  function renderDemoBannerV7(){
+    var host = document.querySelector('#page-dashboard .page-content'); if (!host) return;
+    var b = document.getElementById('demo-banner-v7');
+    if (!isDemoDataV7()) { if (b) b.remove(); return; }
+    if (!b) {
+      b = document.createElement('div'); b.id = 'demo-banner-v7'; b.className = 'demo-banner-v7';
+      b.innerHTML = '<span><strong>Données d\'exemple.</strong> Ce ne sont pas tes ventes : c\'est pour découvrir l\'app.</span>' +
+        '<button type="button" class="btn btn-secondary btn-sm-v7" onclick="startFreshV7()">Repartir de zéro</button>';
+      host.insertBefore(b, host.firstChild);
+    }
+  }
+  window.startFreshV7 = function(){
+    if (!confirm("Effacer les données d'exemple et commencer avec tes vraies ventes ?\n(Une sauvegarde automatique est faite avant.)")) return;
+    try { if (typeof saveBackup18 === 'function') saveBackup18('Avant de repartir de zéro'); } catch (e) {}
+    data.ventes = []; data.marches = []; data.transactions = []; data.factures = []; data.taches = [];
+    data.products = []; data.stocks = [];
+    data.params.demoMode = false; data.params.demoInitialized = true;
+    saveData();
+    if (typeof render === 'function') render();
+    renderDemoBannerV7();
+    toast('Ton espace est vide et prêt. Ajoute tes produits pour commencer.');
+  };
+
+  // Écran d'accueil : bouton « Voir un exemple »
+  function addExampleButtonV7(){
+    var skip = [].slice.call(document.querySelectorAll('button')).find(function(b){ return /Passer, je configurerai/.test(b.textContent); });
+    if (!skip || document.getElementById('welcome-example-v7')) return;
+    var ex = document.createElement('button');
+    ex.type = 'button'; ex.id = 'welcome-example-v7'; ex.className = skip.className;
+    ex.textContent = 'Voir un exemple rempli';
+    ex.onclick = function(){
+      skip.click();
+      setTimeout(function(){ if (window.loadDemoModeV418) loadDemoModeV418('bijoux'); renderDemoBannerV7(); }, 150);
+    };
+    skip.parentNode.insertBefore(ex, skip.nextSibling);
+  }
+
+  // ── Vente express ──
+  var cart = {}, expressMarche = '';
+  function products(){ if (typeof ensureProductsData === 'function') ensureProductsData(); return data.products || []; }
+  function todaysMarket(){
+    var t = today();
+    var m = (data.marches || []).filter(function(m){ return m.debut && m.debut <= t && (m.fin || m.debut) >= t; })[0];
+    return m ? m.id : '';
+  }
+  window.renderExpressGridV7 = function(){
+    var grid = document.getElementById('express-grid'), search = document.getElementById('express-search');
+    var list = products();
+    search.style.display = list.length > 9 ? '' : 'none';
+    var q = (search.value || '').toLowerCase();
+    var shown = list.filter(function(p){ return !q || String(p.label).toLowerCase().indexOf(q) >= 0; });
+    if (!list.length) {
+      grid.innerHTML = '<div class="express-empty">Tu n\'as pas encore de produits.<br><button type="button" class="btn btn-primary" onclick="closeExpressV7(); goPage(\'stock\'); __openModalBaseV7(\'modal-stock\')">Ajouter mon premier produit</button></div>';
+    } else {
+      grid.innerHTML = '';
+      shown.forEach(function(p){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'express-item' + (cart[p.id] ? ' on' : '');
+        var stock = (typeof stockEntry === 'function') ? stockEntry(p.id) : null;
+        var left = stock && stock.suivi ? (Number(stock.stock) || 0) - (cart[p.id] || 0) : null;
+        b.innerHTML = '<span class="express-name"></span><span class="express-price">' + money(Number(p.prix) || 0) + '</span>' +
+          (left !== null ? '<span class="express-left' + (left <= 0 ? ' out' : '') + '">' + (left <= 0 ? 'épuisé' : left + ' en stock') + '</span>' : '') +
+          (cart[p.id] ? '<span class="express-qty">' + cart[p.id] + '</span>' : '');
+        b.querySelector('.express-name').textContent = p.label;
+        b.onclick = function(){ cart[p.id] = (cart[p.id] || 0) + 1; renderExpressGridV7(); };
+        grid.appendChild(b);
+      });
+    }
+    renderCart();
+  };
+  function renderCart(){
+    var box = document.getElementById('express-cart'), total = 0, rows = [];
+    Object.keys(cart).forEach(function(id){
+      var p = products().find(function(x){ return x.id === id; }); if (!p) return;
+      var sub = cart[id] * (Number(p.prix) || 0); total += sub;
+      rows.push('<div class="express-line"><button type="button" class="express-minus" aria-label="Retirer un" data-id="' + id + '">−</button>' +
+        '<span>' + cart[id] + ' × ' + String(p.label).replace(/</g, '&lt;') + '</span><span>' + money(sub) + '</span></div>');
+    });
+    box.innerHTML = rows.join('');
+    box.querySelectorAll('.express-minus').forEach(function(b){
+      b.onclick = function(){ var id = b.getAttribute('data-id'); cart[id]--; if (cart[id] <= 0) delete cart[id]; renderExpressGridV7(); };
+    });
+    document.getElementById('express-total').textContent = money(total);
+    document.querySelectorAll('.express-pay .btn').forEach(function(b){ b.disabled = total <= 0; });
+  }
+  window.openExpressV7 = function(){
+    cart = {};
+    var sel = document.getElementById('express-marche'), t = today();
+    var ms = (data.marches || []).slice().sort(function(a, b){ return String(b.debut).localeCompare(String(a.debut)); });
+    sel.innerHTML = '<option value="">Hors marché (boutique, en ligne, amis…)</option>' +
+      ms.map(function(m){ return '<option value="' + m.id + '">' + String(m.nom || 'Marché').replace(/</g, '&lt;') + (m.debut ? ' — ' + (window.frDateV7 ? frDateV7(m.debut) : m.debut) : '') + '</option>'; }).join('');
+    sel.value = todaysMarket() || expressMarche || '';
+    if (!sel.value && sel.options.length) sel.selectedIndex = 0;
+    document.getElementById('express-search').value = '';
+    renderExpressGridV7();
+    document.getElementById('modal-express').classList.add('open');
+  };
+  window.closeExpressV7 = function(){ document.getElementById('modal-express').classList.remove('open'); };
+  window.openDetailedSaleV7 = function(){ closeExpressV7(); __openModalBaseV7('modal-vente'); };
+  var lastSaleId = null;
+  window.saveExpressV7 = function(paiement){
+    var items = Object.keys(cart).map(function(id){
+      var p = products().find(function(x){ return x.id === id; });
+      return { produit: id, qte: cart[id], prix: Number(p && p.prix) || 0 };
+    }).filter(function(i){ return i.qte > 0; });
+    if (!items.length) return;
+    var warnings = (typeof stockWarningsForSale === 'function') ? stockWarningsForSale(items, []) : [];
+    if (warnings.length && !confirm('Stock insuffisant pour :\n' + warnings.join('\n') + '\n\nEnregistrer quand même ?')) return;
+    var marcheId = document.getElementById('express-marche').value || null;
+    expressMarche = marcheId || '';
+    if (typeof applyStockMovement === 'function') applyStockMovement(items, -1);
+    var v = { id: (typeof uid === 'function' ? uid() : String(Date.now())), date: today(), canal: marcheId ? 'evenement' : 'autre-canal', marcheId: marcheId, note: '', paiement: paiement, items: items };
+    data.ventes.push(v); lastSaleId = v.id;
+    saveData();
+    ['renderDashboard', 'renderVentes', 'renderStock', 'updateBadges', 'renderMarches'].forEach(function(f){ try { if (typeof window[f] === 'function') window[f](); } catch (e) {} });
+    closeExpressV7();
+    var total = items.reduce(function(s, i){ return s + i.qte * i.prix; }, 0);
+    toast('Vente enregistrée : ' + money(total) + (paiement === 'especes' ? ' en liquide' : ' par carte') + '.', true);
+  };
+  function undoLast(){
+    var idx = data.ventes.findIndex(function(v){ return v.id === lastSaleId; }); if (idx < 0) return;
+    var v = data.ventes[idx];
+    if (typeof applyStockMovement === 'function') applyStockMovement(v.items, +1);
+    data.ventes.splice(idx, 1); lastSaleId = null; saveData();
+    ['renderDashboard', 'renderVentes', 'renderStock', 'updateBadges', 'renderMarches'].forEach(function(f){ try { if (typeof window[f] === 'function') window[f](); } catch (e) {} });
+    toast('Vente annulée.');
+  }
+  var toastTimer = null;
+  function toast(msg, withUndo){
+    var t = document.getElementById('express-toast');
+    t.innerHTML = ''; var span = document.createElement('span'); span.textContent = msg; t.appendChild(span);
+    if (withUndo) { var u = document.createElement('button'); u.type = 'button'; u.textContent = 'Annuler'; u.onclick = function(){ undoLast(); }; t.appendChild(u); }
+    t.classList.add('show'); clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, withUndo ? 6000 : 3500);
+  }
+
+  // « Ajouter une vente » ouvre la vente express (le formulaire détaillé reste accessible)
+  window.__openModalBaseV7 = openModal;
+  var wrappedOpen = function(id){
+    if (id === 'modal-vente') { return openExpressV7(); }
+    return window.__openModalBaseV7.apply(this, arguments);
+  };
+  window.openModal = wrappedOpen;
+  try { openModal = wrappedOpen; } catch (e) {}
+
+  // ── Menu « Plus » (téléphone) ──
+  window.openPlusSheetV7 = function(){ document.getElementById('plus-sheet').classList.add('open'); };
+  window.closePlusSheetV7 = function(){ document.getElementById('plus-sheet').classList.remove('open'); };
+  window.plusGoV7 = function(page){ closePlusSheetV7(); goPage(page); };
+
+  // ── Titres de page en français, et « plus » ouvre le menu ──
+  var TITLES = { dashboard: 'Accueil', 'bilan-mensuel': 'Bilan du mois', ventes: 'Ventes', stock: 'Stock', marches: 'Mes marchés', transactions: 'Dépenses', exports: 'Exports et sauvegarde', parametres: 'Paramètres' };
+  function setTitle(page){ var el = document.getElementById('topbar-title'); if (el && TITLES[page]) el.textContent = TITLES[page]; }
+  function wrapGo(){
+    var current = window.goPage; if (!current || current.__v7) return;
+    var w = function(page){
+      if (page === 'plus') { openPlusSheetV7(); return; }
+      var r = current.apply(this, arguments);
+      setTitle(page); setTimeout(function(){ setTitle(page); }, 60); setTimeout(function(){ setTitle(page); }, 250);
+      if (page === 'dashboard') setTimeout(renderDemoBannerV7, 0);
+      return r;
+    };
+    w.__v7 = true; w.__recentrage = current.__recentrage;
+    window.goPage = w; try { goPage = w; } catch (e) {}
+  }
+
+  // Le bouton « + » flottant : « Ajouter une vente » ouvre la vente express
+  var oldQuick = window.mobileQuickActionV435;
+  if (oldQuick) window.mobileQuickActionV435 = function(type){
+    if (type === 'vente') { var m = document.getElementById('mobile-fab-menu-v435'); if (m) m.classList.remove('open'); try { closeFab435(); } catch (e) {} return openExpressV7(); }
+    return oldQuick.apply(this, arguments);
+  };
+
+  function init(){
+    wrapGo();
+    addExampleButtonV7();
+    renderDemoBannerV7();
+    try { if (typeof renderDashboard === 'function') renderDashboard(); } catch (e) {}
+    var active = document.querySelector('.page.active'); if (active) setTitle(active.id.replace(/^page-/, ''));
+    if (!window.installArianePwaV437) { var pi = document.getElementById('plus-install'); if (pi) pi.style.display = 'none'; }
+  }
+  if (document.readyState === 'complete') init(); else window.addEventListener('load', function(){ init(); setTimeout(init, 600); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { closeExpressV7(); closePlusSheetV7(); } });
+})();
+</script>
+
 <style id="ariane-design-v6">
 /* ─── Design v6 « sombre épuré » ──────────────────────────────────────────
    Noir chaud, bordures fines, un seul accent (le bleu Berthier).
@@ -25955,6 +26232,78 @@ html body .help-msg-bot::before{content:'';position:absolute;left:-32px;top:0;wi
 .help-action:hover{background:rgba(255,255,255,.06);border-color:var(--text3);}
 .help-say{font:inherit;color:var(--accent2);background:rgba(79,140,255,.10);border:0;border-radius:4px;padding:1px 4px;margin:1px 0;cursor:pointer;text-align:left;}
 .help-say:hover{background:rgba(79,140,255,.2);color:var(--text);}
+
+/* ─── Parcours v7 ─── */
+/* Vente express */
+.express-modal{max-width:520px;width:100%;}
+.express-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.express-label{display:block;font-size:.78rem;color:var(--text3);margin:14px 0 8px;}
+.express-hint{color:var(--text3);opacity:.8;}
+.express-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:42vh;overflow-y:auto;margin-top:8px;}
+.express-item{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:76px;padding:12px;text-align:left;
+  background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font:inherit;transition:border-color .15s,background .15s;}
+.express-item:hover{border-color:var(--border2);}
+.express-item.on{border-color:var(--accent);background:rgba(79,140,255,.08);}
+.express-name{font-weight:550;font-size:.9rem;line-height:1.25;}
+.express-price{color:var(--text2);font-size:.85rem;font-variant-numeric:tabular-nums;}
+.express-left{font-size:.72rem;color:var(--text3);}
+.express-left.out{color:var(--danger);}
+.express-qty{position:absolute;top:8px;right:8px;min-width:24px;height:24px;padding:0 6px;border-radius:4px;background:var(--accent);color:#fff;font-weight:600;font-size:.8rem;display:grid;place-items:center;}
+.express-empty{grid-column:1/-1;text-align:center;color:var(--text2);padding:24px 8px;line-height:1.8;}
+.express-cart{margin-top:12px;}
+.express-line{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--border);font-size:.88rem;}
+.express-minus{width:28px;height:28px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;font-size:1rem;line-height:1;}
+.express-total{display:flex;justify-content:space-between;align-items:baseline;margin:14px 0;padding-top:12px;border-top:1px solid var(--border2);}
+.express-total strong{font-size:1.5rem;font-weight:650;font-variant-numeric:tabular-nums;}
+.express-pay{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.express-pay .btn{min-height:52px !important;font-size:1rem !important;justify-content:center !important;text-align:center;}
+.express-pay .btn:disabled{opacity:.4;cursor:not-allowed;}
+.express-detail{display:block;width:100%;margin-top:12px;background:none;border:0;color:var(--text3);font:inherit;font-size:.8rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+.express-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:30000;display:flex;gap:14px;align-items:center;
+  background:var(--surface3);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;box-shadow:0 12px 32px rgba(0,0,0,.5);transition:opacity .2s,transform .2s;font-size:.9rem;max-width:calc(100vw - 32px);}
+.express-toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+.express-toast button{background:none;border:0;color:var(--accent2);font:inherit;font-weight:600;cursor:pointer;}
+
+/* Menu « Plus » */
+.plus-sheet{position:fixed;inset:0;z-index:25000;background:rgba(0,0,0,.55);display:none;align-items:flex-end;}
+.plus-sheet.open{display:flex;}
+.plus-panel{width:100%;background:var(--surface);border-top:1px solid var(--border2);border-radius:10px 10px 0 0;padding:8px 12px calc(16px + env(safe-area-inset-bottom));}
+.plus-grab{width:40px;height:4px;border-radius:2px;background:var(--border2);margin:6px auto 10px;}
+.plus-panel button{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 10px;background:none;border:0;border-bottom:1px solid var(--border);color:var(--text);font:inherit;font-size:.98rem;text-align:left;cursor:pointer;}
+.plus-panel button:last-child{border-bottom:0;}
+.plus-panel .icon{color:var(--text2);}
+.plus-berthier{width:20px;height:20px;image-rendering:pixelated;}
+
+/* Bandeau données d'exemple */
+.demo-banner-v7{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 20px;padding:12px 0;border-bottom:1px solid var(--border);color:var(--text2);font-size:.88rem;}
+.demo-banner-v7 strong{color:var(--gold);}
+.btn-sm-v7{min-height:34px !important;padding:0 12px !important;font-size:.82rem !important;}
+/* L'ancien « Conseil… Mode réel » est remplacé par le bandeau ci-dessus */
+html body #dashboard-commercial-v418{display:none !important;}
+
+/* Une seule barre du bas (il y en avait deux superposées) */
+html body #mobile-bottom-nav-v432{display:none !important;}
+
+@media (max-width:900px){
+  /* Boutons flottants : plus de chevauchement */
+  html body #pwa-install-btn-v437{display:none !important;}
+  .page-content{padding-bottom:170px !important;}
+  /* Barre du haut compacte : titre et actions sur une seule ligne */
+  html body .topbar{display:flex !important;flex-wrap:nowrap !important;justify-content:space-between !important;gap:10px !important;padding:10px 14px !important;min-height:0 !important;align-items:center !important;}
+  html body .topbar-title-row-v51{flex:1 1 auto !important;min-width:0 !important;width:auto !important;gap:10px !important;}
+  html body .topbar-title-row-v51 img{height:20px !important;width:auto !important;}
+  html body .topbar > *{min-width:0;}
+  html body .topbar-title{font-size:1.1rem !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  html body .topbar-actions{flex-wrap:nowrap !important;gap:6px !important;margin-left:auto !important;width:auto !important;}
+  html body .topbar-actions .btn{min-height:38px !important;padding:0 12px !important;font-size:.85rem !important;width:auto !important;}
+  html body .topbar-actions .btn-ghost{font-size:0 !important;padding:0 10px !important;}
+  html body .topbar-actions .btn-ghost .icon{font-size:1rem;}
+  /* Page Mes marchés : le bouton « Ajouter » en double débordait */
+  #page-marches .section-header .btn-primary{display:none !important;}
+  #page-marches .section-header{flex-wrap:wrap;gap:10px;}
+  /* Vente express plein écran sur téléphone */
+  .express-modal{max-height:100dvh;overflow-y:auto;}
+}
 
 ::selection{background:rgba(79,140,255,.3);}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
