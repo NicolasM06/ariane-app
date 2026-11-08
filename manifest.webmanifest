@@ -1,8 +1,8 @@
 {
   "id": "/ariane-v5-paiement-reel",
-  "name": "Ariane V5 Paiements",
-  "short_name": "Ariane V5",
-  "description": "Ariane aide les petits créateurs à suivre leurs ventes, stock, factures, calendrier et mini-site.",
+  "name": "Berthier",
+  "short_name": "Berthier",
+  "description": "Berthier aide les créateurs qui vendent sur les marchés à suivre leurs ventes, leur stock, leurs marchés et leurs dépenses.",
   "start_url": "./index.html?v=507",
   "scope": "./",
   "display": "standalone",
