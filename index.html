@@ -5239,6 +5239,11 @@ body {
           <label class="form-label">Type d'activité</label>
           <select class="form-select" id="setup-activite">
             <option value="bijoux">Bijoux</option>
+            <option value="savons">Savons / cosmétiques</option>
+            <option value="bougies">Bougies / déco</option>
+            <option value="textile">Tricot / couture / textile</option>
+            <option value="illustration">Illustration / art</option>
+            <option value="ceramique">Céramique / poterie</option>
             <option value="vetements">Vêtements</option>
             <option value="stickers">Stickers / papeterie</option>
             <option value="artisanat">Artisanat / créations</option>
@@ -5376,7 +5381,7 @@ body {
       <div class="filter-bar">
         <input class="form-input" type="text" id="filter-vente-search" placeholder="Rechercher..." oninput="renderVentes()">
         <select class="form-select" id="filter-vente-canal" onchange="renderVentes()">
-          <option value="">Tous canaux</option>
+          <option value="">Partout</option>
           <option value="evenement">Événement</option>
           <option value="site">Site web</option>
           <option value="autre-canal">Autre</option>
@@ -5489,7 +5494,7 @@ body {
       </div>
       <div class="section-card">
         <div class="section-header">
-          <div class="section-title">Dépenses & Transactions <span id="tx-count" style="color:var(--text3);font-size:0.78rem;font-weight:400"></span></div>
+          <div class="section-title">Dépenses <span id="tx-count" style="color:var(--text3);font-size:0.78rem;font-weight:400"></span></div>
           <button class="btn btn-primary" onclick="openModal('modal-transaction')"><svg class="icon"><use href="#icon-plus"/></svg> Ajouter</button>
         </div>
         <div class="table-scroll"><table>
@@ -5890,10 +5895,10 @@ body {
     <div class="page-content">
       <p style="color:var(--text2);font-size:0.87rem;margin-bottom:20px;line-height:1.6">Exporte tes données pour les archiver ou les transmettre à ton comptable.</p>
       <div class="export-grid">
-        <div class="export-card" onclick="exportCSV()"><div class="export-icon"><svg class="icon"><use href="#icon-exports"/></svg></div><div class="export-title">Export CSV complet</div><div class="export-desc">Ventes, dépenses, factures et résumé financier.</div></div>
-        <div class="export-card" onclick="exportPDF()"><div class="export-icon"><svg class="icon"><use href="#icon-factures"/></svg></div><div class="export-title">Rapport PDF</div><div class="export-desc">Rapport imprimable avec stats, alertes et détails.</div></div>
-        <div class="export-card" onclick="exportJSON()"><div class="export-icon"><svg class="icon"><use href="#icon-duplicate"/></svg></div><div class="export-title">Sauvegarde complète</div><div class="export-desc">Fichier JSON pour restaurer toutes tes données.</div></div>
-        <div class="export-card" onclick="document.getElementById('restore-file').click()"><div class="export-icon"><svg class="icon"><use href="#icon-undo"/></svg></div><div class="export-title">Restaurer</div><div class="export-desc">Recharge une sauvegarde JSON précédente.</div><input type="file" id="restore-file" accept=".json" style="display:none" onchange="restoreJSON(event)"></div>
+        <div class="export-card" onclick="exportCSV()"><div class="export-icon"><svg class="icon"><use href="#icon-exports"/></svg></div><div class="export-title">Tableau Excel</div><div class="export-desc">Tes ventes et dépenses dans un tableau, pour toi ou ton comptable.</div></div>
+        <div class="export-card" onclick="exportPDF()"><div class="export-icon"><svg class="icon"><use href="#icon-factures"/></svg></div><div class="export-title">Rapport à imprimer</div><div class="export-desc">Un résumé en PDF de ton activité.</div></div>
+        <div class="export-card" onclick="exportJSON()"><div class="export-icon"><svg class="icon"><use href="#icon-duplicate"/></svg></div><div class="export-title">Sauvegarder mes données</div><div class="export-desc">Un fichier à garder précieusement pour tout récupérer en cas de problème.</div></div>
+        <div class="export-card" onclick="document.getElementById('restore-file').click()"><div class="export-icon"><svg class="icon"><use href="#icon-undo"/></svg></div><div class="export-title">Récupérer une sauvegarde</div><div class="export-desc">Remet tes données à partir d'un fichier de sauvegarde.</div><input type="file" id="restore-file" accept=".json" style="display:none" onchange="restoreJSON(event)"></div>
       </div>
 
       <div style="margin-top:28px;padding:16px;border-radius:14px;background:var(--surface);border:1px solid var(--border)">
@@ -6065,6 +6070,15 @@ body {
         <div class="param-card">
           <div class="param-title">Impôt sur le revenu (versement libératoire)</div>
           <div class="form-row">
+            <label class="form-label" for="param-vl">As-tu choisi le versement libératoire ?</label>
+            <select class="form-select" id="param-vl" onchange="applyVlV10(this.value)">
+              <option value="inconnu">Je ne sais pas</option>
+              <option value="oui">Oui</option>
+              <option value="non">Non</option>
+            </select>
+            <div class="regime-hint-v8">C'est une option choisie à la création de ta micro-entreprise : tu paies ton impôt sur le revenu en même temps que tes cotisations (1 % pour la vente d'objets). Tu peux le vérifier dans ton espace sur autoentrepreneur.urssaf.fr. Sans cette option, l'impôt se paie l'année suivante avec ta déclaration de revenus : il n'est pas compté ici.</div>
+          </div>
+          <div class="form-row impot-slider-v10">
             <label class="form-label">Taux : <span class="range-display" id="disp-impot">1</span>%</label>
             <input type="range" min="0" max="45" step="0.1" id="param-impot" value="1" oninput="document.getElementById('disp-impot').textContent=this.value;saveParams();renderDashboard()">
           </div>
@@ -6165,6 +6179,14 @@ body {
       <button class="btn btn-ghost" style="flex:1" onclick="openModal('modal-ocr-scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner un ticket</button>
     </div>
     <div class="form-row">
+      <label class="form-label">Paiement</label>
+      <select class="form-select" id="vente-paiement">
+        <option value="">Non précisé</option>
+        <option value="especes">Liquide</option>
+        <option value="carte">Carte</option>
+      </select>
+    </div>
+    <div class="form-row">
       <label class="form-label">Note (optionnel)</label>
       <input type="text" class="form-input" id="vente-note" placeholder="Ex : commande spéciale, bon de réduction...">
     </div>
@@ -6226,7 +6248,7 @@ body {
     <div class="modal-title" id="modal-marche-title">Nouveau marché / événement</div>
     <input type="hidden" id="marche-edit-id">
     <div class="form-row">
-      <label class="form-label">Nom de l'événement</label>
+      <label class="form-label">Nom du marché</label>
       <input type="text" class="form-input" id="marche-nom" placeholder="Ex : Marché de Noël Blois, Convention MythoCon...">
     </div>
     <div class="form-row-grid">
@@ -6256,7 +6278,7 @@ body {
       <label class="form-label">Frais</label>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         <div>
-          <label class="form-label" style="font-size:0.68rem">Trajet (€)</label>
+          <label class="form-label" style="font-size:0.68rem">Trajet / essence (€)</label>
           <input type="number" class="form-input" id="marche-frais-trajet" placeholder="0" step="0.01" oninput="updateMarcheTotal()">
         </div>
         <div>
@@ -6264,7 +6286,7 @@ body {
           <input type="number" class="form-input" id="marche-frais-location" placeholder="0" step="0.01" oninput="updateMarcheTotal()">
         </div>
         <div>
-          <label class="form-label" style="font-size:0.68rem">Prix du stand (€)</label>
+          <label class="form-label" style="font-size:0.68rem">Emplacement / stand (€)</label>
           <input type="number" class="form-input" id="marche-frais-stand" placeholder="0" step="0.01" oninput="updateMarcheTotal()">
         </div>
       </div>
@@ -6296,7 +6318,7 @@ body {
     <input type="hidden" id="tx-edit-id">
     <div class="form-row-grid">
       <div class="form-row"><label class="form-label">Date</label><input type="date" class="form-input" id="tx-date"></div>
-      <div class="form-row"><label class="form-label">Montant (€)</label><input type="number" class="form-input" id="tx-montant" placeholder="Ex: -29.90" step="0.01"></div>
+      <div class="form-row"><label class="form-label">Montant (€)</label><input type="number" class="form-input" id="tx-montant" placeholder="Ex : 29,90" step="0.01"></div>
     </div>
     <div class="form-row"><label class="form-label">Libellé</label><input type="text" class="form-input" id="tx-libelle" placeholder="Ex : Résine époxy, Pigments, URSSAF..."></div>
     <div class="form-row-grid">
@@ -6312,10 +6334,10 @@ body {
       <div class="form-row">
         <label class="form-label">Catégorie</label>
         <select class="form-select" id="tx-categorie" onchange="toggleTxMarcheField()">
-          <optgroup label="Matières premières">
-            <option value="resine">Résine / matériaux</option>
-            <option value="peinture">Peintures / pigments</option>
-            <option value="moules">Moules / silicone</option>
+          <optgroup label="Fabrication">
+            <option value="resine">Matières premières (ingrédients, perles, tissu…)</option>
+            <option value="peinture">Matériel et outils</option>
+            <option value="moules">Contenants, moules, supports</option>
             <option value="fournitures">Fournitures diverses</option>
           </optgroup>
           <optgroup label="Marchés & Événements">
@@ -6341,6 +6363,7 @@ body {
         </select>
       </div>
     </div>
+    <div class="tx-hint-v9">Les frais déjà notés dans un marché (emplacement, trajet, stand) sont comptés automatiquement : inutile de les ajouter ici.</div>
     <div class="form-row" id="row-tx-marche" style="display:none">
       <label class="form-label">Lié à un événement (optionnel)</label>
       <select class="form-select" id="tx-marche-id" onchange="toggleTxAdditionalRow()"><option value="">— Aucun —</option></select>
@@ -6952,7 +6975,7 @@ function goPage(page) {
   if (page==='ventes') actions.innerHTML = `<button class="btn btn-ghost" onclick="openModal('modal-ocr-scan')"><svg class="icon"><use href="#icon-scan"/></svg> Scanner</button><button class="btn btn-primary" onclick="openModal('modal-vente')"><svg class="icon"><use href="#icon-plus"/></svg> Vente</button>`;
   else if (page==='commandes') actions.innerHTML = `<button class="btn btn-primary" onclick="openCommandeModal()"><svg class="icon"><use href="#icon-plus"/></svg> Commande</button>`;
   else if (page==='stock') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-stock')"><svg class="icon"><use href="#icon-plus"/></svg> Stock</button>`;
-  else if (page==='marches') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-marche')"><svg class="icon"><use href="#icon-plus"/></svg> Événement</button>`;
+  else if (page==='marches') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-marche')"><svg class="icon"><use href="#icon-plus"/></svg> Marché</button>`;
   else if (page==='transactions') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-transaction')"><svg class="icon"><use href="#icon-plus"/></svg> Dépense</button>`;
   else if (page==='factures') actions.innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-facture')"><svg class="icon"><use href="#icon-plus"/></svg> Facture</button>`;
   else if (page==='clients') actions.innerHTML = `<button class="btn btn-primary" onclick="openClientModal()"><svg class="icon"><use href="#icon-plus"/></svg> Client</button>`;
@@ -7217,7 +7240,7 @@ function renderVentes() {
         <td style="color:var(--text);font-size:0.81rem;max-width:200px">${v.items.map(i=>`${escapeHtml(prodCategory(i.produit))} — ${escapeHtml(prodLabel(i.produit))} ×${i.qte}`).join(', ')}${v.note?`<div style="color:var(--text3);font-size:0.72rem;margin-top:2px">${escapeHtml(v.note)}</div>`:''}</td>
         <td><span class="tag tag-${canal}">${marche?escapeHtml(marche.nom):CANAUX[canal]||canal}</span>${v.paiement?' <span class="tag tag-pay-'+v.paiement+'">'+(v.paiement==='carte'?'Carte':'Liquide')+'</span>':''}</td>
         <td style="font-family:'Geist',sans-serif;font-size:0.8rem">${v.items.reduce((s,i)=>s+i.qte,0)}</td>
-        <td style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--text3)">${fmt(prixMoyen)}</td>
+        <td style="font-family:'Geist',sans-serif;font-size:0.78rem;color:var(--text3)">${v.items.length>1 ? v.items.map(i=>fmt(i.prix)).join(' · ') : fmt(prixMoyen)}</td>
         <td class="amount-pos">${fmt(total)}</td>
         <td>
           <button class="action-btn" data-action="edit-vente" data-id="${escapeHtml(v.id)}" title="Modifier"><svg class="icon icon-sm"><use href="#icon-edit"/></svg></button>
@@ -7485,7 +7508,7 @@ function renderStatsPage() {
 
 // ─── RENDER TRANSACTIONS ──────────────────────────────────────
 function catLabel(c) {
-  const map = { resine:'Résine/matériaux', peinture:'Peintures', moules:'Moules/silicone', fournitures:'Fournitures', stand:'Frais de stand', 'transport-marche':'Transport marché', hebergement:'Hébergement', 'site-web':'Site web', logiciel:'Logiciel', publicite:'Publicité', emballage:'Emballages', expedition:'Expédition', 'charges-sociales':'URSSAF', 'frais-bancaires':'Frais banc.', formation:'Formation', autre:'Autre' };
+  const map = { resine:'Matières premières', peinture:'Matériel', moules:'Contenants', fournitures:'Fournitures', stand:'Frais de stand', 'transport-marche':'Transport marché', hebergement:'Hébergement', 'site-web':'Site web', logiciel:'Logiciel', publicite:'Publicité', emballage:'Emballages', expedition:'Expédition', 'charges-sociales':'URSSAF', 'frais-bancaires':'Frais banc.', formation:'Formation', autre:'Autre' };
   return map[c] || escapeHtml(c);
 }
 function typeTag(t) {
@@ -7511,9 +7534,9 @@ function renderStock() {
   const kpis = document.getElementById('stock-kpis');
   if (kpis) {
     kpis.innerHTML = `
-      <div class="kpi-card purple"><div class="kpi-label">Valeur coût stock</div><div class="kpi-value purple">${fmt(summary.valueCost)}</div><div class="kpi-sub">Coût de fabrication total</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">Coût de ton stock</div><div class="kpi-value purple">${fmt(summary.valueCost)}</div><div class="kpi-sub">Coût de fabrication total</div></div>
       <div class="kpi-card green"><div class="kpi-label">Valeur vente estimée</div><div class="kpi-value green">${fmt(totalPrixVente)}</div><div class="kpi-sub">Si tout le stock est vendu</div></div>
-      <div class="kpi-card blue"><div class="kpi-label">Marge potentielle</div><div class="kpi-value blue">${fmt(margePotentielle)}</div><div class="kpi-sub">Prix de vente − coût fabrication</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Bénéfice possible</div><div class="kpi-value blue">${fmt(margePotentielle)}</div><div class="kpi-sub">Prix de vente − coût fabrication</div></div>
       <div class="kpi-card gold"><div class="kpi-label">Alertes stock</div><div class="kpi-value gold">${summary.low.length + summary.rupture.length}</div><div class="kpi-sub">${summary.rupture.length} rupture(s), ${summary.low.length} faible(s)</div></div>
     `;
   }
@@ -7579,7 +7602,7 @@ function renderTransactions() {
       <td style="font-size:0.78rem;color:var(--text3)">${catLabel(t.categorie)}</td>
       <td>${typeTag(t.type)}</td>
       <td>${t.type==='depense'?(t.justif?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--danger)">✗</span>'):'-'}</td>
-      <td class="${t.montant>0?'amount-pos':'amount-neg'}">${t.montant>0?'+':''}${fmt(t.montant)}</td>
+      <td class="${t.type==='depense'?'amount-neg':(t.type==='recette'?'amount-pos':'amount-neutral')}">${t.type==='depense'?'−':(t.type==='recette'?'+':'')}${fmt(Math.abs(Number(t.montant)||0))}</td>
       <td>
         <button class="action-btn" data-action="edit-tx" data-id="${escapeHtml(t.id)}" title="Modifier"><svg class="icon icon-sm"><use href="#icon-edit"/></svg></button>
         <button class="action-btn" data-action="delete-tx" data-id="${escapeHtml(t.id)}" title="Supprimer" style="color:var(--danger)"><svg class="icon icon-sm"><use href="#icon-delete"/></svg></button>
@@ -7954,6 +7977,7 @@ function openModal(id) {
     document.getElementById('vente-date').value=new Date().toISOString().split('T')[0];
     document.getElementById('vente-canal').value='evenement';
     document.getElementById('vente-note').value='';
+    if (document.getElementById('vente-paiement')) document.getElementById('vente-paiement').value='';
     refreshMarcheSelect();
     toggleMarcheSelect();
     document.getElementById('vente-items-list').innerHTML='';
@@ -8268,6 +8292,8 @@ function saveVente() {
   const canal = normalizeCanal(document.getElementById('vente-canal').value);
   const marcheId = canal === 'evenement' ? (document.getElementById('vente-marche-id').value || null) : null;
   const note = document.getElementById('vente-note').value.trim();
+  const paiementEl = document.getElementById('vente-paiement');
+  const paiement = paiementEl ? paiementEl.value : '';
   const items = getVenteItems().filter(i=>i.qte>0);
   if (!date || !items.length) { alert('Remplis la date et ajoute au moins un produit.'); return; }
   const oldVente = id ? data.ventes.find(v=>v.id===id) : null;
@@ -8278,9 +8304,9 @@ function saveVente() {
   applyStockMovement(items, -1);
   if (id) {
     const idx = data.ventes.findIndex(v=>v.id===id);
-    if (idx>=0) data.ventes[idx] = { id, date, canal, marcheId, note, items };
+    if (idx>=0) data.ventes[idx] = Object.assign({ id, date, canal, marcheId, note, items }, paiement ? { paiement } : {});
   } else {
-    data.ventes.push({ id: uid(), date, canal, marcheId, note, items });
+    data.ventes.push(Object.assign({ id: uid(), date, canal, marcheId, note, items }, paiement ? { paiement } : {}));
   }
   saveData(); closeModal('modal-vente');
   renderDashboard();
@@ -8295,6 +8321,7 @@ function editVente(id) {
   document.getElementById('vente-date').value = v.date;
   document.getElementById('vente-canal').value = normalizeCanal(v.canal);
   document.getElementById('vente-note').value = v.note||'';
+  if (document.getElementById('vente-paiement')) document.getElementById('vente-paiement').value = v.paiement||'';
   refreshMarcheSelect();
   toggleMarcheSelect();
   document.getElementById('vente-marche-id').value = v.marcheId||'';
@@ -9006,7 +9033,7 @@ function exportPDF() {
   </body></html>`;
   const w=window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(()=>w.print(),600);
 }
-function exportJSON() { download(JSON.stringify(data,null,2),'ariane-sauvegarde.json','application/json'); }
+function exportJSON() { download(JSON.stringify(data,null,2),'berthier-sauvegarde-' + new Date().toISOString().slice(0,10) + '.json','application/json'); }
 function restoreJSON(event) {
   const file=event.target.files[0]; if(!file) return;
   if (!/\.json$/i.test(file.name)) { alert('Merci de choisir un fichier .json (export "Sauvegarder" de Berthier).'); event.target.value=''; return; }
@@ -9793,7 +9820,8 @@ checkDueReminders();
     ensureProductsData(); ensureStockData();
     collectStarterProducts().forEach(p => {
       const id = makeUniqueProductId(p.nom);
-      data.products.push({ id, label: p.nom, prix: p.prix, category: 'Autre' });
+      const cat = (document.getElementById('setup-activite').selectedOptions[0] || {}).textContent || 'Mes créations';
+      data.products.push({ id, label: p.nom, prix: p.prix, category: /^(Autre|Service freelance|Vente en marché|Petite marque Instagram)$/.test(cat) ? 'Mes créations' : cat });
       data.stocks.push({ produit:id, stock:p.stock, seuil:Math.max(2, Math.round(p.stock*0.2)), cout:0, suivi:true });
     });
     ensureProductsData(); ensureStockData();
@@ -18424,7 +18452,7 @@ showPage();
       page.className = 'page';
       page.innerHTML = `
         <div class="page-content">
-          <div class="ariane-help-card"><strong>Bilan mensuel :</strong> cette page sert à montrer clairement le CA, les dépenses, les charges à prévoir et le bénéfice estimé sur un mois. C’est très vendeur pour les micro-entrepreneurs.</div>
+          <div class="ariane-help-card"><strong>Bilan du mois :</strong> ton chiffre d'affaires, tes dépenses, ce qu'il faut mettre de côté et ton bénéfice estimé, mois par mois.</div>
           <div class="monthly-toolbar">
             <div class="form-row">
               <label class="form-label">Mois</label>
@@ -22618,7 +22646,7 @@ const HELP_KB = [
     a: "C'est ton chiffre d'affaires moins tes dépenses (matières, frais de stand, cotisations estimées) sur la période choisie. C'est une estimation pour t'aider à piloter ton activité, pas un document comptable officiel — vérifie toujours avec ton comptable ou l'URSSAF pour tes déclarations." },
   { keywords: ['sauvegarder donnees','exporter donnees','sauvegarde','backup','json'],
     q: "Comment sauvegarder mes données ?",
-    a: "Va dans « Exports » puis clique sur « Sauvegarde complète » : ça télécharge un fichier JSON avec toutes tes données. Garde-le précieusement (Drive, clé USB…). Berthier fait aussi des sauvegardes automatiques dans ton navigateur, visibles plus bas sur la même page, mais elles ne remplacent pas un export régulier." },
+    a: "Va dans « Exports » puis clique sur « Sauvegarder mes données » : ça télécharge un fichier JSON avec toutes tes données. Garde-le précieusement (Drive, clé USB…). Berthier fait aussi des sauvegardes automatiques dans ton navigateur, visibles plus bas sur la même page, mais elles ne remplacent pas un export régulier." },
   { keywords: ['restaurer donnees','importer donnees','recuperer sauvegarde','restauration'],
     q: "Comment restaurer une sauvegarde ?",
     a: "Dans « Exports », clique sur « Restaurer » et choisis ton fichier .json exporté précédemment. Tu peux aussi restaurer une sauvegarde automatique récente juste en dessous, sans avoir besoin de fichier. Une copie de sécurité de tes données actuelles est toujours prise avant d'écraser quoi que ce soit." },
@@ -22642,7 +22670,7 @@ const HELP_KB = [
     a: "Si ton compte est vide, Berthier charge automatiquement un jeu de données de démonstration (ventes, stock, factures, marchés) pour que tu puisses explorer toutes les fonctionnalités avant d'ajouter tes vraies données." },
   { keywords: ['exporter csv','export csv','excel comptable'],
     q: "Comment exporter en CSV ?",
-    a: "Dans « Exports », clique sur « Export CSV complet » : tu obtiens un fichier avec tes ventes, dépenses, factures et un résumé financier, exploitable dans Excel ou pour ton comptable." },
+    a: "Dans « Exports », clique sur « Tableau Excel » : tu obtiens un fichier avec tes ventes, dépenses, factures et un résumé financier, exploitable dans Excel ou pour ton comptable." },
   { keywords: ['mobile telephone appli','marche pas mobile','petit ecran'],
     q: "Berthier fonctionne-t-elle sur mobile ?",
     a: "Oui, l'interface s'adapte aux petits écrans : navigation simplifiée, boutons plus grands, formulaires empilés. Si un affichage te paraît cassé sur ton téléphone, dis-le-moi précisément (page + modèle de téléphone) pour que je corrige." }
@@ -22665,7 +22693,7 @@ function toggleHelpChat(forceState) {
   document.getElementById('help-fab-icon').innerHTML = open ? '<svg class="icon"><use href="#icon-close"/></svg>' : '<img class="help-fab-berthier" src="icons/berthier-tete.svg" alt="">';
   if (open && !helpChatOpened) {
     helpChatOpened = true;
-    addHelpMessage('bot', "Salut, moi c'est Berthier ! Pose-moi une question sur tes ventes, ton stock, tes marchés ou tes sauvegardes — ou dis-moi directement une vente, ex : « vendu 2 sculptures à 45€ », et je te prépare le formulaire.");
+    addHelpMessage('bot', "Salut, moi c'est Berthier ! Pose-moi une question sur tes ventes, ton stock, tes marchés ou tes sauvegardes — ou dis-moi directement une vente, ex : « vendu 2 sculptures à 45€ », et je l'enregistre tout de suite (tu pourras l'annuler).");
     renderHelpQuickChips(HELP_QUICK_QUESTIONS);
     setTimeout(() => document.getElementById('help-chat-input').focus(), 200);
   }
@@ -23342,7 +23370,7 @@ function respondHelp(entry, originalText) {
           const row = document.createElement('div');
           row.className = 'mobile-table-row-v435';
           row.innerHTML = `
-            <div class="mobile-table-label-v435">${headers[i] || 'Info'}</div>
+            <div class="mobile-table-label-v435">${headers[i] || ''}</div>
             <div class="mobile-table-value-v435">${value}</div>
           `;
           mobileCard.appendChild(row);
@@ -25437,7 +25465,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     sauvegarde:['sauvegarde','sauvegarder','backup','json','perdre','perdu','perte','restaurer','restauration','recuperer'],
     exporter:['export','exporter','exports','csv','pdf','telecharger','excel','tableur','comptable'],
     compte:['compte','connexion','connecter','inscription','inscrire','mdp','password','email','mail'],
-    combien:['combien','total','montant','somme','chiffres','bilan','resume','point'],
+    combien:['combien','cb','cbn','cmb','total','montant','somme','chiffres','bilan','resume','point'],
     meilleur:['meilleur','meilleure','meilleurs','top','plus','mieux','record','premier'],
     pire:['pire','moins','nul','flop','dernier','perte'],
     prochain:['prochain','prochaine','suivant','bientot','avenir','venir','agenda','quand'],
@@ -25452,7 +25480,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     prix:['prix','gratuit','payant','abonnement','tarif','coute','payer'],
     donnees:['donnees','confidentialite','rgpd','prive','securite','vie'],
     liquide:['liquide','liquides','espece','especes','cash','monnaie','billet','billets','caisse'],
-    carte:['carte','cartes','cb','sumup','tpe','bancaire','sans contact'],
+    carte:['carte','cartes','sumup','tpe','bancaire','sans contact'],
     semaine:['semaine','semaines','semene','smaine'], mois:['mois','mensuel','moi'], annee:['annee','an','annuel','anee','anne','annees','anne'], jour:['jour','aujourd','aujourdhui','auj','ajd','journee'], hier:['hier']
   };
   var WORD2KEY = {};
@@ -25532,12 +25560,14 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
   // ── Questions sur les chiffres ──
   var INTENTS = [
     { test: function(c){ return (c.liquide || c.carte) && !c.ajouter; }, run: function(c){
-        var p = periodFrom(c), tot = { especes: 0, carte: 0, autre: 0 };
+        // Pour compter sa caisse, la question porte d'habitude sur la journée
+        var noPeriod = !(c.semaine || c.mois || c.annee || c.hier || c.jour);
+        var p = periodFrom(noPeriod ? Object.assign({}, c, { jour: true }) : c), tot = { especes: 0, carte: 0, autre: 0 };
         ventesIn(p).forEach(function(v){ var k = v.paiement === 'carte' ? 'carte' : (v.paiement === 'especes' ? 'especes' : 'autre');
           (v.items || []).forEach(function(i){ tot[k] += (Number(i.qte) || 0) * (Number(i.prix) || 0); }); });
         var t = p.label.charAt(0).toUpperCase() + p.label.slice(1) + ' : ' + money(tot.especes) + ' en liquide, ' + money(tot.carte) + ' par carte.';
         if (tot.autre > 0) t += '\n' + money(tot.autre) + ' de ventes sans moyen de paiement noté (saisies avec le formulaire détaillé).';
-        if (c.liquide && !c.carte) t += '\nC\'est ce que tu devrais avoir en caisse en plus de ton fond de caisse.';
+        if (c.liquide && !c.carte && p.label === "aujourd'hui") t += '\nC\'est ce que tu devrais avoir en caisse en plus de ton fond de caisse.';
         return { text: t, actions: [{ label: 'Voir mes ventes', page: 'ventes' }] };
     } },
     { test: function(c){ return c.marche && (c.meilleur || c.benefice || c.pire); }, run: function(c){
@@ -25559,9 +25589,10 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
         var next = (D().marches || []).filter(function(m){ return (m.fin || m.debut || '') >= today; })
           .sort(function(a, b){ return String(a.debut).localeCompare(String(b.debut)); })[0];
         if (!next) return { text: "Aucun marché à venir n'est noté. Ajoute le prochain pour suivre tes frais et tes ventes du jour.", actions: [{ label: 'Ajouter un marché', modal: 'modal-marche', page: 'marches' }] };
-        return { text: 'Ton prochain marché : ' + (next.nom || 'sans nom') + ' le ' + next.debut + (next.lieu ? ', à ' + next.lieu : '') + (parseFloat(next.frais) ? '. Frais prévus : ' + money(parseFloat(next.frais)) : '') + '.', actions: [{ label: 'Mes marchés', page: 'marches' }] };
+        var when = next.debut <= today ? "aujourd'hui" : 'le ' + (typeof frDateV7 === 'function' ? frDateV7(next.debut) : next.debut);
+        return { text: 'Ton prochain marché : ' + (next.nom || 'sans nom') + ' ' + when + (next.lieu ? ', à ' + next.lieu : '') + (parseFloat(next.frais) ? '. Frais prévus : ' + money(parseFloat(next.frais)) : '') + '.', actions: [{ label: 'Mes marchés', page: 'marches' }] };
     } },
-    { test: function(c){ return c.stock && !c.ajouter; }, run: function(){
+    { test: function(c){ return c.stock && !c.ajouter && !c.supprimer; }, run: function(){
         if (typeof computeStockSummary !== 'function') return null;
         var s = computeStockSummary();
         if (!s.tracked.length) return { text: "Tu ne suis encore le stock d'aucun produit. Active le suivi dans Stock : je te préviendrai avant une rupture.", actions: [{ label: 'Ouvrir le stock', page: 'stock' }] };
@@ -25581,11 +25612,16 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     { test: function(c){ return c.urssaf && (c.combien || !c.ajouter); }, run: function(c){
         var p = periodFrom(c), ca = caOf(ventesIn(p)), r = chargesRate();
         if (!r) return { text: "Tes taux de cotisations et d'impôt ne sont pas réglés. Indique-les dans Paramètres (régime fiscal) et je calculerai ce qu'il faut mettre de côté.", actions: [{ label: 'Régler mes taux', page: 'parametres' }] };
-        return { text: 'Sur ' + money(ca) + ' de ventes ' + p.label + ', mets de côté environ ' + money(ca * r) + ' pour l\'URSSAF et l\'impôt (taux réglé : ' + String(Math.round(r * 1000) / 10).replace('.', ',') + ' %). C\'est une estimation : vérifie toujours sur autoentrepreneur.urssaf.fr.', actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }, { label: 'Mes taux', page: 'parametres' }] };
+        return { text: 'Sur ' + money(ca) + ' de ventes ' + p.label + ', mets de côté environ ' + money(ca * r) + ' pour l\'URSSAF et l\'impôt (taux réglé : ' + String(Math.round(r * 1000) / 10).replace('.', ',') + ' %). C\'est une estimation : vérifie toujours sur autoentrepreneur.urssaf.fr.' + ((D().params || {}).vl === 'oui' ? '' : ((D().params || {}).vl === 'non' ? '\nSans versement libératoire, ton impôt sur le revenu n\'est pas compté : il se paie l\'année suivante.' : '\nDis-moi dans Paramètres si tu as choisi le versement libératoire : sans lui, l\'impôt sur le revenu n\'est pas compté ici.')), actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }, { label: 'Mes taux', page: 'parametres' }] };
     } },
     { test: function(c){ return c.benefice && !c.ajouter; }, run: function(c){
-        var p = periodFrom(c), ca = caOf(ventesIn(p)), dep = sumDep(depensesIn(p)), ch = ca * chargesRate();
-        return { text: 'Bénéfice estimé ' + p.label + ' : ' + money(ca - dep - ch) + '\n' + money(ca) + ' de ventes − ' + money(dep) + ' de dépenses − ' + money(ch) + ' de cotisations et impôt estimés.', actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }] };
+        var p = periodFrom(c);
+        if (window.financeV10) {
+          var f = financeV10(p.start, p.end);
+          return { text: 'Bénéfice estimé ' + p.label + ' : ' + money(f.benef) + '\n' + money(f.ca) + ' de ventes − ' + money(f.depenses) + ' de dépenses et frais de marché − ' + money(f.coutProduits) + ' de coût des produits − ' + money(f.charges) + ' à mettre de côté pour l\'URSSAF.', actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }] };
+        }
+        var ca = caOf(ventesIn(p)), dep = sumDep(depensesIn(p)), ch = ca * chargesRate();
+        return { text: 'Bénéfice estimé ' + p.label + ' : ' + money(ca - dep - ch), actions: [{ label: 'Voir le bilan', page: 'bilan-mensuel' }] };
     } },
     { test: function(c){ return c.depense && (c.combien || c.mois || c.semaine || c.annee || c.jour) && !c.ajouter; }, run: function(c){
         var p = periodFrom(c), list = depensesIn(p), total = sumDep(list), cats = {};
@@ -25605,11 +25641,14 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     { k:['ajouter','vente'], q:'Comment ajouter une vente ?', a:"Clique sur « + Vente » en haut, ou dis-le-moi directement, par exemple « vendu 2 bracelets à 15 € au marché de Noël ». Le stock et ton chiffre d'affaires se mettent à jour tout seuls.", act:[{label:'Ajouter une vente', modal:'modal-vente', page:'ventes'}] },
     { k:['supprimer','vente'], q:'Comment corriger une vente ?', a:"Dans Ventes, clique sur le crayon pour modifier une vente, ou sur la corbeille pour la supprimer. Le stock est remis à jour automatiquement.", act:[{label:'Mes ventes', page:'ventes'}] },
     { k:['ajouter','stock'], q:'Comment ajouter un produit ?', a:"Dans Stock, clique sur « + Stock » : indique le nom, le prix de vente, le coût de fabrication et la quantité. Active le suivi pour être prévenu avant une rupture.", act:[{label:'Ajouter un produit', modal:'modal-stock', page:'stock'}] },
+    { k:['supprimer','produit'], q:'Comment changer le prix d\'un produit ?', a:"Dans Stock, clique sur le crayon à côté du produit : tu peux changer son nom, son prix de vente, son coût et sa quantité. Les ventes déjà notées gardent leur ancien prix.", act:[{label:'Ouvrir le stock', page:'stock'}] },
+    { k:['supprimer','stock'], q:'Comment corriger mon stock ?', a:"Dans Stock, clique sur le crayon à côté du produit pour corriger la quantité (après un inventaire, une casse, un cadeau…).", act:[{label:'Ouvrir le stock', page:'stock'}] },
     { k:['stock'], q:'Comment gérer mon stock ?', a:"Chaque vente retire les articles du stock. Mets un seuil d'alerte par produit : je te dis ce qui est bientôt épuisé (demande-moi « qu'est-ce qui est en rupture ? »).", act:[{label:'Ouvrir le stock', page:'stock'}] },
     { k:['ajouter','marche'], q:'Comment ajouter un marché ?', a:"Dans Mes marchés, clique sur « + Événement » : nom, date, lieu et frais (emplacement, trajet). Ensuite, rattache tes ventes à ce marché pour voir s'il est rentable.", act:[{label:'Ajouter un marché', modal:'modal-marche', page:'marches'}] },
     { k:['marche'], q:'À quoi sert la page Mes marchés ?', a:"Elle compare tes marchés : ventes, frais et bénéfice net de chacun. Demande-moi « quel marché rapporte le plus ? » pour le classement.", act:[{label:'Mes marchés', page:'marches'}] },
     { k:['ajouter','depense'], q:'Comment ajouter une dépense ?', a:"Dans Dépenses, clique sur « + Dépense » : montant, date et catégorie (matières, emplacement, essence…). Elles sont déduites de ton bénéfice.", act:[{label:'Ajouter une dépense', modal:'modal-transaction', page:'transactions'}] },
     { k:['benefice'], q:"C'est quoi le bénéfice estimé ?", a:"Ventes − dépenses − cotisations et impôt estimés. Demande-moi « mon bénéfice ce mois-ci » pour le calcul avec tes chiffres." },
+    { k:['urssaf','donnees'], q:'Quand déclarer à l\'URSSAF ?', a:"Tu déclares ton chiffre d'affaires sur autoentrepreneur.urssaf.fr, chaque mois ou chaque trimestre selon ce que tu as choisi. En trimestriel, c'est en général fin avril, fin juillet, fin octobre et fin janvier. Vérifie ta périodicité et tes dates exactes dans ton espace. Même avec 0 € de ventes, il faut déclarer 0.", act:[{label:'Voir le bilan', page:'bilan-mensuel'}] },
     { k:['urssaf'], q:'Comment régler mon régime fiscal ?', a:"Dans Paramètres, choisis ton régime (micro-BIC pour la vente d'objets, micro-BNC pour les services) et tes taux. Je m'en sers pour estimer ce qu'il faut mettre de côté. Vérifie tes taux sur autoentrepreneur.urssaf.fr.", act:[{label:'Paramètres', page:'parametres'}] },
     { k:['exporter'], q:'Comment exporter mes ventes ?', a:"Dans Exports : CSV pour un tableur ou ton comptable, PDF pour un rapport, JSON pour une sauvegarde complète.", act:[{label:'Exports', page:'exports'}] },
     { k:['sauvegarde'], q:'Comment sauvegarder mes données ?', a:"Sans compte, tes données sont dans ce navigateur : exporte une sauvegarde JSON régulièrement (Exports). Avec un compte, elles sont aussi sauvegardées en ligne. Pour restaurer, utilise « Restaurer » dans Exports.", act:[{label:'Exports', page:'exports'}, {label:'Créer un compte', page:'parametres'}] },
@@ -25618,7 +25657,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     { k:['exemple'], q:'Comment essayer avec des exemples ?', a:"Dans Paramètres → Données → « Essayer avec des exemples » : choisis un métier, des ventes fictives se chargent. Repars de zéro quand tu es prêt.", act:[{label:'Paramètres', page:'parametres'}] },
     { k:['zero'], q:'Comment repartir de zéro ?', a:"Dans Paramètres → Données → « Repartir de zéro ». Fais d'abord une sauvegarde JSON (Exports) au cas où.", act:[{label:'Paramètres', page:'parametres'}] },
     { k:['scanner'], q:'Comment scanner un ticket ?', a:"Clique sur « Scanner » en haut : prends en photo un ticket ou une liste, Berthier essaie de reconnaître les articles et les montants. Vérifie avant de valider.", act:[{label:'Ouvrir le scanner', modal:'modal-ocr-scan'}] },
-    { k:['prix'], q:'Berthier est payant ?', a:"Non, Berthier est gratuit pendant la bêta, sans carte bancaire." },
+    { k:['prix'], q:'Berthier est payant ?', a:"Berthier est gratuit pendant la bêta, sans carte bancaire. S\'il devient payant un jour, tu seras prévenu·e avant, et rien ne sera facturé sans ton accord." },
     { k:['donnees'], q:'Mes données sont-elles privées ?', a:"Oui. Sans compte, rien ne quitte ton appareil. Avec un compte, la sauvegarde est stockée dans l'Union européenne. Pas de pub, pas de revente. Tout est expliqué dans la politique de confidentialité." },
     { k:['bug'], q:'Ça ne marche pas', a:"Désolé ! Clique sur « Signaler un bug » en haut de cette fenêtre et décris ce qui s'est passé : on corrige vite." },
     { k:['aide'], q:'Que sais-tu faire ?', a:"Je réponds sur l'app et je fais tes comptes. Essaie :\n« combien j'ai vendu ce mois ? »\n« quel marché rapporte le plus ? »\n« qu'est-ce qui est en rupture ? »\n« combien en liquide aujourd'hui ? »\n« il me reste combien de bracelets ? »\n« mon bénéfice cette année »\n« combien mettre de côté pour l'URSSAF ? »\n« vendu 3 savons à 6 € »" }
@@ -25679,6 +25718,17 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     var exact = KB.filter(function(e){ return norm(e.q) === norm(text); })[0];
     if (exact) return { text: exact.a, actions: exact.act, q: exact.q };
     var c = concepts(text);
+    var nt = norm(text);
+    if (/sumup|zettle|import/.test(nt)) return { text: "Pas encore : Berthier ne sait pas encore importer tes ventes SumUp. En attendant, note tes ventes par carte en vente express (bouton « Carte ») : ça prend 3 touches. C'est noté dans nos idées.", actions: [{ label: 'Ajouter une vente', modal: 'modal-vente' }] };
+    if (window.marketVerdictV11) { var mv = marketVerdictV11(text, c); if (mv) return mv; }
+    if (/liberatoire/.test(nt)) return { text: "Le versement libératoire, c'est une option choisie à la création de ta micro-entreprise : tu paies ton impôt sur le revenu en même temps que tes cotisations, en pourcentage de tes ventes (1 % pour la vente d'objets). Si tu ne sais pas si tu l'as pris, regarde dans ton espace sur autoentrepreneur.urssaf.fr. Indique ensuite ta réponse dans Paramètres : je calculerai juste.", actions: [{ label: 'Paramètres', page: 'parametres' }] };
+    if (/\b(quand|date|echeance|delai)\b/.test(nt) && /\b(declar|urssaf|payer)/.test(nt)) { var qe = KB.filter(function(e){ return /Quand déclarer/.test(e.q); })[0]; if (qe) return { text: qe.a, actions: qe.act, q: qe.q }; }
+    if (/^(merci|merci beaucoup|merci berthier|super merci|top merci|parfait|genial|cool)\b/.test(nt)) return { text: "Avec plaisir ! Je reste là si tu as besoin de tes chiffres." };
+    if (/^(bonjour|salut|hello|coucou|bonsoir|hey)\b/.test(nt) && nt.split(' ').length <= 3) return { text: "Bonjour ! Je suis Berthier, ton collègue de la compta. Demande-moi par exemple « combien j'ai vendu aujourd'hui ? »." };
+    if (/\b(bic|bnc|regime|statut)\b/.test(nt) && !c.combien){
+      var pr = D().params || {}, labels = { 'micro-bic': 'Micro-BIC — vente de créations ou d\'objets', 'micro-bic-services': 'Micro-BIC — prestations de services', 'micro-bnc': 'Micro-BNC — profession libérale', autre: 'personnalisé' };
+      return { text: 'Ton statut réglé : ' + (labels[pr.regime] || pr.regime || 'non réglé') + ', avec ' + String(pr.cotis).replace('.', ',') + ' % de cotisations et ' + String(pr.impot).replace('.', ',') + ' % d\'impôt (versement libératoire). Pour la vente d\'objets que tu fabriques ou revends, c\'est en général le micro-BIC vente. Vérifie sur autoentrepreneur.urssaf.fr.', actions: [{ label: 'Changer mon statut', page: 'parametres' }] };
+    }
     if ((c.stock || /\breste\b|\bcombien\b/.test(norm(text))) && !c.ajouter && !c.vente && !c.liquide && !c.carte){
       var pm = productMatches(text);
       if (pm.length && pm.length <= 6) return stockAnswer(pm);
@@ -25762,6 +25812,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
       <button type="button" class="btn btn-primary" onclick="saveExpressV7('carte')">Carte</button>
     </div>
     <button type="button" class="express-detail" onclick="openDetailedSaleV7()">Formulaire détaillé (autre date, prix modifié, note…)</button>
+    <div id="express-recent" class="express-recent"></div>
   </div>
 </div>
 
@@ -25859,7 +25910,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
   }
 
   // ── Vente express ──
-  var cart = {}, expressMarche = '';
+  var cart = {}, expressMarche = '', overOk = {};
   function products(){ if (typeof ensureProductsData === 'function') ensureProductsData(); return data.products || []; }
   function todaysMarket(){
     var t = today();
@@ -25885,7 +25936,14 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
           (left !== null ? '<span class="express-left' + (left <= 0 ? ' out' : '') + '">' + (left <= 0 ? 'épuisé' : left + ' en stock') + '</span>' : '') +
           (cart[p.id] ? '<span class="express-qty">' + cart[p.id] + '</span>' : '');
         b.querySelector('.express-name').textContent = p.label;
-        b.onclick = function(){ cart[p.id] = (cart[p.id] || 0) + 1; renderExpressGridV7(); };
+        if (overOk[p.id] === 'warn') { var w = document.createElement('span'); w.className = 'express-warn'; w.textContent = 'Épuisé : touche encore pour vendre quand même.'; b.appendChild(w); }
+        b.setAttribute('aria-label', p.label + ', ' + money(Number(p.prix) || 0) + (left !== null ? ', ' + (left <= 0 ? 'épuisé' : left + ' en stock') : '') + (cart[p.id] ? ', ' + cart[p.id] + ' dans la vente' : ''));
+        b.onclick = function(){
+          if (left !== null && left <= 0 && overOk[p.id] !== 'ok') {
+            if (overOk[p.id] === 'warn') overOk[p.id] = 'ok'; else { overOk[p.id] = 'warn'; renderExpressGridV7(); return; }
+          }
+          cart[p.id] = (cart[p.id] || 0) + 1; renderExpressGridV7();
+        };
         grid.appendChild(b);
       });
     }
@@ -25907,7 +25965,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     document.querySelectorAll('.express-pay .btn').forEach(function(b){ b.disabled = total <= 0; });
   }
   window.openExpressV7 = function(){
-    cart = {};
+    cart = {}; overOk = {};
     var sel = document.getElementById('express-marche'), t = today();
     var ms = (data.marches || []).slice().sort(function(a, b){ return String(b.debut).localeCompare(String(a.debut)); });
     sel.innerHTML = '<option value="">Hors marché (boutique, en ligne, amis…)</option>' +
@@ -25927,12 +25985,11 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
       return { produit: id, qte: cart[id], prix: Number(p && p.prix) || 0 };
     }).filter(function(i){ return i.qte > 0; });
     if (!items.length) return;
-    var warnings = (typeof stockWarningsForSale === 'function') ? stockWarningsForSale(items, []) : [];
-    if (warnings.length && !confirm('Stock insuffisant pour :\n' + warnings.join('\n') + '\n\nEnregistrer quand même ?')) return;
+    // Le dépassement de stock a déjà été confirmé sur la tuile (2e touche) : pas de fenêtre système ici.
     var marcheId = document.getElementById('express-marche').value || null;
     expressMarche = marcheId || '';
     if (typeof applyStockMovement === 'function') applyStockMovement(items, -1);
-    var v = { id: (typeof uid === 'function' ? uid() : String(Date.now())), date: today(), canal: marcheId ? 'evenement' : 'autre-canal', marcheId: marcheId, note: '', paiement: paiement, items: items };
+    var v = { id: (typeof uid === 'function' ? uid() : String(Date.now())), date: (window.saleDateV10 ? saleDateV10(marcheId) : today()), canal: marcheId ? 'evenement' : 'autre-canal', marcheId: marcheId, note: '', paiement: paiement, items: items };
     data.ventes.push(v); lastSaleId = v.id;
     saveData();
     ['renderDashboard', 'renderVentes', 'renderStock', 'updateBadges', 'renderMarches'].forEach(function(f){ try { if (typeof window[f] === 'function') window[f](); } catch (e) {} });
@@ -26022,9 +26079,9 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     data.params.regime = regime;
     var r = RATES[regime];
     if (r){
-      data.params.cotis = r[0]; data.params.impot = r[1];
+      data.params.cotis = r[0]; data.params.impot = (data.params.vl === 'oui') ? r[1] : 0;
       var c = document.getElementById('param-cotis'), i = document.getElementById('param-impot');
-      if (c) c.value = r[0]; if (i) i.value = r[1];
+      if (c) c.value = r[0]; if (i) i.value = data.params.impot;
     }
     saveData(); showRates();
     try { renderDashboard(); } catch (e) {}
@@ -26056,7 +26113,7 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     var adv = ['marche-fin', 'marche-type', 'marche-lieu', 'marche-jours', 'marche-notes'];
     adv.forEach(function(id){ var el = document.getElementById(id); var row = el && el.closest('.form-row'); if (row) row.classList.add('marche-adv-v8'); });
     var stand = document.getElementById('marche-frais-location');
-    var standLabel = stand && stand.previousElementSibling; if (standLabel) standLabel.textContent = 'Emplacement (€)';
+    var standLabel = stand && stand.previousElementSibling; if (standLabel) standLabel.textContent = 'Location de matériel (€)';
     var last = document.getElementById('marche-frais-total');
     var anchor = last && last.closest('.form-row');
     if (anchor){
@@ -26087,6 +26144,265 @@ window.ARIANE_SUPABASE_ANON_KEY = window.ARIANE_SUPABASE_ANON_KEY || 'eyJhbGciOi
     em.__v8 = true; window.editMarche = em; try { editMarche = em; } catch (e) {}
   }
   try { renderVentes(); renderDashboard(); } catch (e) {}
+})();
+</script>
+<script>
+// ─── Confiance v10 : un seul bénéfice, ventes à la bonne date, impôt demandé, données protégées ───
+(function(){
+  function money(n){ return (typeof fmt === 'function') ? fmt(n) : (Math.round(n * 100) / 100) + ' €'; }
+  function todayIso(){ return new Date().toISOString().slice(0, 10); }
+
+  // UNE seule définition du bénéfice, partout (accueil, résumé, Berthier) :
+  // ventes − dépenses − frais des marchés − coût des produits vendus − cotisations et impôt.
+  window.financeV10 = function(start, end){
+    var D = data, ventes = (D.ventes || []).filter(function(v){ return v.date >= start && v.date <= end; });
+    var caVentes = 0, coutProduits = 0;
+    ventes.forEach(function(v){ (v.items || []).forEach(function(i){
+      var q = Number(i.qte) || 0; caVentes += q * (Number(i.prix) || 0);
+      var st = (D.stocks || []).find(function(x){ return x.produit === i.produit; }); coutProduits += q * (Number(st && st.cout) || 0);
+    }); });
+    var txs = (D.transactions || []).filter(function(t){ return (t.date || '') >= start && (t.date || '') <= end; });
+    var recettes = txs.filter(function(t){ return t.type === 'recette'; }).reduce(function(a, t){ return a + Math.abs(Number(t.montant) || 0); }, 0);
+    var depTx = txs.filter(function(t){ return t.type === 'depense'; }).reduce(function(a, t){ return a + Math.abs(Number(t.montant) || 0); }, 0);
+    // Frais des marchés de la période, sans recompter une dépense déjà notée et liée à ce marché
+    var fraisMarches = (D.marches || []).filter(function(m){ return m.debut >= start && m.debut <= end; }).reduce(function(a, m){
+      var frais = (typeof eventEffectiveFrais === 'function') ? eventEffectiveFrais(m) : (parseFloat(m.frais) || 0);
+      var deja = (D.transactions || []).filter(function(t){ return t.type === 'depense' && t.eventId === m.id && !t.additionalToEvent; })
+        .reduce(function(b, t){ return b + Math.abs(Number(t.montant) || 0); }, 0);
+      return a + Math.max(0, frais - deja);
+    }, 0);
+    var ca = caVentes + recettes, depenses = depTx + fraisMarches;
+    var p = D.params || {}, charges = ca * ((Number(p.cotis) || 0) + (Number(p.impot) || 0)) / 100;
+    var especes = 0, carte = 0;
+    ventes.forEach(function(v){ var t = (v.items || []).reduce(function(a, i){ return a + (Number(i.qte) || 0) * (Number(i.prix) || 0); }, 0);
+      if (v.paiement === 'especes') especes += t; else if (v.paiement === 'carte') carte += t; });
+    return { ca: ca, nbVentes: ventes.length, depenses: depenses, coutProduits: coutProduits, charges: charges, benef: ca - depenses - coutProduits - charges, especes: especes, carte: carte };
+  };
+  window.monthFinanceV10 = function(month){
+    month = month || todayIso().slice(0, 7);
+    var y = +month.slice(0, 4), m = +month.slice(5, 7), last = new Date(y, m, 0).getDate();
+    return financeV10(month + '-01', month + '-' + String(last).padStart(2, '0'));
+  };
+
+  // Accueil : un message cohérent avec les chiffres en dessous
+  window.heroTextV7 = function(){
+    if (!(data.products || []).length) return "Ajoute ce que tu vends sur ton stand (nom, prix, quantité). Ensuite, une vente se note en trois touches.";
+    var f = monthFinanceV10();
+    return 'Ce mois-ci : ' + money(f.ca) + ' de ventes, ' + money(f.benef) + ' de bénéfice estimé (après dépenses, frais de marché, coût des produits et URSSAF).';
+  };
+  function moisLabel(month){ var d = new Date(month + '-15T12:00:00'); return d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }); }
+  function renderDashV10(){
+    var grid = document.getElementById('kpi-grid'); if (!grid) return;
+    var f = monthFinanceV10(), all = (typeof compute === 'function') ? compute() : {};
+    var vl = (data.params || {}).vl;
+    grid.innerHTML =
+      '<div class="kpi-card"><div class="kpi-label">Ventes du mois</div><div class="kpi-value">' + money(f.ca) + '</div><div class="kpi-sub">' + f.nbVentes + ' vente' + (f.nbVentes > 1 ? 's' : '') + '</div></div>' +
+      '<div class="kpi-card"><div class="kpi-label">Dépenses et frais</div><div class="kpi-value">' + money(f.depenses + f.coutProduits) + '</div><div class="kpi-sub">dont ' + money(f.coutProduits) + ' de coût des produits</div></div>' +
+      '<div class="kpi-card"><div class="kpi-label">À mettre de côté</div><div class="kpi-value" style="color:var(--gold)">' + money(f.charges) + '</div><div class="kpi-sub">URSSAF' + (vl === 'oui' ? ' et impôt' : '') + ', estimation</div></div>' +
+      '<div class="kpi-card"><div class="kpi-label">Bénéfice du mois</div><div class="kpi-value" style="color:' + (f.benef >= 0 ? 'var(--green)' : 'var(--danger)') + '">' + money(f.benef) + '</div><div class="kpi-sub">ce qu\'il te reste vraiment</div></div>' +
+      '<div class="kpi-card"><div class="kpi-label">Valeur du stock</div><div class="kpi-value">' + money(all.stockSaleValue || 0) + '</div><div class="kpi-sub">au prix de vente</div></div>';
+    // On retire les lignes de formules et doublons ; on garde les alertes utiles (stock, justificatifs)
+    var alerts = document.getElementById('alerts-section');
+    if (alerts) alerts.querySelectorAll('.alert').forEach(function(a){
+      if (/Formule utilisée|^\s*Détail|Valeur nette du stock|Charges sociales|Marge de sécurité|facture|bénéfice négatif|Tout est en ordre/i.test(a.textContent)) a.remove();
+    });
+    if (vl !== 'oui' && alerts && !alerts.querySelector('.vl-note-v10') && f.ca > 0) {
+      var n = document.createElement('div'); n.className = 'alert alert-info vl-note-v10';
+      n.textContent = vl === 'non' ? "L'impôt sur le revenu n'est pas compté : sans versement libératoire, il se paie l'année suivante avec ta déclaration de revenus."
+        : "Indique dans Paramètres si tu as choisi le versement libératoire, pour une estimation juste de ce qu'il faut mettre de côté.";
+      alerts.appendChild(n);
+    }
+    // Résumé mensuel : la même formule que le Bilan
+    var box = document.getElementById('dash-mensuel');
+    if (box) {
+      var months = {}; (data.ventes || []).forEach(function(v){ if (v.date) months[v.date.slice(0, 7)] = 1; });
+      var keys = Object.keys(months).sort().reverse().slice(0, 6);
+      box.innerHTML = keys.length ? keys.map(function(k){ var m = monthFinanceV10(k);
+        return '<div class="month-row-v10"><span>' + moisLabel(k) + '</span><span>' + money(m.ca) + ' de ventes</span><strong style="color:' + (m.benef >= 0 ? 'var(--green)' : 'var(--danger)') + '">' + money(m.benef) + '</strong></div>'; }).join('') +
+        '<button type="button" class="btn btn-secondary" style="margin-top:12px" onclick="goPage(\'bilan-mensuel\')">Voir le bilan détaillé</button>'
+        : '<div style="color:var(--text3);font-size:.85rem">Pas encore de ventes.</div>';
+    }
+    renderBackupBannerV10();
+  }
+  if (typeof renderDashboard === 'function' && !renderDashboard.__v10) {
+    var oldRD = renderDashboard;
+    var rd = function(){ var r = oldRD.apply(this, arguments); try { renderDashV10(); } catch (e) { console.warn(e); } return r; };
+    rd.__v10 = true; window.renderDashboard = rd; try { renderDashboard = rd; } catch (e) {}
+  }
+
+  // Vente express : date du marché choisi
+  window.saleDateV10 = function(marcheId){
+    var t = todayIso(), m = (data.marches || []).find(function(x){ return x.id === marcheId; });
+    if (!m || !m.debut) return t;
+    var fin = m.fin || m.debut;
+    return (t >= m.debut && t <= fin) ? t : m.debut;
+  };
+  function updateExpressDateHint(){
+    var sel = document.getElementById('express-marche'); if (!sel) return;
+    var hint = document.getElementById('express-date-v10');
+    if (!hint) { hint = document.createElement('div'); hint.id = 'express-date-v10'; hint.className = 'express-date-v10'; sel.parentNode.insertBefore(hint, sel.nextSibling); }
+    var d = saleDateV10(sel.value), t = todayIso();
+    hint.textContent = d === t ? '' : 'Ventes datées du ' + (window.frDateV7 ? frDateV7(d) : d) + ' (jour du marché).';
+  }
+  document.addEventListener('change', function(e){ if (e.target && e.target.id === 'express-marche') updateExpressDateHint(); });
+  if (window.openExpressV7 && !openExpressV7.__v10) {
+    var oe = openExpressV7; var we = function(){ var r = oe.apply(this, arguments); updateExpressDateHint(); return r; };
+    we.__v10 = true; window.openExpressV7 = we;
+  }
+
+  // Versement libératoire
+  var RATES = { 'micro-bic': 1, 'micro-bic-services': 1.7, 'micro-bnc': 2.2 };
+  window.applyVlV10 = function(v){
+    data.params.vl = v;
+    if (data.params.regime !== 'autre') data.params.impot = v === 'oui' ? (RATES[data.params.regime] || 0) : 0;
+    var i = document.getElementById('param-impot'); if (i) i.value = data.params.impot;
+    var di = document.getElementById('disp-impot'); if (di) di.textContent = String(data.params.impot).replace('.', ',');
+    saveData(); syncImpotSlider(); try { renderDashboard(); } catch (e) {}
+  };
+  function syncImpotSlider(){
+    var row = document.querySelector('.impot-slider-v10'); if (row) row.style.display = (data.params.regime === 'autre') ? '' : 'none';
+    var sel = document.getElementById('param-vl'); if (sel) sel.value = data.params.vl || 'inconnu';
+  }
+  var pr = data.params || {};
+  if (!pr.vl) {
+    // Personne n'a jamais répondu : on ne compte plus l'impôt d'office
+    pr.vl = 'inconnu';
+    if (pr.regime !== 'autre' && Number(pr.impot) === (RATES[pr.regime] || -1)) pr.impot = 0;
+    saveData();
+  }
+  if (typeof renderParams === 'function' && !renderParams.__v10) {
+    var orp = renderParams; var nrp = function(){ var r = orp.apply(this, arguments); syncImpotSlider(); return r; };
+    nrp.__v10 = true; window.renderParams = nrp; try { renderParams = nrp; } catch (e) {}
+  }
+  document.addEventListener('change', function(e){ if (e.target && e.target.id === 'param-regime') setTimeout(syncImpotSlider, 0); });
+
+  // Données protégées : stockage persistant, sauvegarde confirmée, rappel de sauvegarde
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  function toastV10(msg){
+    var t = document.getElementById('express-toast'); if (!t) return;
+    t.innerHTML = ''; var sp = document.createElement('span'); sp.textContent = msg; t.appendChild(sp);
+    t.classList.add('show'); clearTimeout(toastV10.t); toastV10.t = setTimeout(function(){ t.classList.remove('show'); }, 5000);
+  }
+  window.toastV10 = toastV10;
+  if (typeof exportJSON === 'function' && !exportJSON.__v10) {
+    var oj = exportJSON;
+    var nj = function(){ var r = oj.apply(this, arguments); data.params.lastBackup = new Date().toISOString(); saveData();
+      toastV10('Sauvegarde faite : le fichier « berthier-sauvegarde-' + todayIso() + '.json » est dans tes Téléchargements. Garde-le précieusement.');
+      renderBackupBannerV10(); return r; };
+    nj.__v10 = true; window.exportJSON = nj; try { exportJSON = nj; } catch (e) {}
+  }
+  function hasAccount(){ try { return Object.keys(localStorage).some(function(k){ return /^sb-.*-auth-token$/.test(k) && localStorage.getItem(k); }); } catch (e) { return false; } }
+  window.renderBackupBannerV10 = function(){
+    var host = document.querySelector('#page-dashboard .page-content'); if (!host) return;
+    var b = document.getElementById('backup-banner-v10');
+    var last = data.params && data.params.lastBackup ? new Date(data.params.lastBackup) : null;
+    var stale = !last || (Date.now() - last.getTime()) > 7 * 864e5;
+    var need = (data.ventes || []).length > 0 && !hasAccount() && stale && !(window.isDemoDataV7 && isDemoDataV7());
+    if (!need) { if (b) b.remove(); return; }
+    if (!b) {
+      b = document.createElement('div'); b.id = 'backup-banner-v10'; b.className = 'demo-banner-v7';
+      b.innerHTML = '<span><strong style="color:var(--text)">Tes ventes sont seulement sur ce téléphone.</strong> Si tu changes de téléphone ou si le navigateur est vidé, elles sont perdues. Fais une sauvegarde, ou crée un compte gratuit pour les garder en ligne.</span>' +
+        '<span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm-v7" onclick="exportJSON()">Sauvegarder maintenant</button>' +
+        '<button type="button" class="btn btn-secondary btn-sm-v7" onclick="goPage(\'parametres\')">Créer un compte</button></span>';
+      host.insertBefore(b, host.firstChild);
+    }
+  };
+
+  // « Passer en mode réel » : demande confirmation et efface vraiment tout (produits d'exemple compris)
+  window.startRealModeV418 = function(){ if (window.startFreshV7) startFreshV7(); };
+  try { startRealModeV418 = window.startRealModeV418; } catch (e) {}
+
+  try { renderDashboard(); } catch (e) {}
+})();
+</script>
+<script>
+// ─── Stand v11 : fenêtres de l'app au lieu des fenêtres système, annulation facile, verdict par marché ───
+(function(){
+  function money(n){ return (typeof fmt === 'function') ? fmt(n) : (Math.round(n * 100) / 100) + ' €'; }
+  // Fenêtre de confirmation de l'app (remplace les fenêtres système, moches et parfois bloquées sur téléphone)
+  var dlg = document.createElement('div');
+  dlg.id = 'ask-v11'; dlg.className = 'ask-v11'; dlg.setAttribute('role', 'dialog'); dlg.setAttribute('aria-modal', 'true');
+  dlg.innerHTML = '<div class="ask-box"><p class="ask-msg"></p><div class="ask-actions"><button type="button" class="btn btn-secondary ask-no">Garder</button><button type="button" class="btn btn-danger ask-yes">Supprimer</button></div></div>';
+  document.body.appendChild(dlg);
+  window.askV11 = function(message, yesLabel, noLabel){
+    return new Promise(function(resolve){
+      dlg.querySelector('.ask-msg').textContent = message;
+      dlg.querySelector('.ask-yes').textContent = yesLabel || 'Confirmer';
+      dlg.querySelector('.ask-no').textContent = noLabel || 'Annuler';
+      dlg.classList.add('open');
+      function done(v){ dlg.classList.remove('open'); dlg.querySelector('.ask-yes').onclick = dlg.querySelector('.ask-no').onclick = null; resolve(v); }
+      dlg.querySelector('.ask-yes').onclick = function(){ done(true); };
+      dlg.querySelector('.ask-no').onclick = function(){ done(false); };
+      setTimeout(function(){ dlg.querySelector('.ask-no').focus(); }, 30);
+    });
+  };
+  function withConfirmTrue(fn){ var c = window.confirm; window.confirm = function(){ return true; }; try { return fn(); } finally { window.confirm = c; } }
+
+  // Supprimer une vente
+  if (typeof deleteVente === 'function' && !deleteVente.__v11) {
+    var od = deleteVente;
+    var nd = function(id){
+      var v = (data.ventes || []).find(function(x){ return x.id === id; }); if (!v) return;
+      var tot = (v.items || []).reduce(function(a, i){ return a + i.qte * i.prix; }, 0);
+      var what = (v.items || []).map(function(i){ return i.qte + ' × ' + ((typeof prodLabel === 'function') ? prodLabel(i.produit) : i.produit); }).join(', ');
+      askV11('Supprimer cette vente ?\n' + what + ' — ' + money(tot) + '\nLe stock sera remis à jour.', 'Supprimer', 'Garder').then(function(ok){
+        if (!ok) return;
+        withConfirmTrue(function(){ od(id); });
+        if (window.toastV10) toastV10('Vente supprimée, stock remis à jour.');
+        renderRecent();
+      });
+    };
+    nd.__v11 = true; window.deleteVente = nd; try { deleteVente = nd; } catch (e) {}
+  }
+  // Repartir de zéro
+  if (window.startFreshV7 && !startFreshV7.__v11) {
+    var sf = startFreshV7;
+    var nf = function(){ askV11("Effacer les données d'exemple et commencer avec tes vraies ventes ?\nUne sauvegarde automatique est faite avant.", 'Effacer', 'Annuler').then(function(ok){ if (ok) withConfirmTrue(function(){ sf(); }); }); };
+    nf.__v11 = true; window.startFreshV7 = nf;
+    window.startRealModeV418 = function(){ window.startFreshV7(); }; try { startRealModeV418 = window.startRealModeV418; } catch (e) {}
+  }
+
+  // Dernières ventes dans la vente express, avec « Annuler » pour chacune
+  function renderRecent(){
+    var box = document.getElementById('express-recent'); if (!box) return;
+    var list = (data.ventes || []).slice(-3).reverse();
+    if (!list.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="express-recent-title">Dernières ventes</div>' + list.map(function(v){
+      var tot = (v.items || []).reduce(function(a, i){ return a + i.qte * i.prix; }, 0);
+      var what = (v.items || []).map(function(i){ return i.qte + ' × ' + String((typeof prodLabel === 'function') ? prodLabel(i.produit) : i.produit).replace(/</g, '&lt;'); }).join(', ');
+      return '<div class="express-recent-row"><span>' + what + '</span><span>' + money(tot) + (v.paiement ? ' · ' + (v.paiement === 'carte' ? 'carte' : 'liquide') : '') + '</span><button type="button" class="express-cancel" data-id="' + v.id + '">Annuler</button></div>';
+    }).join('');
+    box.querySelectorAll('.express-cancel').forEach(function(b){ b.onclick = function(){ deleteVente(b.getAttribute('data-id')); }; });
+  }
+  if (window.openExpressV7 && !openExpressV7.__v11) {
+    var oe = openExpressV7; var ne = function(){ var t = document.getElementById('express-toast'); if (t) t.classList.remove('show'); var r = oe.apply(this, arguments); renderRecent(); return r; };
+    ne.__v11 = true; ne.__v10 = true; window.openExpressV7 = ne;
+  }
+
+  // Verdict par marché : « ça vaut le coup de refaire Tours ? »
+  window.marketVerdictV11 = function(text, c){
+    var nt = String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    var ms = data.marches || [];
+    var named = ms.filter(function(m){
+      return String(m.nom || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/)
+        .filter(function(w){ return w.length >= 4 && !/^(marche|salon|festival|convention|noel|foire|expo)$/.test(w); })
+        .some(function(w){ return nt.indexOf(w) >= 0; });
+    });
+    var asks = /vaut le coup|refaire|retourner|y retourner|rentable|interessant|ca vaut/.test(nt);
+    if (!named.length || !(asks || c.benefice || c.marche)) return null;
+    var p = data.params || {}, rate = ((Number(p.cotis) || 0) + (Number(p.impot) || 0)) / 100;
+    var lines = named.map(function(m){
+      var vs = (data.ventes || []).filter(function(v){ return v.marcheId === m.id; });
+      var ca = 0, cout = 0;
+      vs.forEach(function(v){ (v.items || []).forEach(function(i){ ca += i.qte * i.prix; var st = (data.stocks || []).find(function(x){ return x.produit === i.produit; }); cout += i.qte * (Number(st && st.cout) || 0); }); });
+      var frais = (typeof eventEffectiveFrais === 'function') ? eventEffectiveFrais(m) : (parseFloat(m.frais) || 0);
+      var net = ca - frais - cout - ca * rate;
+      var verdict = !vs.length ? "pas encore de vente notée pour ce marché, je ne peux pas juger."
+        : net > 0 ? 'oui, il t\'a rapporté ' + money(net) + ' net.' : 'pas vraiment : il t\'a coûté ' + money(-net) + ' au final.';
+      return (m.nom || 'Ce marché') + ' : ' + verdict + (vs.length ? '\n' + money(ca) + ' de ventes − ' + money(frais) + ' de frais − ' + money(cout) + ' de coût des produits − ' + money(ca * rate) + ' d\'URSSAF.' : '');
+    });
+    return { text: lines.join('\n\n'), actions: [{ label: 'Mes marchés', page: 'marches' }] };
+  };
 })();
 </script>
 <style id="ariane-design-v6">
@@ -26458,6 +26774,44 @@ html body #mobile-bottom-nav-v432{display:none !important;}
   .express-toast{bottom:calc(168px + env(safe-area-inset-bottom));width:calc(100vw - 32px);justify-content:space-between;z-index:40000;}
   html body .mobile-scroll-hint-v432{display:none !important;}
 }
+
+/* v9 */
+.tx-hint-v9{font-size:.76rem;color:var(--text3);margin:-4px 0 14px;line-height:1.5;}
+
+/* v10 */
+.month-row-v10{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--border);font-size:.88rem;}
+.month-row-v10 span:first-child{text-transform:capitalize;color:var(--text);}
+.month-row-v10 span:nth-child(2){color:var(--text3);}
+.express-date-v10{font-size:.78rem;color:var(--gold);margin-top:6px;}
+.express-date-v10:empty{display:none;}
+
+/* v11 */
+/* Vente express : hauteur fixe, les tuiles ne bougent plus quand la vente se remplit */
+.express-modal{display:flex !important;flex-direction:column;height:min(94dvh,780px);max-height:94dvh;overflow:hidden !important;}
+.express-grid{flex:1 1 auto;max-height:none !important;min-height:150px;align-content:start;grid-auto-rows:min-content;}
+.express-item{height:auto !important;}
+.express-cart{flex:0 0 auto;max-height:84px;overflow-y:auto;}
+.express-recent{flex:0 0 auto;margin-top:6px;}
+.express-recent-title{font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:4px 0;}
+.express-recent-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:.8rem;color:var(--text2);padding:4px 0;border-top:1px solid var(--border);}
+.express-recent-row span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.express-cancel{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font:inherit;font-size:.78rem;padding:6px 10px;cursor:pointer;min-height:32px;}
+.express-warn{display:block;margin-top:4px;font-size:.72rem;color:var(--gold);line-height:1.3;}
+.express-item:has(.express-warn){border-color:var(--gold);}
+/* Fenêtre de confirmation de l'app */
+.ask-v11{position:fixed;inset:0;z-index:50000;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;}
+.ask-v11.open{display:flex;}
+.ask-box{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:22px;}
+.ask-msg{white-space:pre-line;color:var(--text);font-size:.95rem;line-height:1.5;margin-bottom:18px;}
+.ask-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ask-actions .btn{min-height:48px !important;justify-content:center !important;}
+/* Écran d'accueil : au-dessus de la barre du bas, et tout est visible sur téléphone */
+html body:has(#welcome-screen:not(.hidden)) #mobile-shell-v435,
+html body:has(#welcome-screen:not(.hidden)) #mobile-fab-v435,
+html body:has(#welcome-screen:not(.hidden)) #help-fab{display:none !important;}
+#welcome-screen{overflow-y:auto !important;}
+/* Configuration : la barre de progression a 3 segments pour 3 étapes */
+.setup-step-dot[data-step-dot="1"]{display:none !important;}
 
 ::selection{background:rgba(79,140,255,.3);}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
